@@ -25,7 +25,9 @@ import java.util.List;
 <#assign mapperClassName=NameUtils.mapperName(source.mainTable.name)/>
 <#assign mapperName=NameUtils.getFieldName(mapperClassName)/>
 <#assign domainName=NameUtils.getName(source.name)/>
-public class ${domainName}RepositoryImpl extends ServiceImpl<${mapperClassName}, ${doClassName}> implements ${domainName}Repository {
+<#assign repositoryClassName=NameUtils.repositoryName(source.name)/>
+<#assign repositoryImplClassName=NameUtils.repositoryImplName(source.name)/>
+public class ${repositoryImplClassName} extends ServiceImpl<${mapperClassName}, ${doClassName}> implements ${repositoryClassName} {
     @Autowired
     private ${mapperClassName} ${NameUtils.getFieldName(mapperClassName)};
 

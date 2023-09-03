@@ -8,7 +8,8 @@ import java.util.List;
 
 <#assign dtoClassName=NameUtils.dataTOName(source.name)/>
 <#assign domainName=NameUtils.getName(source.name)/>
-public interface ${domainName}Repository {
+<#assign repositoryClassName=NameUtils.repositoryName(source.name)/>
+public interface ${repositoryClassName} {
 
      /**
      * 分页查询

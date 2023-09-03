@@ -11,7 +11,14 @@ public class FTLConstants {
 
     public static final String UPDATE_REQUEST_PATH =  "domain/dto/template-update-request.ftl";
 
+    public static final String CREATE_REQUEST_PATH =  "domain/dto/template-create-request.ftl";
     public static final  String REPOSITORY_PATH =  "domain/repository/template-repository.ftl";
 
     public static final  String REPOSITORY_IMPL_PATH =  "domain/repository/template-repository-impl.ftl";
+
+
+    public static final  String DOMAIN_SERVICE_PATH =  "domain/service/template-service.ftl";
+
+
+    public static final  String DOMAIN_SERVICE_IMPL_PATH =  "domain/service/template-service-impl.ftl";
 }

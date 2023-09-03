@@ -32,6 +32,9 @@ public class Program {
             domainDtoGenerator.setTemplateFilePath(FTLConstants.UPDATE_REQUEST_PATH);
             FileUtils.saveFile(path + NameUtils.packageName(domainInfo.getName()) + "\\" + "dto\\request\\", domainInfo.nameSuffix("UpdateRequest") + ".java", domainDtoGenerator.generate(domainInfo));
 
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.CREATE_REQUEST_PATH);
+            FileUtils.saveFile(path + NameUtils.packageName(domainInfo.getName()) + "\\" + "dto\\request\\", domainInfo.nameSuffix("CreateRequest") + ".java", domainDtoGenerator.generate(domainInfo));
+
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_PATH);
             FileUtils.saveFile(path + NameUtils.packageName(domainInfo.getName()) + "\\" + "repository\\", domainInfo.nameSuffix("Repository") + ".java", domainDtoGenerator.generate(domainInfo));
@@ -39,6 +42,13 @@ public class Program {
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_IMPL_PATH);
             FileUtils.saveFile(path + NameUtils.packageName(domainInfo.getName()) + "\\" + "repository\\impl\\", domainInfo.nameSuffix("RepositoryImpl") + ".java", domainDtoGenerator.generate(domainInfo));
+
+
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.DOMAIN_SERVICE_PATH);
+            FileUtils.saveFile(path + NameUtils.packageName(domainInfo.getName()) + "\\" + "service\\", domainInfo.nameSuffix("Service") + ".java", domainDtoGenerator.generate(domainInfo));
+
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.DOMAIN_SERVICE_IMPL_PATH);
+            FileUtils.saveFile(path + NameUtils.packageName(domainInfo.getName()) + "\\" + "service\\impl\\", domainInfo.nameSuffix("ServiceImpl") + ".java", domainDtoGenerator.generate(domainInfo));
         }
 
     }

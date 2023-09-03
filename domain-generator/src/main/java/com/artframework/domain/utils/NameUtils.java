@@ -39,6 +39,19 @@ public class NameUtils {
     public static String mapperName(String name) {
         return getNameWithSuffix(name, "Mapper");
     }
+    public static String repositoryName(String name) {
+        return getNameWithSuffix(name, "Repository");
+    }
+    public static String repositoryImplName(String name) {
+        return getNameWithSuffix(name, "RepositoryImpl");
+    }
+    public static String serviceName(String name) {
+        return getNameWithSuffix(name, "Service");
+    }
+
+    public static String serviceImplName(String name) {
+        return getNameWithSuffix(name, "ServiceImpl");
+    }
 
     public static String fieldSourceLambda(String name) {
         return getFieldWithSuffix(name, "SourceLambda");
