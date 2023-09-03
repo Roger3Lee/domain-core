@@ -34,6 +34,6 @@ public class ${NameUtils.dataObjectName(source.name)} <#if source.inherit??> ext
     <#else>
     @TableField("${column.name}")
     </#if>
-    private ${column.type} ${column.nameFormat};
+    private ${column.type} ${NameUtils.getFieldName(column.name)};
 </#list>
 }

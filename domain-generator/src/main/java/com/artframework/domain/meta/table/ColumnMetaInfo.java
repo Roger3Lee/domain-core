@@ -38,8 +38,4 @@ public class ColumnMetaInfo {
     public void setKey(Boolean key) {
         this.key = key;
     }
-
-    public String getNameFormat() {
-        return StrUtil.toCamelCase(this.name);
-    }
 }

@@ -17,14 +17,6 @@ public class TableInfo {
     private Boolean keyGenerator = false;
     private List<ColumnMetaInfo> column;
 
-    public String nameSuffix(String suffix) {
-        return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", this.name))) + suffix;
-    }
-
-    public String inheritSuffix(String suffix) {
-        return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", this.inherit))) + suffix;
-    }
-
     public static TableInfo covert(TableMetaInfo tableMetaInfo) {
         return BeanUtil.copyProperties(tableMetaInfo, TableInfo.class);
     }

@@ -23,20 +23,23 @@ public class GlobalSetting {
         return domainMetaInfoList;
     }
 
-    public  List<ColumnMetaInfo> getTableColumns(String tableName) {
-
+    public List<ColumnMetaInfo> getTableColumns(String tableName) {
         if (INSTANCE.tableMetaInfoMap.containsKey(tableName)) {
             TableMetaInfo tableMetaInfo = INSTANCE.tableMetaInfoMap.get(tableName);
+            List<ColumnMetaInfo> columnList = new ArrayList<>(tableMetaInfo.getColumn());
             Map<String, ColumnMetaInfo> columns = tableMetaInfo.getColumn().stream()
                     .collect(Collectors.toMap(ColumnMetaInfo::getName, x -> x, (x, y) -> x));
 
             //有继承关系
             if (StringUtils.isNoneBlank(tableMetaInfo.getInherit())) {
-                Map<String, ColumnMetaInfo> childrenColumn = getTableColumns(tableMetaInfo.getInherit()).stream()
-                        .collect(Collectors.toMap(ColumnMetaInfo::getName, x -> x, (x, y) -> x));
-                columns.putAll(childrenColumn);
+                List<ColumnMetaInfo> columnMetaInfos = getTableColumns(tableMetaInfo.getInherit());
+                for (ColumnMetaInfo item:columnMetaInfos) {
+                    if(!columns.containsKey(item.getName())){
+                        columnList.add(item);
+                    }
+                }
             }
-            return new ArrayList<>(columns.values());
+            return columnList;
         }
         return Collections.emptyList();
     }

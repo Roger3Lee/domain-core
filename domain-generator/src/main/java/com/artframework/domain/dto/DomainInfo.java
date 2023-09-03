@@ -45,15 +45,6 @@ public class DomainInfo {
         private String fkTargetColumnType;
         private String fkTargetColumn;
 
-        public String getFkTargetColumnGet(){
-            return StrUtil.genGetter(StrUtil.toCamelCase(StrUtil.format("{}", this.fkTargetColumn)));
-        }
-
-        public String getFkSourceColumnGet() {
-            return StrUtil.genGetter(StrUtil.toCamelCase(StrUtil.format("{}", this.fkSourceColumn)));
-        }
-
-
         public static RelateTableInfo convert(RelatedTableMetaInfo relatedTableMetaInfo) {
             RelateTableInfo tableInfo = new RelateTableInfo();
             tableInfo.setName(relatedTableMetaInfo.getTable());
@@ -82,14 +73,6 @@ public class DomainInfo {
             tableInfo.setName(tableName);
             tableInfo.setColumn(GlobalSetting.INSTANCE.getTableColumns(tableName));
             return tableInfo;
-        }
-
-        public String nameSuffix(String suffix) {
-            return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", this.name))) + suffix;
-        }
-
-        public String nameCamelPrefix(String prefix) {
-            return StrUtil.toCamelCase(StrUtil.format("{}{}",prefix, this.name));
         }
     }
 }

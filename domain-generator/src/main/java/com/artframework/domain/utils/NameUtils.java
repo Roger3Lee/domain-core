@@ -9,6 +9,23 @@ public class NameUtils {
         return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", name))) + suffix;
     }
 
+    public static String getNameWithPrefix(String name, String prefix) {
+        return prefix + StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", name)));
+    }
+
+
+    public static String getFieldName(String name) {
+        return StrUtil.toCamelCase(name);
+    }
+
+    public static String getFieldWithSuffix(String name, String suffix) {
+        return StrUtil.toCamelCase(StrUtil.format("{}", name)) + suffix;
+    }
+
+    public static String getFieldWithPrefix(String name, String prefix) {
+        return prefix + StrUtil.toCamelCase(StrUtil.format("{}", name));
+    }
+
     public static String dataObjectName(String name) {
         return getNameWithSuffix(name, "DO");
     }
@@ -18,6 +35,14 @@ public class NameUtils {
     }
     public static String mapperName(String name) {
         return getNameWithSuffix(name, "Mapper");
+    }
+
+    public static String fieldSourceLambda(String name) {
+        return getFieldWithSuffix(name, "SourceLambda");
+    }
+
+    public static String fieldTargetLambda(String name) {
+        return getFieldWithSuffix(name, "TargetLambda");
     }
 
     public String genGetter(String fieldName){
