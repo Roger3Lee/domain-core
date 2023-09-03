@@ -2,6 +2,7 @@ package com.artframework.domain.generator;
 
 import com.artframework.domain.utils.FreeMakerTplUtil;
 import com.artframework.domain.utils.StreamUtils;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.Map;
 public abstract class AbstractGenerator {
 
     protected String basePackage;
+    @Setter
     protected String templateFilePath;
 
     public  <T> String generate(T source){

@@ -1,8 +1,7 @@
 package ${basePackage!''}.entities;
 
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,7 +22,12 @@ import lombok.ToString;
 <#if source.keyGenerator>
 @KeySequence("seq_${source.name}_id")
 </#if>
-public class ${NameUtils.dataObjectName(source.name)} <#if source.inherit??> extends ${NameUtils.dataObjectName(source.inherit)}</#if> {
+<#assign className=NameUtils.dataObjectName(source.name)/>
+public class ${className} <#if source.inherit??> extends ${NameUtils.dataObjectName(source.inherit)}</#if> {
+    /**
+    * KEY ${source.name} lambda
+    */
+    public static SFunction<${className}, ${source.keyType}> keyLambda= ${className}::${NameUtils.genGetter(source.keyName)};
 
 <#list source.column as column>
     /**

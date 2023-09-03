@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.function.Function;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import ${basePackage!''}.entities.*;
 
 /**
@@ -20,14 +20,19 @@ import ${basePackage!''}.entities.*;
 <#assign className=NameUtils.dataTOName(source.name)/>
 public class ${className}{
 <#if source.mainTable??>
-    <#list source.mainTable.column as column>
-        <#if column.key>
+        /**
+        * 是否有变化
+        */
+        private Boolean changed;
+
+    <#if column.key>
         /**
         * KEY ${relateTable.name} lambda
         */
         public static Function<${className}, ${column.type}> keyLambda= ${className}::${NameUtils.genGetter(column.name)};
-        </#if>
+    </#if>
 
+    <#list source.mainTable.column as column>
         /**
         * ${column.comment}
         */
@@ -47,12 +52,12 @@ public class ${className}{
         /**
         * RELATE ${relateTable.name} lambda
         */
-        public static Function<${className}, ${relateTable.fkSourceColumnType}> ${NameUtils.fieldSourceLambda(fieldName)} = ${className}::${NameUtils.genGetter(relateTable.fkSourceColumn)};
+        public static SFunction<${className}, ${relateTable.fkSourceColumnType}> ${NameUtils.fieldSourceLambda(fieldName)} = ${className}::${NameUtils.genGetter(relateTable.fkSourceColumn)};
 
         /**
         * RELATE ${relateTable.name} lambda
         */
-        public static Function<${relateClassName},${relateTable.fkTargetColumnType}> ${NameUtils.fieldTargetLambda(fieldName)} =${relateClassName}::${NameUtils.genGetter(relateTable.fkTargetColumn)};
+        public static SFunction<${relateClassName},${relateTable.fkTargetColumnType}> ${NameUtils.fieldTargetLambda(fieldName)} =${relateClassName}::${NameUtils.genGetter(relateTable.fkTargetColumn)};
     </#list>
 
 <#--    关联实体类-->
@@ -62,6 +67,11 @@ public class ${className}{
         @Setter
         @ToString
         public static class ${relateClassName}{
+            /**
+            * 是否有变化
+            */
+            private Boolean changed;
+
         <#list relateTable.column as column>
             /**
             * ${column.comment}
@@ -70,5 +80,19 @@ public class ${className}{
         </#list>
         }
     </#list>
+
+        @Getter
+        @Setter
+        @ToString
+        public static class LoadFlag{
+
+        <#list source.relatedTable as relateTable>
+
+            /**
+            *
+            */
+            private Boolean ${NameUtils.getFieldWithPrefix(relateTable.name,"load")};
+        </#list>
+        }
 </#if>
 }

@@ -4,6 +4,9 @@ import cn.hutool.core.util.StrUtil;
 import org.apache.commons.lang3.StringUtils;
 
 public class NameUtils {
+    public static String getName(String name) {
+        return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", name)));
+    }
 
     public static String getNameWithSuffix(String name, String suffix) {
         return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", name))) + suffix;
@@ -15,15 +18,15 @@ public class NameUtils {
 
 
     public static String getFieldName(String name) {
-        return StrUtil.toCamelCase(name);
+        return StringUtils.uncapitalize(StrUtil.toCamelCase(name));
     }
 
     public static String getFieldWithSuffix(String name, String suffix) {
-        return StrUtil.toCamelCase(StrUtil.format("{}", name)) + suffix;
+        return StrUtil.toCamelCase(StrUtil.format("{}", name)) + StringUtils.capitalize(suffix);
     }
 
     public static String getFieldWithPrefix(String name, String prefix) {
-        return prefix + StrUtil.toCamelCase(StrUtil.format("{}", name));
+        return prefix + StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", name)));
     }
 
     public static String dataObjectName(String name) {

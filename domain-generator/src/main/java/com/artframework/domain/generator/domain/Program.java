@@ -1,12 +1,10 @@
 package com.artframework.domain.generator.domain;
 
 import com.artframework.domain.config.GlobalSetting;
+import com.artframework.domain.constants.FTLConstants;
 import com.artframework.domain.dto.DomainInfo;
-import com.artframework.domain.generator.table.TableGenerator;
 import com.artframework.domain.meta.domain.DomainMetaInfo;
-import com.artframework.domain.meta.table.TableCollection;
 import com.artframework.domain.utils.FileUtils;
-import com.artframework.domain.utils.XmlUtils;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
@@ -33,10 +31,29 @@ public class Program {
                 "        <related table=\"user_address\" many=\"true\" fk=\"uuid:user_uuid\"/>\n" +
                 "    </domain>\n" +
                 "</domains>");
-        for (DomainMetaInfo domainMetaInfo: GlobalSetting.INSTANCE.getDomainList()) {
-            DomainInfo domainInfo=DomainInfo.covert(domainMetaInfo);
-            DomainDtoGenerator domainDtoGenerator=new DomainDtoGenerator("com.artframework.domain.demo");
-            FileUtils.saveFile(path + "dto\\", domainInfo.nameSuffix("DTO") + ".java",domainDtoGenerator.generate(domainInfo));
+        for (DomainMetaInfo domainMetaInfo : GlobalSetting.INSTANCE.getDomainList()) {
+            DomainInfo domainInfo = DomainInfo.covert(domainMetaInfo);
+            DomainGenerator domainDtoGenerator = new DomainGenerator("com.artframework.domain.demo", FTLConstants.DTO_PATH);
+            FileUtils.saveFile(path + "dto\\", domainInfo.nameSuffix("DTO") + ".java", domainDtoGenerator.generate(domainInfo));
+
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.FIND_REQUEST_PATH);
+            FileUtils.saveFile(path + "dto\\request\\", domainInfo.nameSuffix("FindRequest") + ".java", domainDtoGenerator.generate(domainInfo));
+
+
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.PAGE_REQUEST_PATH);
+            FileUtils.saveFile(path + "dto\\request\\", domainInfo.nameSuffix("PageRequest") + ".java", domainDtoGenerator.generate(domainInfo));
+
+
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.UPDATE_REQUEST_PATH);
+            FileUtils.saveFile(path + "dto\\request\\", domainInfo.nameSuffix("UpdateRequest") + ".java", domainDtoGenerator.generate(domainInfo));
+
+
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_PATH);
+            FileUtils.saveFile(path + "repository\\", domainInfo.nameSuffix("Repository") + ".java", domainDtoGenerator.generate(domainInfo));
+
+
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_IMPL_PATH);
+            FileUtils.saveFile(path + "repository\\impl\\", domainInfo.nameSuffix("RepositoryImpl") + ".java", domainDtoGenerator.generate(domainInfo));
         }
 
     }

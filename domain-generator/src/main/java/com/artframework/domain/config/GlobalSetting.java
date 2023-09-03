@@ -23,6 +23,10 @@ public class GlobalSetting {
         return domainMetaInfoList;
     }
 
+    public List<TableMetaInfo> getTableList() {
+        return new ArrayList<>(tableMetaInfoMap.values());
+    }
+
     public List<ColumnMetaInfo> getTableColumns(String tableName) {
         if (INSTANCE.tableMetaInfoMap.containsKey(tableName)) {
             TableMetaInfo tableMetaInfo = INSTANCE.tableMetaInfoMap.get(tableName);

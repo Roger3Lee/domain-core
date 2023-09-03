@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @Builder
 public class DomainInfo {
     private String name;
+    private String keyType;
     private String description;
 
     private TableInfo mainTable;
@@ -27,11 +28,13 @@ public class DomainInfo {
     }
 
     public static DomainInfo covert(DomainMetaInfo domainMetaInfo) {
+        TableInfo tableInfo = TableInfo.convert(domainMetaInfo.getMainTable());
         return DomainInfo
                 .builder()
                 .name(domainMetaInfo.getName())
                 .description(domainMetaInfo.getDescription())
-                .mainTable(TableInfo.convert(domainMetaInfo.getMainTable()))
+                .mainTable(tableInfo)
+                .keyType(tableInfo.column.stream().filter(ColumnMetaInfo::getKey).map(ColumnMetaInfo::getType).findFirst().orElse(""))
                 .relatedTable(domainMetaInfo.getRelatedList().stream().map(RelateTableInfo::convert).collect(Collectors.toList()))
                 .build();
     }
@@ -58,6 +61,7 @@ public class DomainInfo {
             tableInfo.setFkTargetColumn(strings[1]);
             tableInfo.setFkTargetColumnType(tableInfo.getColumn().stream().filter(x->x.getName().equals(strings[1]))
                     .map(ColumnMetaInfo::getType).findFirst().orElse(""));
+            tableInfo.setKeyType(tableInfo.getColumn().stream().filter(ColumnMetaInfo::getKey).map(ColumnMetaInfo::getType).findFirst().orElse(""));
             return tableInfo;
         }
     }
@@ -67,6 +71,7 @@ public class DomainInfo {
     public static class TableInfo {
         private String name;
         private List<ColumnMetaInfo> column;
+        private String keyType;
 
         public static TableInfo convert(String tableName) {
             TableInfo tableInfo = new TableInfo();

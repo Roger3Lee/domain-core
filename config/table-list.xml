@@ -6,9 +6,11 @@
         <column name="create_user" type="java.lang.String" comment="創建用戶"/>
     </table>
     <table name="user_info" inherit="base">
+        <column name="id" type="java.lang.Long" comment="主鍵" key="true"/>
         <column name="name" type="java.lang.String" comment="名字"/>
     </table>
     <table name="user_address" inherit="base">
+        <column name="id" type="java.lang.Long" comment="主鍵" key="true"/>
         <column name="user_uuid" type="java.lang.String" comment="唯一键"/>
         <column name="address_name" type="java.lang.String" comment="地址"/>
     </table>
