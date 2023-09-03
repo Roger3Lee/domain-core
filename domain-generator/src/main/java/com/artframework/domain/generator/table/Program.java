@@ -3,6 +3,7 @@ package com.artframework.domain.generator.table;
 import com.artframework.domain.config.GlobalSetting;
 import com.artframework.domain.constants.FTLConstants;
 import com.artframework.domain.dto.TableInfo;
+import com.artframework.domain.generator.CommonGenerator;
 import com.artframework.domain.meta.table.TableMetaInfo;
 import com.artframework.domain.utils.FileUtils;
 import com.artframework.domain.utils.NameUtils;
@@ -18,6 +19,11 @@ public class Program {
         TableGenerator generator = new TableGenerator("com.artframework.domain.demo");
         GlobalSetting.load(new File("D:\\github\\domain-generator\\config\\table-list.xml"),
                 new File("D:\\github\\domain-generator\\config\\domain-config.xml"));
+
+        CommonGenerator commonGenerator=new CommonGenerator("com.artframework.domain.demo");
+        commonGenerator.setTemplateFilePath(FTLConstants.COMMON_PAGE_REQUEST);
+        FileUtils.saveFile(path + "common\\", "PageRequest.java", commonGenerator.generate(null));
+
         List<TableMetaInfo> tableCollection = GlobalSetting.INSTANCE.getTableList();
         for (TableMetaInfo table : tableCollection) {
             TableInfo tableMetaInfo = TableInfo.covert(table);

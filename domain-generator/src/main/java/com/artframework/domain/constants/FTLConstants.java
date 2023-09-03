@@ -21,4 +21,5 @@ public class FTLConstants {
 
 
     public static final  String DOMAIN_SERVICE_IMPL_PATH =  "domain/service/template-service-impl.ftl";
+    public static final String COMMON_PAGE_REQUEST = "common/template-page-request.ftl";
 }
