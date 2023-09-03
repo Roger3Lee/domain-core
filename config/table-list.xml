@@ -1,0 +1,15 @@
+<tables>
+    <table name="base" basic="true">
+        <column name="id" type="java.lang.Long" comment="主鍵" key="true"/>
+        <column name="uuid" type="java.lang.String" comment="唯一键"/>
+        <column name="gmt_create" type="java.util.Date" comment="創建時間"/>
+        <column name="create_user" type="java.lang.String" comment="創建用戶"/>
+    </table>
+    <table name="user_info" inherit="base">
+        <column name="name" type="java.lang.String" comment="名字"/>
+    </table>
+    <table name="user_address" inherit="base">
+        <column name="user_uuid" type="java.lang.String" comment="唯一键"/>
+        <column name="address_name" type="java.lang.String" comment="地址"/>
+    </table>
+</tables>

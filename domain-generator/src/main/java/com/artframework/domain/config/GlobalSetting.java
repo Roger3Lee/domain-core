@@ -1,0 +1,53 @@
+package com.artframework.domain.config;
+
+import com.artframework.domain.meta.domain.DomainCollection;
+import com.artframework.domain.meta.domain.DomainMetaInfo;
+import com.artframework.domain.meta.table.ColumnMetaInfo;
+import com.artframework.domain.meta.table.TableCollection;
+import com.artframework.domain.meta.table.TableMetaInfo;
+import com.artframework.domain.utils.XmlUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.xml.bind.JAXBException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class GlobalSetting {
+    public static GlobalSetting INSTANCE = new GlobalSetting();
+
+    private Map<String, TableMetaInfo> tableMetaInfoMap = new HashMap<>();
+    private List<DomainMetaInfo> domainMetaInfoList = new ArrayList<>();
+
+
+    public List<DomainMetaInfo> getDomainList() {
+        return domainMetaInfoList;
+    }
+
+    public  List<ColumnMetaInfo> getTableColumns(String tableName) {
+
+        if (INSTANCE.tableMetaInfoMap.containsKey(tableName)) {
+            TableMetaInfo tableMetaInfo = INSTANCE.tableMetaInfoMap.get(tableName);
+            Map<String, ColumnMetaInfo> columns = tableMetaInfo.getColumn().stream()
+                    .collect(Collectors.toMap(ColumnMetaInfo::getName, x -> x, (x, y) -> x));
+
+            //有继承关系
+            if (StringUtils.isNoneBlank(tableMetaInfo.getInherit())) {
+                Map<String, ColumnMetaInfo> childrenColumn = getTableColumns(tableMetaInfo.getInherit()).stream()
+                        .collect(Collectors.toMap(ColumnMetaInfo::getName, x -> x, (x, y) -> x));
+                columns.putAll(childrenColumn);
+            }
+            return new ArrayList<>(columns.values());
+        }
+        return Collections.emptyList();
+    }
+
+    public static void load(String tableXml, String domainXml) throws JAXBException {
+        INSTANCE = new GlobalSetting();
+        TableCollection tableCollection = XmlUtils.xmlToBean(tableXml, TableCollection.class);
+        DomainCollection domainCollection = XmlUtils.xmlToBean(domainXml, DomainCollection.class);
+
+        INSTANCE.domainMetaInfoList = domainCollection.getDomain();
+        INSTANCE.tableMetaInfoMap = tableCollection.getTables().stream().collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
+    }
+
+}
