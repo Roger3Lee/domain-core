@@ -1,10 +1,10 @@
-package ${basePackage!''}.domain.dto.request;
+package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import ${basePackage!''}.domain.dto.*;
+import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
 
 @Getter
 @Setter

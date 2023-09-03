@@ -1,6 +1,9 @@
 package com.artframework.domain.constants;
 
 public class FTLConstants {
+    public static final String TABLE_DO_PATH = "table/template-table.ftl";
+    public static final String TABLE_MAPPER_PATH = "table/mapper/template-mapper.ftl";
+
     public static final String DTO_PATH = "domain/dto/template-dto.ftl";
     public static final String FIND_REQUEST_PATH =  "domain/dto/template-find-request.ftl";
 

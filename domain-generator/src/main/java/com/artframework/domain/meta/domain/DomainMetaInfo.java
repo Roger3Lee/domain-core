@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ public class DomainMetaInfo {
     private String name;
     private String description;
     private String mainTable;
-    private List<RelatedTableMetaInfo> relatedList;
+    private List<RelatedTableMetaInfo> relatedList=new ArrayList<>();
 
     @XmlAttribute(name = "name")
     public void setName(String name) {

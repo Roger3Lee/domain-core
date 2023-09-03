@@ -1,8 +1,8 @@
-package ${basePackage!''}.domain.repository.impl;
+package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.repository.impl;
 
-import ${basePackage!''}.domain.dto.*;
-import ${basePackage!''}.domain.dto.request.*;
-import ${basePackage!''}.domain.repository.*;
+import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
+import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request.*;
+import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.repository.*;
 import ${basePackage!''}.entities.*;
 import ${basePackage!''}.mappers.*;
 import ${basePackage!''}.utils.*;
@@ -11,6 +11,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +22,12 @@ import java.util.List;
 @Repository
 <#assign dtoClassName=NameUtils.dataTOName(source.name)/>
 <#assign doClassName=NameUtils.dataObjectName(source.mainTable.name)/>
-<#assign mapperName=NameUtils.mapperName(source.mainTable.name)/>
+<#assign mapperClassName=NameUtils.mapperName(source.mainTable.name)/>
+<#assign mapperName=NameUtils.getFieldName(mapperClassName)/>
 <#assign domainName=NameUtils.getName(source.name)/>
-public class ${domainName}RepositoryImpl implements ${domainName}Repository {
+public class ${domainName}RepositoryImpl extends ServiceImpl<${mapperClassName}, ${doClassName}> implements ${domainName}Repository {
     @Autowired
-    private ${mapperName} ${NameUtils.getFieldName(mapperName)};
+    private ${mapperClassName} ${NameUtils.getFieldName(mapperClassName)};
 
     <#--关联表-->
     <#list source.relatedTable as relateTable>
@@ -43,7 +45,7 @@ public class ${domainName}RepositoryImpl implements ${domainName}Repository {
     @Override
     public IPage<${dtoClassName}> page(IPage<?> page, ${domainName}PageRequest request){
         IPage<${doClassName}> queryPage = new Page<>(page.getPages(), page.getSize());
-        return PageHelper.convert(${NameUtils.getFieldName(mapperName)}.selectPage(queryPage, null), Convertor.INSTANCE::convert);
+        return PageHelper.convert(${NameUtils.getFieldName(mapperClassName)}.selectPage(queryPage, null), Convertor.INSTANCE::convert);
     }
 
     /**
@@ -56,7 +58,7 @@ public class ${domainName}RepositoryImpl implements ${domainName}Repository {
         LambdaQueryWrapper<${doClassName}> wrapper=new LambdaQueryWrapper<${doClassName}>()
             .eq(${doClassName}.keyLambda,id);
 
-        return Convertor.INSTANCE.convert(${NameUtils.getFieldName(mapperName)}.selectOne(wrapper));
+        return Convertor.INSTANCE.convert(${NameUtils.getFieldName(mapperClassName)}.selectOne(wrapper));
     }
 
     /**
@@ -67,7 +69,7 @@ public class ${domainName}RepositoryImpl implements ${domainName}Repository {
     @Override
     public ${source.keyType} insert(${dtoClassName} dtoData){
         ${doClassName} doData= Convertor.INSTANCE.convert(dtoData);
-        userInfoMapper.insert(doData);
+        ${NameUtils.getFieldName(mapperClassName)}.insert(doData);
         return ${doClassName}.keyLambda.apply(doData);
     }
 
@@ -79,7 +81,7 @@ public class ${domainName}RepositoryImpl implements ${domainName}Repository {
     @Override
     public Boolean update(${dtoClassName} dtoData){
         ${doClassName} doData= Convertor.INSTANCE.convert(dtoData);
-        return ${NameUtils.getFieldName(mapperName)}.update(doData,null) > 0;
+        return ${NameUtils.getFieldName(mapperClassName)}.update(doData,null) > 0;
     }
 
     /**
@@ -91,7 +93,7 @@ public class ${domainName}RepositoryImpl implements ${domainName}Repository {
     public Boolean delete(${source.keyType} id){
         LambdaQueryWrapper<${doClassName}> wrapper = new LambdaQueryWrapper<${doClassName}>()
             .eq(${doClassName}.keyLambda,id);
-        return ${NameUtils.getFieldName(mapperName)}.delete(wrapper) > 0;
+        return ${NameUtils.getFieldName(mapperClassName)}.delete(wrapper) > 0;
     }
 
 <#--    关联实体类-->

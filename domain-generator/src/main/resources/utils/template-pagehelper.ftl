@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 
 public class PageHelper {
 
-    public static <T, F> IPage<F> Covert(IPage<T> pageResult, Function<T, F> covert){
+    public static <T, F> IPage<F> Covert(IPage<T> pageResult, Function<T, F> converter){
         IPage<F> page=new Page<>();
         page.setPages(pageResult.getPages());
         page.setSize(pageResult.getSize());
         page.setTotal(pageResult.getTotal());
         if(CollUtil.isNotEmpty(pageResult.getRecords())){
-            page.setRecords(pageResult.getRecords().stream().map(covert).collect(Collectors.toList()));
+            page.setRecords(pageResult.getRecords().stream().map(converter).collect(Collectors.toList()));
         }
         return page;
     }

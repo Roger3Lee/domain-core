@@ -48,6 +48,10 @@ public class NameUtils {
         return getFieldWithSuffix(name, "TargetLambda");
     }
 
+    public static String packageName(String name) {
+        return StrUtil.toCamelCase(StrUtil.format("{}", name)).toLowerCase();
+    }
+
     public String genGetter(String fieldName){
         return StrUtil.genGetter(StrUtil.toCamelCase(StrUtil.format("{}", fieldName)));
     }

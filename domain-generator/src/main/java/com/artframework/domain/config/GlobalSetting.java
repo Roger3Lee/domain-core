@@ -5,10 +5,16 @@ import com.artframework.domain.meta.domain.DomainMetaInfo;
 import com.artframework.domain.meta.table.ColumnMetaInfo;
 import com.artframework.domain.meta.table.TableCollection;
 import com.artframework.domain.meta.table.TableMetaInfo;
+import com.artframework.domain.utils.StreamUtils;
 import com.artframework.domain.utils.XmlUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,6 +61,10 @@ public class GlobalSetting {
 
         INSTANCE.domainMetaInfoList = domainCollection.getDomain();
         INSTANCE.tableMetaInfoMap = tableCollection.getTables().stream().collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
+    }
+
+    public static void load(File tableFile, File domainFile) throws IOException, JAXBException {
+        load(StreamUtils.readAsString(Files.newInputStream(tableFile.toPath())),StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())));
     }
 
 }

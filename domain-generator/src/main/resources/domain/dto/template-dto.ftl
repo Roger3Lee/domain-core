@@ -1,4 +1,4 @@
-package ${basePackage!''}.domain.dto;
+package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto;
 
 import lombok.Getter;
 import lombok.Setter;

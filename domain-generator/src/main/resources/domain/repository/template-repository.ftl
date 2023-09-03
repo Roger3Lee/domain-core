@@ -1,7 +1,7 @@
-package ${basePackage!''}.domain.repository;
+package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.repository;
 
-import ${basePackage!''}.domain.dto.request.*;
-import ${basePackage!''}.domain.dto.*;
+import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request.*;
+import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.util.List;

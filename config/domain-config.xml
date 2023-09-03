@@ -2,4 +2,7 @@
     <domain name="user" description="用戶域" main-table="user_info">
         <related table="user_address" many="true" fk="uuid:user_uuid"/>
     </domain>
+    <domain name="shop" description="店铺域" main-table="shop">
+        <related table="shop_item" many="true" fk="id:shop_id"/>
+    </domain>
 </domains>
