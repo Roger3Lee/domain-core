@@ -1,11 +1,9 @@
 package com.artframework.domain.generator.table;
 
+import com.artframework.domain.meta.table.TableMetaInfo;
 import com.artframework.domain.dto.TableInfo;
 import com.artframework.domain.generator.AbstractGenerator;
-import com.artframework.domain.meta.table.TableMetaInfo;
 import org.springframework.stereotype.Component;
-
-import javax.xml.bind.JAXBException;
 
 /**
  * @author li.pengcheng

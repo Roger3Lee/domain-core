@@ -1,8 +1,6 @@
 package com.artframework.domain.meta.table;
 
-import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;

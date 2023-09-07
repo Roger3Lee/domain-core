@@ -5,8 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.artframework</groupId>
-        <artifactId>domain-generator-parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <artifactId>domain-dependencies</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../domain-dependencies/pom.xml</relativePath>
     </parent>
 
     <artifactId>domain-generator</artifactId>
@@ -25,7 +26,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.11</version>
+            <version> 3.12.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -45,6 +46,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version> 2.0.7</version>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -52,11 +54,13 @@
             <version>3.5.3.1</version>
             <scope>compile</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter -->
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-stater</artifactId>
-            <version>3.4.0</version>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.5.3.1</version>
         </dependency>
+
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-core</artifactId>

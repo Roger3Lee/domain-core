@@ -4,6 +4,9 @@ import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.service.*;
 import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request.*;
 import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
 import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.repository.*;
+import com.artframework.domain.core.service.impl.*;
+
+import com.artframework.domain.core.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 <#assign domainName=NameUtils.getName(source.name)/>
 <#assign repositoryClassName=NameUtils.repositoryName(source.name)/>
 @Service
-public class ${serviceImplClassName} implements ${serviceClassName} {
-    @Autowired
-    private ${repositoryClassName} ${NameUtils.getFieldName(repositoryClassName)};
+public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${serviceClassName} {
+@Autowired
+private ${repositoryClassName} ${NameUtils.getFieldName(repositoryClassName)};
 /**
 * 分页查询
 * @param request 请求体

@@ -5,7 +5,8 @@ import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.reques
 import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.repository.*;
 import ${basePackage!''}.entities.*;
 import ${basePackage!''}.mappers.*;
-import ${basePackage!''}.utils.*;
+import ${basePackage!''}.entities.*;
+import com.artframework.domain.core.repository.impl.*;
 
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -27,144 +28,33 @@ import java.util.List;
 <#assign domainName=NameUtils.getName(source.name)/>
 <#assign repositoryClassName=NameUtils.repositoryName(source.name)/>
 <#assign repositoryImplClassName=NameUtils.repositoryImplName(source.name)/>
-public class ${repositoryImplClassName} extends ServiceImpl<${mapperClassName}, ${doClassName}> implements ${repositoryClassName} {
-    @Autowired
-    private ${mapperClassName} ${NameUtils.getFieldName(mapperClassName)};
+public class ${repositoryImplClassName} extends BaseRepositoryImpl<${dtoClassName},${doClassName}>  implements ${repositoryClassName} {
+@Override
+public List<${doClassName}> convert2DO(List<${dtoClassName}> list) {
+return null;
+}
 
-    <#--关联表-->
-    <#list source.relatedTable as relateTable>
-    <#assign relateMapperName=NameUtils.mapperName(relateTable.name)/>
-    @Autowired
-    private ${relateMapperName} ${NameUtils.getFieldName(relateMapperName)};
-    </#list>
+@Override
+public List<${dtoClassName}> convert2DTO(List<${doClassName}> list) {
+return null;
+}
 
-    /**
-    * 分页查询
-    * @param page
-    * @param request
-    * @return
-    */
-    @Override
-    public IPage<${dtoClassName}> page(IPage<?> page, ${domainName}PageRequest request){
-        IPage<${doClassName}> queryPage = new Page<>(page.getPages(), page.getSize());
-        return PageHelper.convert(${NameUtils.getFieldName(mapperClassName)}.selectPage(queryPage, null), Convertor.INSTANCE::convert);
-    }
+@Override
+public Function<${dtoClassName}, ?> keyLambda() {
+return null;
+}
+}
 
-    /**
-    * 查找
-    * @param id 数据ID
-    * @return
-    */
-    @Override
-    public ${dtoClassName} find(${source.keyType} id){
-        LambdaQueryWrapper<${doClassName}> wrapper=new LambdaQueryWrapper<${doClassName}>()
-            .eq(${doClassName}.keyLambda,id);
 
-        return Convertor.INSTANCE.convert(${NameUtils.getFieldName(mapperClassName)}.selectOne(wrapper));
-    }
-
-    /**
-    * 新增
-    * @param dtoData 数据
-    * @return
-    */
-    @Override
-    public ${source.keyType} insert(${dtoClassName} dtoData){
-        ${doClassName} doData= Convertor.INSTANCE.convert(dtoData);
-        ${NameUtils.getFieldName(mapperClassName)}.insert(doData);
-        return ${doClassName}.keyLambda.apply(doData);
-    }
-
-    /**
-    * 修改
-    * @param dtoData 数据
-    * @return 成功OR失败
-    */
-    @Override
-    public Boolean update(${dtoClassName} dtoData){
-        ${doClassName} doData= Convertor.INSTANCE.convert(dtoData);
-        return ${NameUtils.getFieldName(mapperClassName)}.update(doData,null) > 0;
-    }
-
-    /**
-    * 删除
-    * @param id 数据ID
-    * @return 成功OR失败
-    */
-    @Override
-    public Boolean delete(${source.keyType} id){
-        LambdaQueryWrapper<${doClassName}> wrapper = new LambdaQueryWrapper<${doClassName}>()
-            .eq(${doClassName}.keyLambda,id);
-        return ${NameUtils.getFieldName(mapperClassName)}.delete(wrapper) > 0;
-    }
-
-<#--    关联实体类-->
 <#list source.relatedTable as relateTable>
     <#assign relateDOClassName= NameUtils.dataObjectName(relateTable.name)/>
     <#assign relateDTOClassName= NameUtils.dataTOName(relateTable.name)/>
     <#assign relateMapperClassName=NameUtils.mapperName(relateTable.name)/>
     <#assign relateMapperName=NameUtils.getFieldName(relateMapperClassName)/>
     <#assign relateFieldName=NameUtils.getFieldName(relateTable.name)/>
-    /**
-    * 新增 ${relateDTOClassName}
-    * @param dtoData 数据
-    * @return 成功OR失败
-    */
-    @Override
-    public Boolean insert${NameUtils.getName(relateTable.name)}(List<${dtoClassName}.${relateDTOClassName}> dtoData){
-        if(CollUtil.isNotEmpty(dtoData)){
-            List<${relateDOClassName}> doData=Convertor.INSTANCE.convert2DO(dtoData);
-            for (${relateDOClassName} item:doData) {
-                ${relateMapperName}.insert(item);
-            }
-        }
-        return true;
-    }
-
-    /**
-    * 修改
-    * @param dtoData 数据
-    * @return 成功OR失败
-    */
-    @Override
-    public Boolean update${NameUtils.getName(relateTable.name)}(List<${dtoClassName}.${relateDTOClassName}> dtoData){
-        if(CollUtil.isNotEmpty(dtoData)){
-            List<${relateDOClassName}> doData=Convertor.INSTANCE.convert2DO(dtoData);
-            for (${relateDOClassName} item:doData) {
-                ${relateMapperName}.update(item ,null);
-            }
-        }
-        return true;
-    }
-
-    /**
-    * 删除
-    * @param refId 数据ID
-    * @return 成功OR失败
-    */
-    @Override
-    public Boolean delete${NameUtils.getName(relateTable.name)}(${relateTable.fkSourceColumnType} refId){
-        LambdaQueryWrapper<${relateDOClassName}> wrapper = new LambdaQueryWrapper<${relateDOClassName}>()
-            .eq(${dtoClassName}.${NameUtils.fieldTargetLambda(relateFieldName)} ,refId);
-        return ${relateMapperName}.delete(wrapper) > 0;
-    }
-</#list>
-
-<#--MAPPER-->
-    @Mapper
-    public interface  Convertor{
-        Convertor INSTANCE= Mappers.getMapper(Convertor.class);
-
-        ${dtoClassName} convert(${doClassName} request);
-        ${doClassName} convert(${dtoClassName} request);
-
-        <#list source.relatedTable as relateTable>
-            <#assign relateDTOClassName= NameUtils.dataTOName(relateTable.name)/>
-            <#assign relateDOClassName= NameUtils.dataObjectName(relateTable.name)/>
-        ${dtoClassName}.${relateDTOClassName} convert2DTO(${relateDOClassName} request);
-        List<${dtoClassName}.${relateDTOClassName}> convert2DTO(List<${relateDOClassName}>  request);
-        ${relateDOClassName} convert2DO(${dtoClassName}.${relateDTOClassName} request);
-        List<${relateDOClassName}> convert2DO(List<${dtoClassName}.${relateDTOClassName}>  request);
-        </#list>
-    }
+    <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
+    <#assign relateRepositoryImplClassName=NameUtils.repositoryImplName(relateTable.name)/>
+@Repository
+public class ${relateRepositoryImplClassName} extends BaseRepositoryImpl<${dtoClassName}.${relateDTOClassName},${relateDOClassName}>  implements ${relateRepositoryClassName} {
 }
+</#list>
