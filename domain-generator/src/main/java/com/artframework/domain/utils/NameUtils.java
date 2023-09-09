@@ -48,7 +48,9 @@ public class NameUtils {
     public static String serviceName(String name) {
         return getNameWithSuffix(name, "Service");
     }
-
+    public static String controllerName(String name) {
+        return getNameWithSuffix(name, "Controller");
+    }
     public static String serviceImplName(String name) {
         return getNameWithSuffix(name, "ServiceImpl");
     }

@@ -61,10 +61,11 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
                 <#assign loadProperty=NameUtils.getFieldWithPrefix(relateTable.name,"getLoad")/>
                 <#assign relateFieldName=NameUtils.getFieldName(relateTable.name)/>
                 <#assign relatesourceLambda=NameUtils.fieldSourceLambda(relateFieldName)/>
+                <#assign relatetargetLambda=NameUtils.fieldTargetLambda(relateFieldName)/>
                 <#assign setRelatedProperty=NameUtils.genSetter(relateTable.name)/>
             if(request.getLoadFlag().${loadProperty}()){
                 Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(response);
-                response.${setRelatedProperty}(${NameUtils.getFieldName(relateRepositoryClassName)}.${relateTable.many? string('queryList',"query")}(key, ${lambdaClassName}.${targetLambda}));
+                response.${setRelatedProperty}(${NameUtils.getFieldName(relateRepositoryClassName)}.${relateTable.many? string('queryList',"query")}(key, ${lambdaClassName}.${relatetargetLambda}));
             }
 
             </#list>

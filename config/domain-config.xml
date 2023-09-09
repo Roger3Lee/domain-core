@@ -1,6 +1,6 @@
 <domains>
     <domain name="user" description="用戶域" main-table="user_info">
-<!--        <related table="user_address" many="false" fk="id:user_id"/>-->
-<!--        <related table="user_family_member" many="true" fk="id:user_id"/>-->
+        <related table="user_address" many="false" fk="id:user_id"/>
+        <related table="user_family_member" many="true" fk="id:user_id"/>
     </domain>
 </domains>

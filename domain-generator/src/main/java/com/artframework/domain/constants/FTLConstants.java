@@ -23,4 +23,5 @@ public class FTLConstants {
     public static final  String DOMAIN_SERVICE_IMPL_PATH =  "domain/service/template-service-impl.ftl";
 
     public static final  String DOMAIN_LAMBDA_EXP_PATH =  "domain/lambda-exp/template-lambda-exp.ftl";
+    public static final String CONTROLLER_PATH =  "controller/template-controller.ftl";;
 }

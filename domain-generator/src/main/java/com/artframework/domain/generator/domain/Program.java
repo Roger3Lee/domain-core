@@ -75,6 +75,11 @@ public class Program {
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.DOMAIN_LAMBDA_EXP_PATH);
             FileUtils.saveFile(path+ "domain\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "lambdaexp\\", NameUtils.lambdaExpName(domainInfo.getName()) + ".java", domainDtoGenerator.generate(domainInfo));
+
+
+
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.CONTROLLER_PATH);
+            FileUtils.saveFile(path + "controller\\", NameUtils.controllerName(domainInfo.getName()) + ".java", domainDtoGenerator.generate(domainInfo));
         }
 
     }
