@@ -13,7 +13,14 @@ import java.util.List;
 <#assign domainName=NameUtils.getName(source.name)/>
 <#assign repositoryClassName=NameUtils.repositoryName(source.name)/>
 public interface ${repositoryClassName} extends BaseRepository<${dtoClassName}, ${doClassName}> {
-}
+
+    /**
+    * 分页查询
+    * @param request 请求体
+    * @return 返回数据
+    */
+    IPage<${dtoClassName}> page(${domainName}PageRequest request);
+
 <#--    关联实体类-->
 <#list source.relatedTable as relateTable>
     <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
@@ -22,3 +29,4 @@ public interface ${repositoryClassName} extends BaseRepository<${dtoClassName}, 
     public interface ${relateRepositoryClassName} extends BaseRepository<${dtoClassName}.${relateDtoClassName}, ${relateDoClassName}> {
     }
 </#list>
+}

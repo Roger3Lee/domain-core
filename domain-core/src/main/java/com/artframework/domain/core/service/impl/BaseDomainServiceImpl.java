@@ -8,6 +8,7 @@ import com.artframework.domain.core.repository.impl.BaseRepositoryImpl;
 import com.artframework.domain.core.service.BaseDomainService;
 import com.artframework.domain.core.uitls.CompareUtil;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,7 +23,7 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
      * @param
      */
     @Override
-    public <T extends BaseDTO> void merge(List<T> oldList, List<T> newList, Function<T, Object> keyWrap, BaseRepository repository) {
+    public <T extends BaseDTO> void merge(List<T> oldList, List<T> newList, Function<T, Serializable> keyWrap, BaseRepository repository) {
         CompareUtil.CompareResult<T> compareList = CompareUtil.compareList(oldList, newList, keyWrap);
 
         //新增

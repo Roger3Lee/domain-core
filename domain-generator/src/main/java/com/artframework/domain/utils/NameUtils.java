@@ -53,12 +53,29 @@ public class NameUtils {
         return getNameWithSuffix(name, "ServiceImpl");
     }
 
+    public static String lambdaExpName(String name) {
+        return getNameWithSuffix(name, "LambdaExp");
+    }
+
     public static String fieldSourceLambda(String name) {
         return getFieldWithSuffix(name, "SourceLambda");
     }
 
+
+    public static String fieldTargetKeyLambda(String name) {
+        return getFieldWithSuffix(name, "keyLambda");
+    }
+
     public static String fieldTargetLambda(String name) {
         return getFieldWithSuffix(name, "TargetLambda");
+    }
+
+    public static String fieldTargetSetLambda(String name) {
+        return getFieldWithSuffix(name, "TargetSetLambda");
+    }
+
+    public static String covertName(String name) {
+        return getNameWithSuffix(name, "Convertor");
     }
 
     public static String packageName(String name) {
@@ -68,5 +85,7 @@ public class NameUtils {
     public String genGetter(String fieldName){
         return StrUtil.genGetter(StrUtil.toCamelCase(StrUtil.format("{}", fieldName)));
     }
-
+    public String genSetter(String fieldName){
+        return StrUtil.genSetter(StrUtil.toCamelCase(StrUtil.format("{}", fieldName)));
+    }
 }

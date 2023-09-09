@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -13,8 +14,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class BaseRepositoryImpl<DTO, DO> extends ServiceImpl<BaseMapper<DO>, DO> implements BaseRepository<DTO, DO> {
-
+public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO, DO> {
+    @Autowired
+    protected BaseMapper<DO> baseMapper;
     @Override
     public DTO query(Serializable id, SFunction<DO, Serializable> idWrap) {
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
@@ -27,6 +29,7 @@ public abstract class BaseRepositoryImpl<DTO, DO> extends ServiceImpl<BaseMapper
         }
         return list.get(0);
     }
+
     @Override
     public List<DTO> queryList(Serializable id, SFunction<DO, Serializable> idWrap) {
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
@@ -66,6 +69,7 @@ public abstract class BaseRepositoryImpl<DTO, DO> extends ServiceImpl<BaseMapper
         return convert2DTO(tList);
     }
 
+
     /**
      *  批量删除
      * @param list
@@ -76,7 +80,7 @@ public abstract class BaseRepositoryImpl<DTO, DO> extends ServiceImpl<BaseMapper
         if (CollUtil.isEmpty(list)) {
             return 0;
         }
-        List<?> keyList = list.stream().map(x -> keyLambda().apply(x)).collect(Collectors.toList());
+        List<Serializable> keyList = list.stream().map(x -> keyLambda().apply(x)).collect(Collectors.toList());
         return this.baseMapper.deleteBatchIds(keyList);
     }
 
@@ -113,5 +117,5 @@ public abstract class BaseRepositoryImpl<DTO, DO> extends ServiceImpl<BaseMapper
 
     public abstract List<DTO> convert2DTO(List<DO> list);
 
-    public abstract Function<DTO,?> keyLambda();
+    public abstract Function<DTO, Serializable> keyLambda();
 }

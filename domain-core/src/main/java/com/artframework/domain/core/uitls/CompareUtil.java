@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,12 +26,12 @@ public class CompareUtil {
      * @param <T>
      * @return Tuple get(0)為新增， get(1) 為刪除, get(2)為更新
      */
-    public static <T> CompareResult<T> compareList(List<T> oldList, List<T> newList, Function<? super T, Object> keyWrap) {
+    public static <T> CompareResult<T> compareList(List<T> oldList, List<T> newList, Function<? super T, Serializable> keyWrap) {
         List<T> deleteItems = new ArrayList<>();
         List<T> addItems = new ArrayList<>();
         List<T> updateItems = new ArrayList<>();
-        Map<Object, T> oldMap = new HashMap<>();
-        Map<Object, T> newMap = new HashMap<>();
+        Map<Serializable, T> oldMap = new HashMap<>();
+        Map<Serializable, T> newMap = new HashMap<>();
         if (CollUtil.isNotEmpty(oldList)) {
             oldMap = oldList.stream().collect(Collectors.toMap(keyWrap, x -> x, (prev, next) -> next));
         }
@@ -40,18 +41,18 @@ public class CompareUtil {
             newMap = newList.stream().filter(x-> !ObjectUtil.isNull(keyWrap.apply(x))).collect(Collectors.toMap(keyWrap, x -> x, (prev, next) -> next));
         }
 
-        List<Object> oldKeys = Arrays.asList(oldMap.keySet().toArray());
-        List<Object> newKeys = Arrays.asList(newMap.keySet().toArray());
-        Collection<Object> deletes = CollUtil.subtract(oldKeys, newKeys);
-        Collection<Object> adds = CollUtil.subtract(newKeys, oldKeys);
-        Collection<Object> updates = CollUtil.intersection(newKeys, oldKeys);
+        List<Serializable> oldKeys = new ArrayList<>(oldMap.keySet());
+        List<Serializable> newKeys = new ArrayList<>(newMap.keySet());
+        Collection<Serializable> deletes = CollUtil.subtract(oldKeys, newKeys);
+        Collection<Serializable> adds = CollUtil.subtract(newKeys, oldKeys);
+        Collection<Serializable> updates = CollUtil.intersection(newKeys, oldKeys);
 
-        Map<Object, T> finalOldMap = oldMap;
+        Map<Serializable, T> finalOldMap = oldMap;
         deletes.forEach(x -> {
             deleteItems.add(finalOldMap.get(x));
         });
 
-        Map<Object, T> finalNewMap = newMap;
+        Map<Serializable, T> finalNewMap = newMap;
         adds.forEach(x -> {
             addItems.add(finalNewMap.get(x)) ;
         });

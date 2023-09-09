@@ -1,10 +1,9 @@
 package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request;
 
+import com.artframework.domain.core.dto.request.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import ${basePackage!''}.common.*;
 
 @Getter
 @Setter

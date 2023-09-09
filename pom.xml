@@ -20,7 +20,6 @@
 
     <modules>
         <module>domain-dependencies</module>
-        <module>domain-generator-starter</module>
         <module>domain-generator</module>
         <module>domain-core</module>
         <module>domain-sample</module>
@@ -37,6 +36,11 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>3.5.3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>1.4.2.Final</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

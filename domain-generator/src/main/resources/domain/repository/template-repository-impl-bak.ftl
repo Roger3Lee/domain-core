@@ -56,7 +56,7 @@ public class ${repositoryImplClassName} extends BaseRepository<${dtoClassName},$
     * @return
     */
     @Override
-    public ${dtoClassName} find(${source.keyType} id){
+    public ${dtoClassName} find(${source.mainTable.keyType} id){
         LambdaQueryWrapper<${doClassName}> wrapper=new LambdaQueryWrapper<${doClassName}>()
             .eq(${doClassName}.keyLambda,id);
 
@@ -69,7 +69,7 @@ public class ${repositoryImplClassName} extends BaseRepository<${dtoClassName},$
     * @return
     */
     @Override
-    public ${source.keyType} insert(${dtoClassName} dtoData){
+    public ${source.mainTable.keyType} insert(${dtoClassName} dtoData){
         ${doClassName} doData= Convertor.INSTANCE.convert(dtoData);
         ${NameUtils.getFieldName(mapperClassName)}.insert(doData);
         return ${doClassName}.keyLambda.apply(doData);
@@ -92,7 +92,7 @@ public class ${repositoryImplClassName} extends BaseRepository<${dtoClassName},$
     * @return 成功OR失败
     */
     @Override
-    public Boolean delete(${source.keyType} id){
+    public Boolean delete(${source.mainTable.keyType} id){
         LambdaQueryWrapper<${doClassName}> wrapper = new LambdaQueryWrapper<${doClassName}>()
             .eq(${doClassName}.keyLambda,id);
         return ${NameUtils.getFieldName(mapperClassName)}.delete(wrapper) > 0;

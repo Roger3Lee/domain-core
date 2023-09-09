@@ -9,6 +9,5 @@ import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
 @Getter
 @Setter
 @ToString
-public class ${NameUtils.getName(source.name)}CreateRequest {
-    private ${NameUtils.dataTOName(source.name)} entity;
+public class ${NameUtils.getName(source.name)}CreateRequest extends ${NameUtils.dataTOName(source.name)} {
 }

@@ -9,7 +9,5 @@ import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
 @Getter
 @Setter
 @ToString
-public class ${NameUtils.getName(source.name)}UpdateRequest {
-    private ${NameUtils.dataTOName(source.name)} entity;
-    private ${NameUtils.dataTOName(source.name)}.LoadFlag loadFlag;
+public class ${NameUtils.getName(source.name)}UpdateRequest extends ${NameUtils.dataTOName(source.name)}{
 }

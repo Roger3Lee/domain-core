@@ -24,10 +24,13 @@ import lombok.ToString;
 </#if>
 <#assign className=NameUtils.dataObjectName(source.name)/>
 public class ${className} <#if source.inherit??> extends ${NameUtils.dataObjectName(source.inherit)}</#if> {
-    /**
-    * KEY ${source.name} lambda
-    */
-    public static SFunction<${className}, ${source.keyType}> keyLambda= ${className}::${NameUtils.genGetter(source.keyName)};
+
+<#--<#if !source.basic>-->
+<#--    /**-->
+<#--    * KEY ${source.name} lambda-->
+<#--    */-->
+<#--    public static SFunction<${className}, ${source.mainTable.keyType}> keyLambda= ${className}::${NameUtils.genGetter(source.keyName)};-->
+<#--</#if>-->
 
 <#list source.column as column>
     /**

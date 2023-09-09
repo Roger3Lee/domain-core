@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 @Builder
 public class DomainInfo {
     private String name;
-    private String keyType;
     private String description;
 
     private TableInfo mainTable;
@@ -34,7 +33,6 @@ public class DomainInfo {
                 .name(domainMetaInfo.getName())
                 .description(domainMetaInfo.getDescription())
                 .mainTable(tableInfo)
-                .keyType(tableInfo.column.stream().filter(ColumnMetaInfo::getKey).map(ColumnMetaInfo::getType).findFirst().orElse(""))
                 .relatedTable(domainMetaInfo.getRelatedList().stream().map(RelateTableInfo::convert).collect(Collectors.toList()))
                 .build();
     }
@@ -52,6 +50,11 @@ public class DomainInfo {
             RelateTableInfo tableInfo = new RelateTableInfo();
             tableInfo.setName(relatedTableMetaInfo.getTable());
             tableInfo.setColumn(GlobalSetting.INSTANCE.getTableColumns(relatedTableMetaInfo.getTable()));
+            ColumnMetaInfo keyColumn = tableInfo.getColumn().stream().filter(ColumnMetaInfo::getKey).findFirst().orElse(null);
+            if (keyColumn != null) {
+                tableInfo.setKeyType(keyColumn.getType());
+                tableInfo.setKeyColName(keyColumn.getName());
+            }
 
             tableInfo.setMany(relatedTableMetaInfo.getMany());
             String[] strings = relatedTableMetaInfo.getFk().split(":");
@@ -61,7 +64,6 @@ public class DomainInfo {
             tableInfo.setFkTargetColumn(strings[1]);
             tableInfo.setFkTargetColumnType(tableInfo.getColumn().stream().filter(x->x.getName().equals(strings[1]))
                     .map(ColumnMetaInfo::getType).findFirst().orElse(""));
-            tableInfo.setKeyType(tableInfo.getColumn().stream().filter(ColumnMetaInfo::getKey).map(ColumnMetaInfo::getType).findFirst().orElse(""));
             return tableInfo;
         }
     }
@@ -72,11 +74,19 @@ public class DomainInfo {
         private String name;
         private List<ColumnMetaInfo> column;
         private String keyType;
+        private String keyColName;
 
         public static TableInfo convert(String tableName) {
             TableInfo tableInfo = new TableInfo();
             tableInfo.setName(tableName);
             tableInfo.setColumn(GlobalSetting.INSTANCE.getTableColumns(tableName));
+
+            ColumnMetaInfo keyColumn = tableInfo.column.stream().filter(ColumnMetaInfo::getKey).findFirst().orElse(null);
+            if (keyColumn != null) {
+                tableInfo.setKeyType(keyColumn.getType());
+                tableInfo.setKeyColName(keyColumn.getName());
+            }
+
             return tableInfo;
         }
     }

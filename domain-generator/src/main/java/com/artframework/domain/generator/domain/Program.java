@@ -23,11 +23,6 @@ public class Program {
         GlobalSetting.load(new File("D:\\github\\domain-generator\\config\\table-list.xml"),
                 new File("D:\\github\\domain-generator\\config\\domain-config.xml"));
 
-
-        CommonGenerator commonGenerator=new CommonGenerator("com.artframework.domain.demo");
-        commonGenerator.setTemplateFilePath(FTLConstants.COMMON_PAGE_REQUEST);
-        FileUtils.saveFile(path + "common\\", "PageRequest.java", commonGenerator.generate(null));
-
         List<TableMetaInfo> tableCollection = GlobalSetting.INSTANCE.getTableList();
         for (TableMetaInfo table : tableCollection) {
             TableInfo tableMetaInfo = TableInfo.covert(table);
@@ -75,6 +70,11 @@ public class Program {
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.DOMAIN_SERVICE_IMPL_PATH);
             FileUtils.saveFile(path+ "domain\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "service\\impl\\", domainInfo.nameSuffix("ServiceImpl") + ".java", domainDtoGenerator.generate(domainInfo));
+
+
+
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.DOMAIN_LAMBDA_EXP_PATH);
+            FileUtils.saveFile(path+ "domain\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "lambdaexp\\", NameUtils.lambdaExpName(domainInfo.getName()) + ".java", domainDtoGenerator.generate(domainInfo));
         }
 
     }

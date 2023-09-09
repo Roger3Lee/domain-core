@@ -1,5 +1,6 @@
 package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto;
 
+import com.artframework.domain.core.dto.BaseDTO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -18,25 +19,19 @@ import ${basePackage!''}.entities.*;
 @Setter
 @ToString
 <#assign className=NameUtils.dataTOName(source.name)/>
-public class ${className}{
+<#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
+public class ${className} extends BaseDTO {
 <#if source.mainTable??>
-        /**
-        * 是否有变化
-        */
-        private Boolean changed;
-
-    <#if column.key>
-        /**
-        * KEY ${relateTable.name} lambda
-        */
-        public static Function<${className}, ${column.type}> keyLambda= ${className}::${NameUtils.genGetter(column.name)};
-    </#if>
+    /**
+    * 是否有变化
+    */
+    private Boolean changed;
 
     <#list source.mainTable.column as column>
-        /**
-        * ${column.comment}
-        */
-        private ${column.type} ${NameUtils.getFieldName(column.name)};
+    /**
+    * ${column.comment}
+    */
+    private ${column.type} ${NameUtils.getFieldName(column.name)};
     </#list>
 
 <#--    关联实体属性-->
@@ -44,55 +39,49 @@ public class ${className}{
         <#assign relateClassName=NameUtils.dataObjectName(relateTable.name)/>
         <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
         <#assign fieldName=NameUtils.getFieldName(relateTable.name)/>
-        /**
-        * RELATE ${relateTable.name}
-        */
-        private <#if relateTable.many>java.util.List<${relateDtoClassName}> <#else>${relateDtoClassName}</#if> ${fieldName};
-
-        /**
-        * RELATE ${relateTable.name} lambda
-        */
-        public static SFunction<${className}, ${relateTable.fkSourceColumnType}> ${NameUtils.fieldSourceLambda(fieldName)} = ${className}::${NameUtils.genGetter(relateTable.fkSourceColumn)};
-
-        /**
-        * RELATE ${relateTable.name} lambda
-        */
-        public static SFunction<${relateClassName},${relateTable.fkTargetColumnType}> ${NameUtils.fieldTargetLambda(fieldName)} =${relateClassName}::${NameUtils.genGetter(relateTable.fkTargetColumn)};
+    /**
+    * RELATE ${relateTable.name}
+    */
+    private <#if relateTable.many>java.util.List<${relateDtoClassName}> <#else>${relateDtoClassName}</#if> ${fieldName};
     </#list>
+
+    /**
+    * 加载数据对象
+    */
+    private LoadFlag loadFlag = new LoadFlag();
 
 <#--    关联实体类-->
     <#list source.relatedTable as relateTable>
-        <#assign relateClassName= NameUtils.dataTOName(relateTable.name)/>
-        @Getter
-        @Setter
-        @ToString
-        public static class ${relateClassName}{
-            /**
-            * 是否有变化
-            */
-            private Boolean changed;
+    <#assign relateClassName= NameUtils.dataTOName(relateTable.name)/>
+    @Getter
+    @Setter
+    @ToString
+    public static class ${relateClassName} extends BaseDTO{
+        /**
+        * 是否有变化
+        */
+        private Boolean changed;
 
-        <#list relateTable.column as column>
-            /**
-            * ${column.comment}
-            */
-            private ${column.type} ${NameUtils.getFieldName(column.name)};
-        </#list>
-        }
+    <#list relateTable.column as column>
+        /**
+        * ${column.comment}
+        */
+        private ${column.type} ${NameUtils.getFieldName(column.name)};
+    </#list>
+    }
     </#list>
 
-        @Getter
-        @Setter
-        @ToString
-        public static class LoadFlag{
+    @Getter
+    @Setter
+    @ToString
+    public static class LoadFlag{
+    <#list source.relatedTable as relateTable>
 
-        <#list source.relatedTable as relateTable>
-
-            /**
-            *
-            */
-            private Boolean ${NameUtils.getFieldWithPrefix(relateTable.name,"load")};
+        /**
+        *
+        */
+        private Boolean ${NameUtils.getFieldWithPrefix(relateTable.name,"load")} = true;
         </#list>
-        }
+    }
 </#if>
 }

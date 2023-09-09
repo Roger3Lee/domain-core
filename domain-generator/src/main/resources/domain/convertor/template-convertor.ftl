@@ -3,11 +3,12 @@ package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.convertor
 
 import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
 import ${basePackage!''}.entities.*;
-import ${basePackage!''}.mappers.*;
+import org.apache.ibatis.annotations.Mapper;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Repository
+<#assign covertName=NameUtils.covertName(source.name)/>
 <#assign dtoClassName=NameUtils.dataTOName(source.name)/>
 <#assign doClassName=NameUtils.dataObjectName(source.mainTable.name)/>
 <#assign mapperClassName=NameUtils.mapperName(source.mainTable.name)/>
@@ -15,21 +16,23 @@ import java.util.List;
 <#assign domainName=NameUtils.getName(source.name)/>
 <#assign repositoryClassName=NameUtils.repositoryName(source.name)/>
 <#assign repositoryImplClassName=NameUtils.repositoryImplName(source.name)/>
-
 <#--MAPPER-->
 @Mapper
-public interface  ${domainName}Convertor{
-${domainName}Convertor INSTANCE= Mappers.getMapper(${domainName}Convertor.class);
+public interface  ${covertName}{
+    ${domainName}Convertor INSTANCE= Mappers.getMapper(${domainName}Convertor.class);
 
     ${dtoClassName} convert2DTO(${doClassName} request);
+    List<${dtoClassName}> convert2DTO(List<${doClassName}> request);
     ${doClassName} convert2DO(${dtoClassName} request);
+    List<${doClassName}> convert2DO(List<${dtoClassName}> request);
 
     <#list source.relatedTable as relateTable>
-        <#assign relateDTOClassName= NameUtils.dataTOName(relateTable.name)/>
-        <#assign relateDOClassName= NameUtils.dataObjectName(relateTable.name)/>
-        ${dtoClassName}.${relateDTOClassName} convert2DTO(${relateDOClassName} request);
-        List<${dtoClassName}.${relateDTOClassName}> convert2DTO(List<${relateDOClassName}>  request);
-        ${relateDOClassName} convert2DO(${dtoClassName}.${relateDTOClassName} request);
-        List<${relateDOClassName}> convert2DO(List<${dtoClassName}.${relateDTOClassName}>  request);
+    <#assign relateDTOClassName= NameUtils.dataTOName(relateTable.name)/>
+    <#assign relateDOClassName= NameUtils.dataObjectName(relateTable.name)/>
+    <#assign relateName= NameUtils.getName(relateTable.name)/>
+    ${dtoClassName}.${relateDTOClassName} convert2${relateName}DTO(${relateDOClassName} request);
+    List<${dtoClassName}.${relateDTOClassName}> convert2${relateName}DTO(List<${relateDOClassName}>  request);
+    ${relateDOClassName} convert2${relateName}DO(${dtoClassName}.${relateDTOClassName} request);
+    List<${relateDOClassName}> convert2${relateName}DO(List<${dtoClassName}.${relateDTOClassName}>  request);
     </#list>
 }

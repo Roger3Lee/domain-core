@@ -1,22 +1,24 @@
 <tables>
     <table name="base" basic="true">
-        <column name="id" type="java.lang.Long" comment="主鍵" key="true"/>
-        <column name="uuid" type="java.lang.String" comment="唯一键"/>
-        <column name="gmt_create" type="java.util.Date" comment="創建時間"/>
-        <column name="create_user" type="java.lang.String" comment="創建用戶"/>
+        <column name="CREATED_TIME" type="java.util.Date" comment="創建時間"/>
+        <column name="CREATED_BY" type="java.lang.String" comment="創建用戶"/>
+        <column name="UPDATED_TIME" type="java.util.Date" comment="創建時間"/>
+        <column name="UPDATED_BY" type="java.lang.String" comment="創建用戶"/>
     </table>
     <table name="user_info" inherit="base">
+        <column name="id" type="java.lang.Long" comment="主鍵" key="true"/>
         <column name="name" type="java.lang.String" comment="名字"/>
+        <column name="phone" type="java.lang.String" comment="手机"/>
     </table>
     <table name="user_address" inherit="base">
-        <column name="user_uuid" type="java.lang.String" comment="唯一键"/>
+        <column name="id" type="java.lang.Long" comment="主鍵" key="true"/>
+        <column name="user_id" type="java.lang.Long" comment="关联用户"/>
         <column name="address_name" type="java.lang.String" comment="地址"/>
     </table>
-    <table name="shop" inherit="base">
-        <column name="name" type="java.lang.String" comment="店铺名"/>
-    </table>
-    <table name="shop_item" inherit="base">
-        <column name="shop_id" type="java.lang.Long" comment="店铺ID"/>
-        <column name="item_name" type="java.lang.String" comment="商品名"/>
+    <table name="user_family_member" inherit="base">
+        <column name="id" type="java.lang.Long" comment="主鍵" key="true"/>
+        <column name="user_id" type="java.lang.Long" comment="唯一键"/>
+        <column name="name" type="java.lang.String" comment="姓名"/>
+        <column name="rel_type" type="java.lang.String" comment="家属关系"/>
     </table>
 </tables>
