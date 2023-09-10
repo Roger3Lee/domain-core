@@ -3,7 +3,6 @@ package com.artframework.domain;
 import com.artframework.domain.config.GlobalSetting;
 import com.artframework.domain.constants.FTLConstants;
 import com.artframework.domain.dto.DomainInfo;
-import com.artframework.domain.generator.CommonGenerator;
 import com.artframework.domain.generator.domain.DomainGenerator;
 import com.artframework.domain.generator.table.TableGenerator;
 import com.artframework.domain.meta.domain.DomainMetaInfo;
