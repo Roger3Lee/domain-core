@@ -39,3 +39,4 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
         }
     }
 }
+    

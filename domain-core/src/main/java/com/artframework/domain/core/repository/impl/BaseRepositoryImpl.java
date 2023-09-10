@@ -108,7 +108,7 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
         }
         List<DO> tList = convert2DO(list);
         for (DO item : tList) {
-            this.baseMapper.update(item,null);
+            this.baseMapper.updateById(item);
         }
         return convert2DTO(tList);
     }

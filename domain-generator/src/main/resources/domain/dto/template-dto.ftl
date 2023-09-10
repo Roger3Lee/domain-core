@@ -25,7 +25,7 @@ public class ${className} extends BaseDTO {
     /**
     * 是否有变化
     */
-    private Boolean changed;
+    private Boolean changed = false;
 
     <#list source.mainTable.column as column>
     /**
@@ -60,7 +60,7 @@ public class ${className} extends BaseDTO {
         /**
         * 是否有变化
         */
-        private Boolean changed;
+        private Boolean changed = false;
 
     <#list relateTable.column as column>
         /**

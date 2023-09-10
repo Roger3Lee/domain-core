@@ -6,6 +6,7 @@ import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
 import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.repository.*;
 import com.artframework.domain.core.service.impl.*;
 
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -70,6 +71,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
 
             </#list>
         }
+        response.setLoadFlag(request.getLoadFlag());
         return response;
     }
 
@@ -82,7 +84,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     @Transactional(rollbackFor = Exception.class)
     public ${source.mainTable.keyType} insert(${domainName}CreateRequest request){
         //插入数据
-        ${repositoryName}.insert(request);
+        ${dtoClassName} dto = ${repositoryName}.insert(request);
 
     <#list source.relatedTable as relateTable>
         <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
@@ -95,13 +97,13 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         //插入关联数据${relateTable.name}
         <#if relateTable.many>
         if(CollUtil.isNotEmpty(request.${getter}())){
-            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
+            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(dto);
             request.${getter}().forEach(x->${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key));
             ${NameUtils.getFieldName(relateRepositoryClassName)}.insert(request.${getter}());
         }
         <#else>
         if(ObjectUtil.isNotNull(request.${getter}())){
-            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
+            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(dto);
             ${lambdaClassName}.${targetSetLambda}.accept(request.${getter}(),(${relateTable.fkTargetColumnType})key);
             ${NameUtils.getFieldName(relateRepositoryClassName)}.insert(request.${getter}());
         }
@@ -120,7 +122,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     public Boolean update(${domainName}UpdateRequest request){
         Serializable keyId = ${lambdaClassName}.dtoKeyLambda.apply(request);
         ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindRequest(keyId, request.getLoadFlag()));
-        if(request.getChanged()){
+        if(BooleanUtil.isTrue(request.getChanged())){
             //更新数据
             ${repositoryName}.update(request);
         }
@@ -144,7 +146,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         if(ObjectUtil.isNotNull(request.${getter}())){
             Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
             ${lambdaClassName}.${targetSetLambda}.accept(request.${getter}(),(${relateTable.fkTargetColumnType})key);
-            if(request.${getter}().getChanged()){
+            if(BooleanUtil.isTrue(request.${getter}().getChanged())){
                 ${NameUtils.getFieldName(relateRepositoryClassName)}.update(request.${getter}());
             }
         }

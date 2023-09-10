@@ -11,7 +11,7 @@ import lombok.ToString;
 *
 * @author auto
 * @version v1.0
-* @date 2023-9-10 0:42:56
+* @date 2023-9-10 10:32:39
 */
 @Getter
 @Setter
@@ -23,7 +23,7 @@ public class UserInfoDO  extends BaseDO {
     /**
     * 主鍵
     */
-    @TableId(value = "id", type = IdType.INPUT)
+    @TableId(value = "id", type = IdType.AUTO)
     private java.lang.Long id;
     /**
     * 名字

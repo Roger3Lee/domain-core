@@ -6,6 +6,7 @@ import com.artframework.sample.domain.user.dto.*;
 import com.artframework.sample.domain.user.repository.*;
 import com.artframework.domain.core.service.impl.*;
 
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -58,6 +59,7 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
             }
 
         }
+        response.setLoadFlag(request.getLoadFlag());
         return response;
     }
 
@@ -70,17 +72,17 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
     @Transactional(rollbackFor = Exception.class)
     public java.lang.Long insert(UserCreateRequest request){
         //插入数据
-        userRepository.insert(request);
+        UserDTO dto = userRepository.insert(request);
 
         //插入关联数据user_address
         if(ObjectUtil.isNotNull(request.getUserAddress())){
-            Serializable key = UserLambdaExp.userAddressSourceLambda.apply(request);
+            Serializable key = UserLambdaExp.userAddressSourceLambda.apply(dto);
             UserLambdaExp.userAddressTargetSetLambda.accept(request.getUserAddress(),(java.lang.Long)key);
             userAddressRepository.insert(request.getUserAddress());
         }
         //插入关联数据user_family_member
         if(CollUtil.isNotEmpty(request.getUserFamilyMember())){
-            Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(request);
+            Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(dto);
             request.getUserFamilyMember().forEach(x->UserLambdaExp.userFamilyMemberTargetSetLambda.accept(x,(java.lang.Long)key));
             userFamilyMemberRepository.insert(request.getUserFamilyMember());
         }
@@ -97,14 +99,14 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
     public Boolean update(UserUpdateRequest request){
         Serializable keyId = UserLambdaExp.dtoKeyLambda.apply(request);
         UserDTO old = find(new UserFindRequest(keyId, request.getLoadFlag()));
-        if(request.getChanged()){
+        if(BooleanUtil.isTrue(request.getChanged())){
             //更新数据
             userRepository.update(request);
         }
         if(ObjectUtil.isNotNull(request.getUserAddress())){
             Serializable key = UserLambdaExp.userAddressSourceLambda.apply(request);
             UserLambdaExp.userAddressTargetSetLambda.accept(request.getUserAddress(),(java.lang.Long)key);
-            if(request.getUserAddress().getChanged()){
+            if(BooleanUtil.isTrue(request.getUserAddress().getChanged())){
                 userAddressRepository.update(request.getUserAddress());
             }
         }

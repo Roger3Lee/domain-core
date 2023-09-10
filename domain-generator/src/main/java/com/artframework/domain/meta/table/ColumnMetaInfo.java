@@ -18,6 +18,7 @@ public class ColumnMetaInfo {
     private String type;
     private String comment;
     private Boolean key = false;
+    private Boolean keyGenerator=false;
 
     @XmlAttribute(name = "name")
     public void setName(String name) {
@@ -37,5 +38,9 @@ public class ColumnMetaInfo {
     @XmlAttribute(name = "key")
     public void setKey(Boolean key) {
         this.key = key;
+    }
+    @XmlAttribute(name = "keyGenerator")
+    public void setKeyGenerator(Boolean keyGenerator) {
+        this.keyGenerator = keyGenerator;
     }
 }

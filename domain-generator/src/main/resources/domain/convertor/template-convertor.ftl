@@ -3,7 +3,7 @@ package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.convertor
 
 import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
 import ${basePackage!''}.entities.*;
-import org.apache.ibatis.annotations.Mapper;
+import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;

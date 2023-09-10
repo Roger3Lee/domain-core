@@ -3,7 +3,7 @@ package com.artframework.sample.domain.user.convertor;
 
 import com.artframework.sample.domain.user.dto.*;
 import com.artframework.sample.entities.*;
-import org.apache.ibatis.annotations.Mapper;
+import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
