@@ -22,11 +22,6 @@ import ${basePackage!''}.entities.*;
 <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
 public class ${className} extends BaseDTO {
 <#if source.mainTable??>
-    /**
-    * 是否有变化
-    */
-    private Boolean changed = false;
-
     <#list source.mainTable.column as column>
     /**
     * ${column.comment}
@@ -48,7 +43,7 @@ public class ${className} extends BaseDTO {
     /**
     * 加载数据对象
     */
-    private LoadFlag loadFlag = new LoadFlag();
+    private LoadFlag loadFlag;
 
 <#--    关联实体类-->
     <#list source.relatedTable as relateTable>

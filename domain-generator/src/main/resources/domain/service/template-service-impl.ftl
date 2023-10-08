@@ -109,7 +109,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         }
         </#if>
     </#list>
-        return (${source.mainTable.keyType}) UserLambdaExp.dtoKeyLambda.apply(request);
+        return (${source.mainTable.keyType}) UserLambdaExp.dtoKeyLambda.apply(dto);
     }
 
     /**
@@ -122,10 +122,8 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     public Boolean update(${domainName}UpdateRequest request){
         Serializable keyId = ${lambdaClassName}.dtoKeyLambda.apply(request);
         ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindRequest(keyId, request.getLoadFlag()));
-        if(BooleanUtil.isTrue(request.getChanged())){
-            //更新数据
-            ${repositoryName}.update(request);
-        }
+        //更新数据
+        ${repositoryName}.update(request);
 <#list source.relatedTable as relateTable>
     <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
     <#assign getter=NameUtils.genGetter(relateTable.name)/>

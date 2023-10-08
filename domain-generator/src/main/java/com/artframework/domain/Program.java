@@ -18,13 +18,14 @@ import java.util.List;
 
 public class Program {
     public static void main(String[] args) throws JAXBException, IOException {
-        String path = "D:\\github\\domain-generator\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\";
-        TableGenerator generator = new TableGenerator("com.artframework.sample");
-        GlobalSetting.load(new File("D:\\github\\domain-generator\\config\\table-list.xml"),
-                new File("D:\\github\\domain-generator\\config\\domain-config.xml"));
+        String path = "C:\\work\\demo\\artframework.domain-master\\artframework.domain-master\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\";
+        String configPath = "C:\\work\\demo\\artframework.domain-master\\artframework.domain-master\\config\\";
+        GlobalSetting.load(new File(configPath + "\\table-list.xml"),
+                new File(configPath + "\\domain-config.xml"));
 
         List<TableMetaInfo> tableCollection = GlobalSetting.INSTANCE.getTableList();
         for (TableMetaInfo table : tableCollection) {
+            TableGenerator generator = new TableGenerator("com.artframework.sample");
             TableInfo tableMetaInfo = TableInfo.covert(table);
             generator.setTemplateFilePath(FTLConstants.TABLE_DO_PATH);
             FileUtils.saveFile(path + "entities\\", NameUtils.dataObjectName(tableMetaInfo.getName())+ ".java", generator.generate(tableMetaInfo));
@@ -33,7 +34,6 @@ public class Program {
                 FileUtils.saveFile(path + "mappers\\", NameUtils.mapperName(tableMetaInfo.getName()) + ".java", generator.generate(tableMetaInfo));
             }
         }
-
 
         for (DomainMetaInfo domainMetaInfo : GlobalSetting.INSTANCE.getDomainList()) {
             DomainInfo domainInfo = DomainInfo.covert(domainMetaInfo);
@@ -52,9 +52,6 @@ public class Program {
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.CREATE_REQUEST_PATH);
             FileUtils.saveFile(path+ "domain\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "dto\\request\\", domainInfo.nameSuffix("CreateRequest") + ".java", domainDtoGenerator.generate(domainInfo));
-
-            domainDtoGenerator.setTemplateFilePath(FTLConstants.DOMAIN_CONVERTOR_PATH);
-            FileUtils.saveFile(path+ "domain\\"+  NameUtils.packageName(domainInfo.getName()) + "\\" + "convertor\\", domainInfo.nameSuffix("Convertor") + ".java", domainDtoGenerator.generate(domainInfo));
 
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_PATH);
@@ -77,6 +74,11 @@ public class Program {
             FileUtils.saveFile(path+ "domain\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "lambdaexp\\", NameUtils.lambdaExpName(domainInfo.getName()) + ".java", domainDtoGenerator.generate(domainInfo));
 
 
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.DOMAIN_CONVERTOR_PATH);
+            FileUtils.saveFile(path+ "domain\\"+  NameUtils.packageName(domainInfo.getName()) + "\\" + "convertor\\", domainInfo.nameSuffix("Convertor") + ".java", domainDtoGenerator.generate(domainInfo));
+
+            domainDtoGenerator.setTemplateFilePath(FTLConstants.DOMAIN_CONVERTOR_DECORATOR_PATH);
+            FileUtils.saveFile(path+ "domain\\"+  NameUtils.packageName(domainInfo.getName()) + "\\" + "convertor\\", domainInfo.nameSuffix("ConvertorDecorator") + ".java", domainDtoGenerator.generate(domainInfo));
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.CONTROLLER_PATH);
             FileUtils.saveFile(path + "controller\\", NameUtils.controllerName(domainInfo.getName()) + ".java", domainDtoGenerator.generate(domainInfo));

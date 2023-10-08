@@ -3,7 +3,7 @@ package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.convertor
 
 import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
 import ${basePackage!''}.entities.*;
-import org.mapstruct.Mapper;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -16,13 +16,16 @@ import java.util.List;
 <#assign domainName=NameUtils.getName(source.name)/>
 <#assign repositoryClassName=NameUtils.repositoryName(source.name)/>
 <#assign repositoryImplClassName=NameUtils.repositoryImplName(source.name)/>
+<#assign decoratorName=NameUtils.covertDecoratorName(source.name)/>
 <#--MAPPER-->
-@Mapper
+@Mapper(uses = ${decoratorName}.class)
 public interface  ${covertName}{
     ${domainName}Convertor INSTANCE= Mappers.getMapper(${domainName}Convertor.class);
 
     ${dtoClassName} convert2DTO(${doClassName} request);
     List<${dtoClassName}> convert2DTO(List<${doClassName}> request);
+
+    @BeanMapping(qualifiedByName = { "${decoratorName}"})
     ${doClassName} convert2DO(${dtoClassName} request);
     List<${doClassName}> convert2DO(List<${dtoClassName}> request);
 

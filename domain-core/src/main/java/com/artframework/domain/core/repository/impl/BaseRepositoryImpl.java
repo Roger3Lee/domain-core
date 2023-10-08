@@ -1,6 +1,8 @@
 package com.artframework.domain.core.repository.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.BooleanUtil;
+import com.artframework.domain.core.dto.BaseDTO;
 import com.artframework.domain.core.repository.BaseRepository;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -33,8 +35,7 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
     @Override
     public List<DTO> queryList(Serializable id, SFunction<DO, Serializable> idWrap) {
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
-                .eq(idWrap, id)
-                .last("limit 1");
+                .eq(idWrap, id);
 
         return convert2DTO(this.baseMapper.selectList(wrapper));
     }
@@ -91,8 +92,8 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
      */
     @Override
     public DTO update(DTO item) {
-        List<DTO> insertResponse = update(CollUtil.newArrayList(item));
-        return insertResponse.get(0);
+        List<DTO> response = update(CollUtil.newArrayList(item));
+        return response.get(0);
     }
 
     /**

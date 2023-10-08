@@ -80,6 +80,9 @@ public class NameUtils {
         return getNameWithSuffix(name, "Convertor");
     }
 
+    public static String covertDecoratorName(String name) {
+        return getNameWithSuffix(name, "ConvertorDecorator");
+    }
     public static String packageName(String name) {
         return StrUtil.toCamelCase(StrUtil.format("{}", name)).toLowerCase();
     }

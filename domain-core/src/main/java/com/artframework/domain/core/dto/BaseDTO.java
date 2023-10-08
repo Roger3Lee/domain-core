@@ -7,5 +7,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BaseDTO {
-    private Boolean changed;
+    private Boolean changed = false;
 }

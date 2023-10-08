@@ -7,6 +7,7 @@ public class FTLConstants {
     public static final String DTO_PATH = "domain/dto/template-dto.ftl";
     public static final String FIND_REQUEST_PATH =  "domain/dto/template-find-request.ftl";
     public static final String DOMAIN_CONVERTOR_PATH = "domain/convertor/template-convertor.ftl";
+    public static final String DOMAIN_CONVERTOR_DECORATOR_PATH = "domain/convertor/template-convertor-decorator.ftl";
     public static final String PAGE_REQUEST_PATH =  "domain/dto/template-page-request.ftl";
 
     public static final String UPDATE_REQUEST_PATH =  "domain/dto/template-update-request.ftl";

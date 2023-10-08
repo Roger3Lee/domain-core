@@ -11,7 +11,7 @@ import lombok.ToString;
 *
 * @author auto
 * @version v1.0
-* @date 2023-9-10 10:32:39
+* @date 2023-10-8 16:51:24
 */
 @Getter
 @Setter
@@ -35,4 +35,9 @@ public class UserInfoDO  extends BaseDO {
     */
     @TableField("phone")
     private java.lang.String phone;
+    /**
+    * 家庭成員總數
+    */
+    @TableField("family_member_count")
+    private java.lang.Integer familyMemberCount;
 }

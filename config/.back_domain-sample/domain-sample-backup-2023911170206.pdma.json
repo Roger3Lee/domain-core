@@ -2,9 +2,9 @@
   "name": "domain-sample",
   "describe": "domain-sample",
   "avatar": "",
-  "version": "4.1.3",
+  "version": "4.6.3",
   "createdTime": "2023-9-9 20:45:05",
-  "updatedTime": "2023-9-11 17:02:13",
+  "updatedTime": "2023-9-9 21:04:02",
   "dbConns": [],
   "profile": {
     "default": {
@@ -812,23 +812,6 @@
           "extProps": {},
           "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
           "id": "6D88826E-589F-4224-8112-442316574AC0"
-        },
-        {
-          "defKey": "family_member_count",
-          "defName": "家庭成員數",
-          "comment": "",
-          "type": "INT",
-          "len": 2,
-          "scale": "",
-          "primaryKey": false,
-          "notNull": false,
-          "autoIncrement": false,
-          "defaultValue": "",
-          "hideInGraph": false,
-          "refDict": "",
-          "extProps": {},
-          "domain": "",
-          "id": "E6452E14-50E4-44C9-B50E-3E342736EBBC"
         },
         {
           "defKey": "CREATED_BY",

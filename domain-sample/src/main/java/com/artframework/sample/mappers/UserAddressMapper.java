@@ -9,7 +9,7 @@ import com.artframework.sample.entities.*;
 *
 * @author auto
 * @version v1.0
-* @date 2023-9-10 10:32:39
+* @date 2023-10-8 16:51:24
 */
 public interface UserAddressMapper extends BaseMapper<UserAddressDO> {
 }

@@ -27,9 +27,13 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
         CompareUtil.CompareResult<T> compareList = CompareUtil.compareList(oldList, newList, keyWrap);
 
         //新增
-        repository.insert(compareList.getAddList());
+        if(CollUtil.isNotEmpty(compareList.getAddList())){
+            repository.insert(compareList.getAddList());
+        }
         //删除
-        repository.delete(compareList.getDeleteList());
+        if(CollUtil.isNotEmpty(compareList.getDeleteList())){
+            repository.delete(compareList.getDeleteList());
+        }
         //修改
         if (CollUtil.isNotEmpty(compareList.getUpdateList())) {
             List<T> updateList = compareList.getUpdateList().stream()

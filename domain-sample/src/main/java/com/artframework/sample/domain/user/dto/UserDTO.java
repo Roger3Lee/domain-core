@@ -13,17 +13,12 @@ import com.artframework.sample.entities.*;
 *
 * @author auto
 * @version v1.0
-* @date 2023-9-10 10:32:39
+* @date 2023-10-8 16:51:25
 */
 @Getter
 @Setter
 @ToString
 public class UserDTO extends BaseDTO {
-    /**
-    * 是否有变化
-    */
-    private Boolean changed = false;
-
     /**
     * 主鍵
     */
@@ -36,6 +31,10 @@ public class UserDTO extends BaseDTO {
     * 手机
     */
     private java.lang.String phone;
+    /**
+    * 家庭成員總數
+    */
+    private java.lang.Integer familyMemberCount;
     /**
     * 創建時間
     */
@@ -65,7 +64,7 @@ public class UserDTO extends BaseDTO {
     /**
     * 加载数据对象
     */
-    private LoadFlag loadFlag = new LoadFlag();
+    private LoadFlag loadFlag;
 
     @Getter
     @Setter

@@ -3,17 +3,19 @@ package com.artframework.sample.domain.user.convertor;
 
 import com.artframework.sample.domain.user.dto.*;
 import com.artframework.sample.entities.*;
-import org.mapstruct.Mapper;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper
+@Mapper(uses = UserConvertorDecorator.class)
 public interface  UserConvertor{
     UserConvertor INSTANCE= Mappers.getMapper(UserConvertor.class);
 
     UserDTO convert2DTO(UserInfoDO request);
     List<UserDTO> convert2DTO(List<UserInfoDO> request);
+
+    @BeanMapping(qualifiedByName = { "UserConvertorDecorator"})
     UserInfoDO convert2DO(UserDTO request);
     List<UserInfoDO> convert2DO(List<UserDTO> request);
 

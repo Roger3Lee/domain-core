@@ -86,7 +86,7 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
             request.getUserFamilyMember().forEach(x->UserLambdaExp.userFamilyMemberTargetSetLambda.accept(x,(java.lang.Long)key));
             userFamilyMemberRepository.insert(request.getUserFamilyMember());
         }
-        return (java.lang.Long) UserLambdaExp.dtoKeyLambda.apply(request);
+        return (java.lang.Long) UserLambdaExp.dtoKeyLambda.apply(dto);
     }
 
     /**
@@ -99,10 +99,8 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
     public Boolean update(UserUpdateRequest request){
         Serializable keyId = UserLambdaExp.dtoKeyLambda.apply(request);
         UserDTO old = find(new UserFindRequest(keyId, request.getLoadFlag()));
-        if(BooleanUtil.isTrue(request.getChanged())){
-            //更新数据
-            userRepository.update(request);
-        }
+        //更新数据
+        userRepository.update(request);
         if(ObjectUtil.isNotNull(request.getUserAddress())){
             Serializable key = UserLambdaExp.userAddressSourceLambda.apply(request);
             UserLambdaExp.userAddressTargetSetLambda.accept(request.getUserAddress(),(java.lang.Long)key);
