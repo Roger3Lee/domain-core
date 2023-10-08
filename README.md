@@ -119,29 +119,29 @@ Mybatis plus, mapstruct、hutool
 
 - ​	新增用户，信息包括家庭住址和家庭成员，接口返回为数据新增后的主键
 
-  ![image-20231008160429968](C:\work\demo\artframework.domain-master\artframework.domain-master\images\add.png)
+  ![image-20231008160429968](https://github.com/Roger3Lee/artframework.domain/blob/master/images/add.png)
   
 - ​	分页查询
 
-  ![image-20231008162534040](C:\work\demo\artframework.domain-master\artframework.domain-master\images\page-query.png)
+  ![image-20231008162534040](https://github.com/Roger3Lee/artframework.domain/blob/master/images/page-query.png)
 
 - ​	领域实体查询
 
 	可以通过loadFlag中关联的实体的加载属性来控制查询的数据，例如如下图：查询了包括家庭住址和家庭成员在内的数据
 
-  ![image-20231008162751086](C:\work\demo\artframework.domain-master\artframework.domain-master\images\id-query1.png)
+  ![image-20231008162751086](https://github.com/Roger3Lee/artframework.domain/blob/master/images/id-query1.png)
 
 	如下图：则只查询了家庭成员的数据
-![image-20231008163434202](C:\work\demo\artframework.domain-master\artframework.domain-master\images\id-query2.png)
+![image-20231008163434202](https://github.com/Roger3Lee/artframework.domain/blob/master/images/id-query2.png)
 
 
 - ​    修改
 
   修改家庭成员儿子的名字为"李伟"并增加女儿"李芳"。
 
-  ![image-20231008164742955](C:\work\demo\artframework.domain-master\artframework.domain-master\images\update.png)再次查询家庭成员，发现实体聚合根属性familyMemberCount的值变成了2， 家庭成员儿子的姓名变成了李伟， 增加了女儿李芳。
+  ![image-20231008164742955](https://github.com/Roger3Lee/artframework.domain/blob/master/images/update.png)再次查询家庭成员，发现实体聚合根属性familyMemberCount的值变成了2， 家庭成员儿子的姓名变成了李伟， 增加了女儿李芳。
   
-  ![image-20231008165624529](C:\work\demo\artframework.domain-master\artframework.domain-master\images\id-query3.png)
+  ![image-20231008165624529](https://github.com/Roger3Lee/artframework.domain/blob/master/images/id-query3.png)
 
 
 - ​	删除
