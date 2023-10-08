@@ -148,7 +148,7 @@ Mybatis plus, mapstruct、hutool
 
   删除成功后，实体和所关联的值/引用类型都将从数据库删除
 
-  ![image-20231008165820553](C:\Users\浩鲸新智能\AppData\Roaming\Typora\typora-user-images\image-20231008165820553.png)
+  ![image-20231008165820553](https://github.com/Roger3Lee/artframework.domain/blob/master/images/delete.png)
 
 
 # VNEXT
