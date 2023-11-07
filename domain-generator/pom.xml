@@ -83,6 +83,11 @@
             <version>3.5.3.1</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.28</version>
+        </dependency>
     </dependencies>
 
 </project>
