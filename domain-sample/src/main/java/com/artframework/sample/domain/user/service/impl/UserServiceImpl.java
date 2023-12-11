@@ -5,6 +5,7 @@ import com.artframework.sample.domain.user.dto.request.*;
 import com.artframework.sample.domain.user.dto.*;
 import com.artframework.sample.domain.user.repository.*;
 import com.artframework.domain.core.service.impl.*;
+import com.artframework.domain.core.uitls.*;
 
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -55,7 +56,8 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
 
             if(request.getLoadFlag().getLoadUserFamilyMember()){
                 Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(response);
-                response.setUserFamilyMember(userFamilyMemberRepository.queryList(key, UserLambdaExp.userFamilyMemberTargetLambda));
+                response.setUserFamilyMemberList(userFamilyMemberRepository.queryList(key, UserLambdaExp.userFamilyMemberTargetLambda,
+                                LoadFiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(),"UserFamilyMember")));
             }
 
         }
@@ -81,10 +83,10 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
             userAddressRepository.insert(request.getUserAddress());
         }
         //插入关联数据user_family_member
-        if(CollUtil.isNotEmpty(request.getUserFamilyMember())){
+        if(CollUtil.isNotEmpty(request.getUserFamilyMemberList())){
             Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(dto);
-            request.getUserFamilyMember().forEach(x->UserLambdaExp.userFamilyMemberTargetSetLambda.accept(x,(java.lang.Long)key));
-            userFamilyMemberRepository.insert(request.getUserFamilyMember());
+            request.getUserFamilyMemberList().forEach(x->UserLambdaExp.userFamilyMemberTargetSetLambda.accept(x,(java.lang.Long)key));
+            userFamilyMemberRepository.insert(request.getUserFamilyMemberList());
         }
         return (java.lang.Long) UserLambdaExp.dtoKeyLambda.apply(dto);
     }
@@ -109,10 +111,10 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
             }
         }
         //更新关联数据user_family_member
-        if(CollUtil.isNotEmpty(request.getUserFamilyMember())){
+        if(CollUtil.isNotEmpty(request.getUserFamilyMemberList())){
             Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(request);
-            request.getUserFamilyMember().forEach(x->UserLambdaExp.userFamilyMemberTargetSetLambda.accept(x,(java.lang.Long)key));
-            this.merge(old.getUserFamilyMember(), request.getUserFamilyMember(), UserLambdaExp.userFamilyMemberKeyLambda, userFamilyMemberRepository);
+            request.getUserFamilyMemberList().forEach(x->UserLambdaExp.userFamilyMemberTargetSetLambda.accept(x,(java.lang.Long)key));
+            this.merge(old.getUserFamilyMemberList(), request.getUserFamilyMemberList(), UserLambdaExp.userFamilyMemberKeyLambda, userFamilyMemberRepository);
         }
         return true;
     }
@@ -132,8 +134,8 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
             userAddressRepository.delete(CollUtil.newArrayList(old.getUserAddress()));
         }
         //删除关联数据user_family_member
-        if(CollUtil.isNotEmpty(old.getUserFamilyMember())){
-            userFamilyMemberRepository.delete(old.getUserFamilyMember());
+        if(CollUtil.isNotEmpty(old.getUserFamilyMemberList())){
+            userFamilyMemberRepository.delete(old.getUserFamilyMemberList());
         }
 
         return userRepository.delete(CollUtil.newArrayList(old)) > 0;

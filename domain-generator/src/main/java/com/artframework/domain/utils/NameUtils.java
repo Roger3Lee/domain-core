@@ -21,6 +21,10 @@ public class NameUtils {
         return StringUtils.uncapitalize(StrUtil.toCamelCase(name));
     }
 
+    public static String getListFieldName(String name) {
+        return StringUtils.uncapitalize(StrUtil.toCamelCase(name)) + "List";
+    }
+
     public static String getFieldWithSuffix(String name, String suffix) {
         return StrUtil.toCamelCase(StrUtil.format("{}", name)) + StringUtils.capitalize(suffix);
     }
@@ -36,21 +40,27 @@ public class NameUtils {
     public static String dataTOName(String name) {
         return getNameWithSuffix(name, "DTO");
     }
+
     public static String mapperName(String name) {
         return getNameWithSuffix(name, "Mapper");
     }
+
     public static String repositoryName(String name) {
         return getNameWithSuffix(name, "Repository");
     }
+
     public static String repositoryImplName(String name) {
         return getNameWithSuffix(name, "RepositoryImpl");
     }
+
     public static String serviceName(String name) {
         return getNameWithSuffix(name, "Service");
     }
+
     public static String controllerName(String name) {
         return getNameWithSuffix(name, "Controller");
     }
+
     public static String serviceImplName(String name) {
         return getNameWithSuffix(name, "ServiceImpl");
     }
@@ -83,14 +93,24 @@ public class NameUtils {
     public static String covertDecoratorName(String name) {
         return getNameWithSuffix(name, "ConvertorDecorator");
     }
+
     public static String packageName(String name) {
         return StrUtil.toCamelCase(StrUtil.format("{}", name)).toLowerCase();
     }
 
-    public String genGetter(String fieldName){
+    public String genGetter(String fieldName) {
         return StrUtil.genGetter(StrUtil.toCamelCase(StrUtil.format("{}", fieldName)));
     }
-    public String genSetter(String fieldName){
+
+    public String genListGetter(String fieldName) {
+        return StrUtil.genGetter(StrUtil.toCamelCase(StrUtil.format("{}", fieldName))) + "List";
+    }
+
+    public String genSetter(String fieldName) {
         return StrUtil.genSetter(StrUtil.toCamelCase(StrUtil.format("{}", fieldName)));
+    }
+
+    public String genListSetter(String fieldName) {
+        return StrUtil.genSetter(StrUtil.toCamelCase(StrUtil.format("{}", fieldName))) + "List";
     }
 }

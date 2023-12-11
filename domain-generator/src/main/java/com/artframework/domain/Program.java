@@ -18,8 +18,8 @@ import java.util.List;
 
 public class Program {
     public static void main(String[] args) throws JAXBException, IOException {
-        String path = "C:\\work\\demo\\artframework.domain-master\\artframework.domain-master\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\";
-        String configPath = "C:\\work\\demo\\artframework.domain-master\\artframework.domain-master\\config\\";
+        String path = "C:\\work\\demo\\artframework.domain\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\";
+        String configPath = "C:\\work\\demo\\artframework.domain\\config\\";
         GlobalSetting.load(new File(configPath + "\\table-list.xml"),
                 new File(configPath + "\\domain-config.xml"));
 

@@ -35,6 +35,10 @@ public class UserRepositoryImpl extends BaseRepositoryImpl<UserDTO,UserInfoDO>  
         return UserLambdaExp.dtoKeyLambda;
     }
 
+    @Override
+    public Class<UserInfoDO> getDOClass() {
+        return UserInfoDO.class;
+    }
 
     @Override
     public IPage<UserDTO> page(UserPageRequest request){
@@ -60,6 +64,11 @@ public class UserRepositoryImpl extends BaseRepositoryImpl<UserDTO,UserInfoDO>  
         public SFunction<UserDTO.UserAddressDTO, Serializable> keyLambda() {
             return UserLambdaExp.userAddressKeyLambda;
         }
+
+        @Override
+        public Class<UserAddressDO> getDOClass() {
+            return UserAddressDO.class;
+        }
     }
     @Repository
     public static class UserFamilyMemberRepositoryImpl extends BaseRepositoryImpl<UserDTO.UserFamilyMemberDTO,UserFamilyMemberDO>  implements UserFamilyMemberRepository {
@@ -77,6 +86,11 @@ public class UserRepositoryImpl extends BaseRepositoryImpl<UserDTO,UserInfoDO>  
         @Override
         public SFunction<UserDTO.UserFamilyMemberDTO, Serializable> keyLambda() {
             return UserLambdaExp.userFamilyMemberKeyLambda;
+        }
+
+        @Override
+        public Class<UserFamilyMemberDO> getDOClass() {
+            return UserFamilyMemberDO.class;
         }
     }
 }

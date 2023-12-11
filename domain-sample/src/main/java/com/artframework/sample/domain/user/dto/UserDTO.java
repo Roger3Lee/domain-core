@@ -5,6 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.HashMap;
+import java.util.Map;
+
+
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.artframework.sample.entities.*;
 
@@ -13,7 +17,7 @@ import com.artframework.sample.entities.*;
 *
 * @author auto
 * @version v1.0
-* @date 2023-10-8 16:51:25
+* @date 2023-12-11 16:12:26
 */
 @Getter
 @Setter
@@ -59,7 +63,7 @@ public class UserDTO extends BaseDTO {
     /**
     * RELATE user_family_member
     */
-    private java.util.List<UserFamilyMemberDTO>  userFamilyMember;
+    private java.util.List<UserFamilyMemberDTO> userFamilyMemberList;
 
     /**
     * 加载数据对象
@@ -155,11 +159,16 @@ public class UserDTO extends BaseDTO {
         /**
         *
         */
-        private Boolean loadUserAddress = true;
+        private Boolean loadUserAddress = false;
 
         /**
         *
         */
-        private Boolean loadUserFamilyMember = true;
+        private Boolean loadUserFamilyMember = false;
+
+        /**
+         * 過濾條件
+         */
+        private Map<String, Object> filters = new HashMap<>();
     }
 }

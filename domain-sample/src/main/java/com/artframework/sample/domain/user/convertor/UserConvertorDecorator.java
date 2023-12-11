@@ -1,6 +1,5 @@
 package com.artframework.sample.domain.user.convertor;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.artframework.sample.domain.user.dto.*;
 import com.artframework.sample.entities.*;
 import org.mapstruct.AfterMapping;
@@ -13,15 +12,6 @@ public class UserConvertorDecorator {
 
     @BeforeMapping
     public void before(UserDTO dtoRequest) {
-        if (null != dtoRequest.getLoadFlag() && dtoRequest.getLoadFlag().getLoadUserFamilyMember()) {
-            if (CollectionUtil.isNotEmpty(dtoRequest.getUserFamilyMember())) {
-                dtoRequest.setFamilyMemberCount(dtoRequest.getUserFamilyMember().size());
-                dtoRequest.setChanged(true);
-            } else {
-                dtoRequest.setFamilyMemberCount(0);
-                dtoRequest.setChanged(true);
-            }
-        }
     }
 
     @AfterMapping

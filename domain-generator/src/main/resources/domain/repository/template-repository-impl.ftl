@@ -44,6 +44,10 @@ public class ${repositoryImplClassName} extends BaseRepositoryImpl<${dtoClassNam
         return ${lambdaClassName}.dtoKeyLambda;
     }
 
+    @Override
+    public Class<${doClassName}> getDOClass() {
+        return ${doClassName}.class;
+    }
 
     @Override
     public IPage<${dtoClassName}> page(${domainName}PageRequest request){
@@ -78,6 +82,11 @@ public class ${repositoryImplClassName} extends BaseRepositoryImpl<${dtoClassNam
         @Override
         public SFunction<${relateDTOClassName}, Serializable> keyLambda() {
             return ${lambdaClassName}.${NameUtils.fieldTargetKeyLambda(fieldName)};
+        }
+
+        @Override
+        public Class<${relateDOClassName}> getDOClass() {
+            return ${relateDOClassName}.class;
         }
     }
     </#list>

@@ -5,6 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.HashMap;
+import java.util.Map;
+
+
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import ${basePackage!''}.entities.*;
 
@@ -34,10 +38,11 @@ public class ${className} extends BaseDTO {
         <#assign relateClassName=NameUtils.dataObjectName(relateTable.name)/>
         <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
         <#assign fieldName=NameUtils.getFieldName(relateTable.name)/>
+        <#assign fieldNameList=NameUtils.getListFieldName(relateTable.name)/>
     /**
     * RELATE ${relateTable.name}
     */
-    private <#if relateTable.many>java.util.List<${relateDtoClassName}> <#else>${relateDtoClassName}</#if> ${fieldName};
+    private <#if relateTable.many>java.util.List<${relateDtoClassName}> ${fieldNameList};<#else>${relateDtoClassName} ${fieldName};</#if>
     </#list>
 
     /**
@@ -75,8 +80,13 @@ public class ${className} extends BaseDTO {
         /**
         *
         */
-        private Boolean ${NameUtils.getFieldWithPrefix(relateTable.name,"load")} = true;
+        private Boolean ${NameUtils.getFieldWithPrefix(relateTable.name,"load")} = false;
         </#list>
+
+        /**
+         * 過濾條件
+         */
+        private Map<String, Object> filters = new HashMap<>();
     }
 </#if>
 }

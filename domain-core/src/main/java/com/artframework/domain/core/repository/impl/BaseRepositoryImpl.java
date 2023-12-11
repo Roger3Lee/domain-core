@@ -1,45 +1,66 @@
 package com.artframework.domain.core.repository.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.BooleanUtil;
-import com.artframework.domain.core.dto.BaseDTO;
+import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.repository.BaseRepository;
+import com.artframework.domain.core.MPFieldLambda;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO, DO> {
     @Autowired
     protected BaseMapper<DO> baseMapper;
+
     @Override
     public DTO query(Serializable id, SFunction<DO, Serializable> idWrap) {
-        LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
-                .eq(idWrap, id)
-                .last("limit 1");
+        return query(id, idWrap, null);
+    }
 
+    @Override
+    public DTO query(Serializable id, SFunction<DO, Serializable> idWrap, Map<String, Object> filters){
+        LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
+                .eq(idWrap, id);
+        //額外的filter
+        if (ObjectUtil.isNotNull(filters)) {
+            for (Map.Entry<String, Object> filter : filters.entrySet()) {
+                wrapper = wrapper.eq(new MPFieldLambda(this.getDOClass(), filter.getKey()).fieldLambda(), filter.getValue());
+            }
+        }
+        wrapper = wrapper.last("limit 1");
         List<DTO> list = convert2DTO(this.baseMapper.selectList(wrapper));
         if (CollUtil.isEmpty(list)) {
             return null;
         }
         return list.get(0);
     }
+    @Override
+    public List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap) {
+        return queryList(id, wrap, null);
+    }
 
     @Override
-    public List<DTO> queryList(Serializable id, SFunction<DO, Serializable> idWrap) {
+    public List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap, Map<String, Object> filters){
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
-                .eq(idWrap, id);
+                .eq(wrap, id);
+
+        //額外的filter
+        if (ObjectUtil.isNotNull(filters)) {
+            for (Map.Entry<String, Object> filter : filters.entrySet()) {
+                wrapper = wrapper.eq(new MPFieldLambda(this.getDOClass(),filter.getKey()).fieldLambda(), filter.getValue());
+            }
+        }
 
         return convert2DTO(this.baseMapper.selectList(wrapper));
     }
-
 
     /**
      * 插入一条数据
@@ -119,4 +140,6 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
     public abstract List<DTO> convert2DTO(List<DO> list);
 
     public abstract Function<DTO, Serializable> keyLambda();
+
+    public abstract Class<DO> getDOClass();
 }

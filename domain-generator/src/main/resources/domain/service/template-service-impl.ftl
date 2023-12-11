@@ -5,6 +5,7 @@ import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.reques
 import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
 import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.repository.*;
 import com.artframework.domain.core.service.impl.*;
+import com.artframework.domain.core.uitls.*;
 
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -60,13 +61,20 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
             <#list source.relatedTable as relateTable>
                 <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
                 <#assign loadProperty=NameUtils.getFieldWithPrefix(relateTable.name,"getLoad")/>
+                <#assign relateName=NameUtils.getName(relateTable.name)/>
                 <#assign relateFieldName=NameUtils.getFieldName(relateTable.name)/>
                 <#assign relatesourceLambda=NameUtils.fieldSourceLambda(relateFieldName)/>
                 <#assign relatetargetLambda=NameUtils.fieldTargetLambda(relateFieldName)/>
                 <#assign setRelatedProperty=NameUtils.genSetter(relateTable.name)/>
+                <#assign setRelatedPropertyList=NameUtils.genListSetter(relateTable.name)/>
             if(request.getLoadFlag().${loadProperty}()){
                 Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(response);
-                response.${setRelatedProperty}(${NameUtils.getFieldName(relateRepositoryClassName)}.${relateTable.many? string('queryList',"query")}(key, ${lambdaClassName}.${relatetargetLambda}));
+                <#if relateTable.many>
+                response.${setRelatedPropertyList}(${NameUtils.getFieldName(relateRepositoryClassName)}.queryList(key, ${lambdaClassName}.${relatetargetLambda},
+                                LoadFiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(),"${relateName}")));
+                <#else>
+                response.${setRelatedProperty}(${NameUtils.getFieldName(relateRepositoryClassName)}.query(key, ${lambdaClassName}.${relatetargetLambda}));
+                </#if>
             }
 
             </#list>
@@ -89,6 +97,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     <#list source.relatedTable as relateTable>
         <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
         <#assign getter=NameUtils.genGetter(relateTable.name)/>
+        <#assign getterList=NameUtils.genListGetter(relateTable.name)/>
         <#assign relateFieldName=NameUtils.getFieldName(relateTable.name)/>
         <#assign relatesourceLambda=NameUtils.fieldSourceLambda(relateFieldName)/>
         <#assign targetSetLambda=NameUtils.fieldTargetSetLambda(relateFieldName)/>
@@ -96,10 +105,10 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         <#assign setRelatedTargetProperty=NameUtils.genGetter(relateTable.fkTargetColumn)/>
         //插入关联数据${relateTable.name}
         <#if relateTable.many>
-        if(CollUtil.isNotEmpty(request.${getter}())){
+        if(CollUtil.isNotEmpty(request.${getterList}())){
             Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(dto);
-            request.${getter}().forEach(x->${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key));
-            ${NameUtils.getFieldName(relateRepositoryClassName)}.insert(request.${getter}());
+            request.${getterList}().forEach(x->${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key));
+            ${NameUtils.getFieldName(relateRepositoryClassName)}.insert(request.${getterList}());
         }
         <#else>
         if(ObjectUtil.isNotNull(request.${getter}())){
@@ -127,6 +136,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
 <#list source.relatedTable as relateTable>
     <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
     <#assign getter=NameUtils.genGetter(relateTable.name)/>
+    <#assign getterList=NameUtils.genListGetter(relateTable.name)/>
     <#assign relateFieldName=NameUtils.getFieldName(relateTable.name)/>
     <#assign relatesourceLambda=NameUtils.fieldSourceLambda(relateFieldName)/>
     <#assign targetSetLambda=NameUtils.fieldTargetSetLambda(relateFieldName)/>
@@ -135,10 +145,10 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     <#assign setRelatedTargetProperty=NameUtils.genGetter(relateTable.fkTargetColumn)/>
         <#if relateTable.many>
         //更新关联数据${relateTable.name}
-        if(CollUtil.isNotEmpty(request.${getter}())){
+        if(CollUtil.isNotEmpty(request.${getterList}())){
             Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
-            request.${getter}().forEach(x->${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key));
-            this.merge(old.${getter}(), request.${getter}(), UserLambdaExp.${targetKeyLambda}, ${NameUtils.getFieldName(relateRepositoryClassName)});
+            request.${getterList}().forEach(x->${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key));
+            this.merge(old.${getterList}(), request.${getterList}(), UserLambdaExp.${targetKeyLambda}, ${NameUtils.getFieldName(relateRepositoryClassName)});
         }
         <#else>
         if(ObjectUtil.isNotNull(request.${getter}())){
@@ -166,10 +176,11 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
 <#list source.relatedTable as relateTable>
 <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
 <#assign getter=NameUtils.genGetter(relateTable.name)/>
+<#assign getterList=NameUtils.genListGetter(relateTable.name)/>
         //删除关联数据${relateTable.name}
         <#if relateTable.many>
-        if(CollUtil.isNotEmpty(old.${getter}())){
-            ${NameUtils.getFieldName(relateRepositoryClassName)}.delete(old.${getter}());
+        if(CollUtil.isNotEmpty(old.${getterList}())){
+            ${NameUtils.getFieldName(relateRepositoryClassName)}.delete(old.${getterList}());
         }
         <#else>
         if(ObjectUtil.isNotNull(old.${getter}())){
