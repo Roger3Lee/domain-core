@@ -1,12 +1,12 @@
-package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.lambdaexp;
+package ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.lambdaexp;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
-import ${basePackage!''}.entities.*;
+import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
+import ${tablePackage!''}.entities.*;
 
 import java.util.function.*;
 import java.io.Serializable;

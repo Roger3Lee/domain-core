@@ -1,4 +1,4 @@
-package ${basePackage!''}.mappers;
+package ${tablePackage!''}.mappers;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 

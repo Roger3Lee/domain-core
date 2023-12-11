@@ -1,4 +1,4 @@
-package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request;
+package ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request;
 
 import com.artframework.domain.core.dto.request.*;
 import lombok.Getter;

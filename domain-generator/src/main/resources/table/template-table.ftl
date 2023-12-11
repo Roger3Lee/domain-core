@@ -1,7 +1,6 @@
-package ${basePackage!''}.entities;
+package ${tablePackage!''}.entities;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

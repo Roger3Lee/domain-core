@@ -1,7 +1,7 @@
-package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.convertor;
+package ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.convertor;
 
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
-import ${basePackage!''}.entities.*;
+import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
+import ${tablePackage!''}.entities.*;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.BeforeMapping;
 import org.mapstruct.MappingTarget;

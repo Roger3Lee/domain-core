@@ -16,11 +16,21 @@ public abstract class AbstractGenerator {
     @Setter
     protected String templateFilePath;
 
+    private Map<String,String> params=new HashMap();
+
+    public void putParam(String key, String value) {
+        this.params.put(key, value);
+    }
+    public void putParam(Map<String,String> params) {
+        this.params.putAll(params);
+    }
+
     public  <T> String generate(T source){
         try (InputStream inputStream = AbstractGenerator.class.getClassLoader().getResourceAsStream(templateFilePath)) {
             String template = StreamUtils.readAsString(inputStream);
             Map<String, Object> paramMap = new HashMap<>();
             paramMap.put("basePackage",this.basePackage);
+            paramMap.putAll(params);
             paramMap.put("source", buildParam(source));
             return FreeMakerTplUtil.process(template, paramMap);
         } catch (Throwable e) {

@@ -14,7 +14,9 @@ import com.artframework.domain.dto.TableInfo;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Program {
     public static void main(String[] args) throws JAXBException, IOException {
@@ -23,9 +25,15 @@ public class Program {
         GlobalSetting.load(new File(configPath + "\\table-list.xml"),
                 new File(configPath + "\\domain-config.xml"));
 
+        Map<String, String> packageParam=new HashMap<>();
+        packageParam.put("tablePackage","com.artframework.sample");
+        packageParam.put("domainPackage","com.artframework.sample");
+        packageParam.put("controllerPackage","com.artframework.sample");
+
         List<TableMetaInfo> tableCollection = GlobalSetting.INSTANCE.getTableList();
         for (TableMetaInfo table : tableCollection) {
             TableGenerator generator = new TableGenerator("com.artframework.sample");
+            generator.putParam(packageParam);
             TableInfo tableMetaInfo = TableInfo.covert(table);
             generator.setTemplateFilePath(FTLConstants.TABLE_DO_PATH);
             FileUtils.saveFile(path + "entities\\", NameUtils.dataObjectName(tableMetaInfo.getName())+ ".java", generator.generate(tableMetaInfo));
@@ -38,6 +46,7 @@ public class Program {
         for (DomainMetaInfo domainMetaInfo : GlobalSetting.INSTANCE.getDomainList()) {
             DomainInfo domainInfo = DomainInfo.covert(domainMetaInfo);
             DomainGenerator domainDtoGenerator = new DomainGenerator("com.artframework.sample", FTLConstants.DTO_PATH);
+            domainDtoGenerator.putParam(packageParam);
             FileUtils.saveFile(path+ "domain\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "dto\\", domainInfo.nameSuffix("DTO") + ".java", domainDtoGenerator.generate(domainInfo));
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.FIND_REQUEST_PATH);

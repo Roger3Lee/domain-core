@@ -1,8 +1,8 @@
-package ${basePackage!''}.controller;
+package ${controllerPackage!''}.controller;
 
-import ${basePackage!''}.domain.user.dto.*;
-import ${basePackage!''}.domain.user.dto.request.*;
-import ${basePackage!''}.domain.user.service.*;
+import ${domainPackage!''}.domain.user.dto.*;
+import ${domainPackage!''}.domain.user.dto.request.*;
+import ${domainPackage!''}.domain.user.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

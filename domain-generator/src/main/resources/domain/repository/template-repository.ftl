@@ -1,8 +1,8 @@
-package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.repository;
+package ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.repository;
 
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request.*;
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
-import ${basePackage!''}.entities.*;
+import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request.*;
+import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
+import ${tablePackage!''}.entities.*;
 import com.artframework.domain.core.repository.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 

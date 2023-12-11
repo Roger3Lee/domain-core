@@ -1,7 +1,6 @@
 package com.artframework.sample.entities;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,7 +10,7 @@ import lombok.ToString;
 *
 * @author auto
 * @version v1.0
-* @date 2023-12-11 16:12:26
+* @date 2023-12-11 16:56:40
 */
 @Getter
 @Setter

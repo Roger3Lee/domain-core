@@ -1,10 +1,10 @@
-package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request;
+package ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request;
 
 import lombok.*;
 
 import java.io.Serializable;
 
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
+import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
 
 @Getter
 @Setter

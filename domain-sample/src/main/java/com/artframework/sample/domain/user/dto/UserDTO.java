@@ -9,15 +9,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.artframework.sample.entities.*;
-
 /**
 * user
 *
 * @author auto
 * @version v1.0
-* @date 2023-12-11 16:12:26
+* @date 2023-12-11 16:56:40
 */
 @Getter
 @Setter

@@ -1,4 +1,4 @@
-package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto;
+package ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto;
 
 import com.artframework.domain.core.dto.BaseDTO;
 import lombok.Getter;
@@ -8,9 +8,6 @@ import lombok.ToString;
 import java.util.HashMap;
 import java.util.Map;
 
-
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import ${basePackage!''}.entities.*;
 
 /**
 * ${source.name}

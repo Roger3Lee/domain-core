@@ -1,11 +1,11 @@
-package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.repository.impl;
+package ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.repository.impl;
 
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.convertor.*;
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.lambdaexp.*;
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request.*;
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.repository.*;
-import ${basePackage!''}.entities.*;
+import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.convertor.*;
+import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.lambdaexp.*;
+import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
+import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request.*;
+import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.repository.*;
+import ${tablePackage!''}.entities.*;
 import com.artframework.domain.core.repository.impl.*;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
