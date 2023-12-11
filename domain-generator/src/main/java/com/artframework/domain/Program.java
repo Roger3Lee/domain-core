@@ -26,9 +26,10 @@ public class Program {
                 new File(configPath + "\\domain-config.xml"));
 
         Map<String, String> packageParam=new HashMap<>();
-        packageParam.put("tablePackage","com.artframework.sample");
-        packageParam.put("domainPackage","com.artframework.sample");
-        packageParam.put("controllerPackage","com.artframework.sample");
+        packageParam.put("tablePackage","com.artframework.sample.entities");
+        packageParam.put("mapperPackage","com.artframework.sample.mappers");
+        packageParam.put("domainPackage","com.artframework.sample.domain");
+        packageParam.put("controllerPackage","com.artframework.sample.controller");
 
         List<TableMetaInfo> tableCollection = GlobalSetting.INSTANCE.getTableList();
         for (TableMetaInfo table : tableCollection) {

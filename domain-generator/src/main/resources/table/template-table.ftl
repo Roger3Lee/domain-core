@@ -1,4 +1,4 @@
-package ${tablePackage!''}.entities;
+package ${tablePackage!''};
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;

@@ -1,11 +1,11 @@
-package ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.repository.impl;
+package ${domainPackage!''}.${NameUtils.packageName(source.name)}.repository.impl;
 
-import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.convertor.*;
-import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.lambdaexp.*;
-import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
-import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request.*;
-import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.repository.*;
-import ${tablePackage!''}.entities.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.convertor.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.lambdaexp.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.request.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.repository.*;
+import ${tablePackage!''}.*;
 import com.artframework.domain.core.repository.impl.*;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;

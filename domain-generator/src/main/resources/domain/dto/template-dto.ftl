@@ -1,4 +1,4 @@
-package ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto;
+package ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto;
 
 import com.artframework.domain.core.dto.BaseDTO;
 import lombok.Getter;

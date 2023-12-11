@@ -1,8 +1,8 @@
 
-package ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.convertor;
+package ${domainPackage!''}.${NameUtils.packageName(source.name)}.convertor;
 
-import ${domainPackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
-import ${tablePackage!''}.entities.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.*;
+import ${tablePackage!''}.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
