@@ -7,9 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DomainGenerator extends AbstractGenerator {
-    public DomainGenerator(String basePackage, String dtoPath){
-        this.basePackage = basePackage;
-        this.templateFilePath = "domain/dto/template-dto.ftl";
+    public DomainGenerator(){
+        this.basePackage = "";
     }
 
     @Override

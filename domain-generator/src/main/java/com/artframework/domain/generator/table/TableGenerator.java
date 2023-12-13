@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class TableGenerator extends AbstractGenerator {
 
-    public TableGenerator(String basePackage) {
-        this.basePackage = basePackage;
+    public TableGenerator() {
+        this.basePackage = "";
         this.templateFilePath = "table/template-table.ftl";
     }
 

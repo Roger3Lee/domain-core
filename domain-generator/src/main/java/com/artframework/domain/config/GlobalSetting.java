@@ -1,5 +1,6 @@
 package com.artframework.domain.config;
 
+import com.artframework.domain.datasource.TableQuery;
 import com.artframework.domain.meta.domain.DomainCollection;
 import com.artframework.domain.meta.domain.DomainMetaInfo;
 import com.artframework.domain.meta.table.ColumnMetaInfo;
@@ -7,6 +8,9 @@ import com.artframework.domain.meta.table.TableCollection;
 import com.artframework.domain.meta.table.TableMetaInfo;
 import com.artframework.domain.utils.StreamUtils;
 import com.artframework.domain.utils.XmlUtils;
+import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
+import com.baomidou.mybatisplus.generator.config.po.TableField;
+import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBException;
@@ -65,4 +69,30 @@ public class GlobalSetting {
         load(StreamUtils.readAsString(Files.newInputStream(tableFile.toPath())),StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())));
     }
 
+    public static void loadFromDB(DataSourceConfig dataSourceConfig, File domainFile) throws IOException, JAXBException {
+
+        TableQuery tableQuery = new TableQuery(dataSourceConfig);
+        List<TableInfo> tableInfos = tableQuery.queryTables();
+        DomainCollection domainCollection = XmlUtils.xmlToBean(StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())), DomainCollection.class);
+
+        INSTANCE.domainMetaInfoList = domainCollection.getDomain();
+        INSTANCE.tableMetaInfoMap = tableInfos.stream().map(GlobalSetting::convert).collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
+    }
+
+    public static TableMetaInfo convert(TableInfo tableInfo) {
+        TableMetaInfo table = new TableMetaInfo();
+        table.setName(tableInfo.getName());
+        List<ColumnMetaInfo> columnMetaInfos = new ArrayList<>();
+        for (TableField tableField : tableInfo.getFields()) {
+            ColumnMetaInfo column = new ColumnMetaInfo();
+            column.setKey(tableField.isKeyFlag());
+            column.setComment(tableField.getComment());
+            column.setName(table.getName());
+            column.setType(tableField.getType());
+            column.setKeyGenerator(true);
+            columnMetaInfos.add(column);
+        }
+        table.setColumn(columnMetaInfos);
+        return table;
+    }
 }
