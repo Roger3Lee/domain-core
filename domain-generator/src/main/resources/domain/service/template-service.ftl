@@ -1,7 +1,7 @@
-package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.service;
+package ${domainPackage!''}.${NameUtils.packageName(source.name)}.service;
 
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request.*;
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.request.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.*;
 import com.artframework.domain.core.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 

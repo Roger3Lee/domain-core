@@ -1,9 +1,9 @@
-package ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.service.impl;
+package ${domainPackage!''}.${NameUtils.packageName(source.name)}.service.impl;
 
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.service.*;
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.request.*;
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.dto.*;
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.repository.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.service.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.request.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.repository.*;
 import com.artframework.domain.core.service.impl.*;
 import com.artframework.domain.core.uitls.*;
 
@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 <#assign sourceLambda=NameUtils.fieldSourceLambda(source.name)/>
 
 import java.io.Serializable;
-import ${basePackage!''}.domain.${NameUtils.packageName(source.name)}.lambdaexp.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.lambdaexp.*;
 
 @Service
 public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${serviceClassName} {

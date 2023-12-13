@@ -73,9 +73,6 @@ public class GlobalSetting {
 
         TableQuery tableQuery = new TableQuery(dataSourceConfig);
         List<TableInfo> tableInfos = tableQuery.queryTables();
-        DomainCollection domainCollection = XmlUtils.xmlToBean(StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())), DomainCollection.class);
-
-        INSTANCE.domainMetaInfoList = domainCollection.getDomain();
         INSTANCE.tableMetaInfoMap = tableInfos.stream().map(GlobalSetting::convert).collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
     }
 
@@ -87,9 +84,19 @@ public class GlobalSetting {
             ColumnMetaInfo column = new ColumnMetaInfo();
             column.setKey(tableField.isKeyFlag());
             column.setComment(tableField.getComment());
-            column.setName(table.getName());
-            column.setType(tableField.getType());
-            column.setKeyGenerator(true);
+            column.setName(tableField.getName());
+            if(StringUtils.isNoneBlank(tableField.getColumnType().getPkg())){
+                if(tableField.getColumnType().getPkg().equals("java.time.LocalDateTime")){
+                    column.setType("java.util.Date");
+                }else{
+                    column.setType(tableField.getColumnType().getPkg());
+                }
+            }else{
+                column.setType(tableField.getColumnType().getType());
+            }
+            if(tableField.isKeyFlag()){
+                column.setKeyGenerator(true);
+            }
             columnMetaInfos.add(column);
         }
         table.setColumn(columnMetaInfos);

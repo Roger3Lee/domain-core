@@ -16,7 +16,7 @@ public class TableQuery {
         Class<? extends IDatabaseQuery> databaseQueryClass = dataSourceConfig.getDatabaseQueryClass();
 
         try {
-            ConfigBuilder configBuilder=    new ConfigBuilder(null,dataSourceConfig,null,null,null,null);
+            ConfigBuilder configBuilder = new ConfigBuilder(null, dataSourceConfig, null, null, null, null);
             Constructor<? extends IDatabaseQuery> declaredConstructor = databaseQueryClass.getDeclaredConstructor(configBuilder.getClass());
             this.databaseQuery = (IDatabaseQuery) declaredConstructor.newInstance(configBuilder);
         } catch (ReflectiveOperationException var9) {

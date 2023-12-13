@@ -2,7 +2,7 @@ package ${mapperPackage!''};
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-import ${basePackage!''}.entities.*;
+import ${tablePackage!''}.*;
 
 /**
 * ${source.name}
