@@ -30,7 +30,7 @@
             <dependency>
                 <groupId>com.artframework</groupId>
                 <artifactId>domain-generator</artifactId>
-                <version>${version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>

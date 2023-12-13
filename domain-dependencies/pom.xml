@@ -20,7 +20,7 @@
             <dependency>
                 <groupId>com.artframework</groupId>
                 <artifactId>domain-core</artifactId>
-                <version>${version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>cn.hutool</groupId>

@@ -4,7 +4,6 @@ package com.artframework.domain.datasource;
 import com.baomidou.mybatisplus.generator.config.builder.ConfigBuilder;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import com.baomidou.mybatisplus.generator.query.IDatabaseQuery;
-import com.sun.istack.internal.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.List;
 public class TableQuery {
     private final IDatabaseQuery databaseQuery;
 
-    public TableQuery(@NotNull com.baomidou.mybatisplus.generator.config.DataSourceConfig dataSourceConfig) {
+    public TableQuery(com.baomidou.mybatisplus.generator.config.DataSourceConfig dataSourceConfig) {
 
         Class<? extends IDatabaseQuery> databaseQueryClass = dataSourceConfig.getDatabaseQueryClass();
 
