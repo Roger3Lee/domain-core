@@ -1,8 +1,8 @@
 package ${controllerPackage!''};
 
-import ${domainPackage!''}.user.dto.*;
-import ${domainPackage!''}.user.dto.request.*;
-import ${domainPackage!''}.user.service.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.request.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +21,7 @@ public class ${controllerClassName} {
     /**
     * 分页查询
     * @param request 请求体
-    * @return
+    * @return IPage<${dtoClassName}>
     */
     @PostMapping("page")
     public IPage<${dtoClassName}> page(@RequestBody ${NameUtils.getName(source.name)}PageRequest request){
@@ -31,7 +31,7 @@ public class ${controllerClassName} {
     /**
     * 查找
     * @param request 请求体
-    * @return
+    * @return ${dtoClassName}
     */
     @PostMapping("/query")
     public ${dtoClassName} find(@RequestBody ${NameUtils.getName(source.name)}FindRequest request){
@@ -41,7 +41,7 @@ public class ${controllerClassName} {
     /**
     * 新增
     * @param request 请求体
-    * @return
+    * @return ${source.mainTable.keyType}
     */
     @PutMapping()
     public ${source.mainTable.keyType} insert(@RequestBody ${NameUtils.getName(source.name)}CreateRequest request){

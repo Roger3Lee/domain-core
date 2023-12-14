@@ -1,5 +1,7 @@
 package com.artframework.domain.config;
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.datasource.TableQuery;
 import com.artframework.domain.meta.domain.DomainCollection;
 import com.artframework.domain.meta.domain.DomainMetaInfo;
@@ -74,6 +76,11 @@ public class GlobalSetting {
         TableQuery tableQuery = new TableQuery(dataSourceConfig);
         List<TableInfo> tableInfos = tableQuery.queryTables();
         INSTANCE.tableMetaInfoMap = tableInfos.stream().map(GlobalSetting::convert).collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
+
+        DomainCollection domainCollection = XmlUtils.xmlToBean(StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())), DomainCollection.class);
+       if(ObjectUtil.isNotEmpty(domainCollection)){
+           INSTANCE.domainMetaInfoList = domainCollection.getDomain();
+       }
     }
 
     public static TableMetaInfo convert(TableInfo tableInfo) {
