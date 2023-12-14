@@ -45,5 +45,7 @@ tasks {
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    complie("com.baomidou:mybatis-plus-generator:3.5.3.1")
+    implementation("com.baomidou:mybatis-plus-generator:3.5.3.1")
+    implementation("com.baomidou:mybatis-plus-core:3.5.3.1")
+    implementation("org.postgresql:postgresql:42.5.0")
 }

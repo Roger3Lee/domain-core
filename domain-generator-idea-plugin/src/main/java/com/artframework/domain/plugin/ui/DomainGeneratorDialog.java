@@ -1,6 +1,7 @@
 package com.artframework.domain.plugin.ui;
 
 import com.artframework.domain.datasource.TableQuery;
+import com.artframework.domain.plugin.component.CheckBoxRenderer;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
 import com.baomidou.mybatisplus.generator.config.converts.MySqlTypeConvert;
 import com.baomidou.mybatisplus.generator.config.converts.PostgreSqlTypeConvert;
@@ -10,16 +11,17 @@ import com.baomidou.mybatisplus.generator.config.querys.PostgreSqlQuery;
 import com.baomidou.mybatisplus.generator.keywords.MySqlKeyWordsHandler;
 import com.baomidou.mybatisplus.generator.keywords.PostgreSqlKeyWordsHandler;
 import com.baomidou.mybatisplus.generator.query.SQLQuery;
-import com.intellij.notification.Notification;
-import com.intellij.openapi.ui.MessageDialogBuilder;
 import com.intellij.openapi.ui.Messages;
-import com.jetbrains.qodana.sarif.model.Message;
+import com.intellij.ui.JBColor;
+import com.intellij.ui.SideBorder;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class DomainGeneratorDialog extends JDialog {
@@ -36,6 +38,22 @@ public class DomainGeneratorDialog extends JDialog {
     private JPasswordField db_password;
     private JButton btn_loadTables;
     private JComboBox db_type;
+    private JTextField t_schema;
+    private JLabel l_schema;
+    private JCheckBox chk_mapper;
+    private JCheckBox chk_domain;
+    private JTextField t_domainFile;
+    private JButton btn_fileChoose;
+    private JTextField t_mapper_package;
+    private JTextField t_eneity_package;
+    private JTextField t_entity_save;
+    private JTextField t_mapper_save;
+    private JTextField t_domain_save;
+    private JTextField t_domain_package;
+    private JTextField t_controller_package;
+    private JTextField t_controller_save;
+    private JCheckBox chk_controller;
+
 
     public DomainGeneratorDialog() {
         this.setTitle("DDD代碼生成器");
@@ -90,16 +108,115 @@ public class DomainGeneratorDialog extends JDialog {
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         //
-        db_tables.setModel(new DBTableModel(new ArrayList<>()));
+        initTableGrid(new ArrayList<>());
+        l_schema.setVisible(false);
+        t_schema.setVisible(false);
+
+        btn_fileChoose.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showFileChooseDialog();
+            }
+        });
+
+
+        db_tables.setBorder(new SideBorder(JBColor.BLACK, SideBorder.ALL));
+        db_tables.setVisible(true);
+
+        chk_domain.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (!chk_domain.isSelected()) {
+                    setDisable(t_domain_package);
+                    setDisable(t_domain_save);
+                } else {
+                    setEnable(t_domain_package);
+                    setEnable( t_domain_save);
+                }
+            }
+        });
+
+        chk_controller.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (!chk_controller.isSelected()) {
+                    setDisable(t_controller_package);
+                    setDisable(t_controller_save);
+                } else {
+                    setEnable(t_controller_package);
+                    setEnable(t_controller_save);
+                }
+            }
+        });
+
+        chk_mapper.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (!chk_mapper.isSelected()) {
+                    setDisable(t_eneity_package);
+                    setDisable(t_entity_save);
+                    setDisable(t_mapper_package);
+                    setDisable(t_mapper_save);
+                } else {
+                    setEnable(t_eneity_package);
+                    setEnable(t_entity_save);
+                    setEnable(t_mapper_package);
+                    setEnable(t_mapper_save);
+                }
+            }
+        });
+    }
+
+    public  void setDisable(JTextField textField){
+        textField.disable();
+        textField.setDisabledTextColor(Color.white);
+    }
+    public  void setEnable(JTextField textField){
+        textField.enable();
+    }
+
+    private void showFileChooseDialog() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setMultiSelectionEnabled(false);
+        int result = fileChooser.showDialog(null, "選擇文件");
+        if (result == JFileChooser.APPROVE_OPTION) {
+            t_domainFile.setText(fileChooser.getSelectedFile().getPath());
+        }
+    }
+
+    private void initTableGrid(List<TableInfo> objects) {
+        String[] columnNames = {"選擇", "表名", "描述"};
+        Object[][] tableData = new Object[][]{};
+        for (int i = 0; i < objects.size(); i++) {
+            tableData[i + 1][1] = false;
+            tableData[i + 1][2] = objects.get(i).getName();
+            tableData[i + 1][3] = objects.get(i).getComment();
+            tableData[i + 1][4] = objects.get(i);
+        }
+
+        DefaultTableModel tableModel = new DefaultTableModel(tableData, columnNames);
+//        db_tables = new JBTable(tableModel);
+        db_tables.setModel(tableModel);
+        db_tables.getColumnModel().getColumn(0).setWidth(80);
+        db_tables.getColumnModel().getColumn(0).setCellRenderer(new CheckBoxRenderer());
+        db_tables.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(new JCheckBox()));
     }
 
     private void onDbTypeChange(String selectedItem) {
+        if (selectedItem.equals(MY_SQL)) {
+            l_schema.setVisible(false);
+            t_schema.setVisible(false);
+        } else {
+            l_schema.setVisible(true);
+            t_schema.setVisible(true);
+        }
     }
 
     private void loadTables() {
-        try{
-            DataSourceConfig.Builder builder= new DataSourceConfig
-                    .Builder(db_url.getText(),db_user.getText() ,Arrays.toString(db_password.getPassword()));
+        try {
+            DataSourceConfig.Builder builder = new DataSourceConfig
+                    .Builder(db_url.getText(), db_user.getText(), String.valueOf(db_password.getPassword()));
             if (db_type.getSelectedItem().equals(MY_SQL)) {
                 builder.dbQuery(new MySqlQuery())
                         .typeConvert(new MySqlTypeConvert())
@@ -107,23 +224,23 @@ public class DomainGeneratorDialog extends JDialog {
                         .databaseQueryClass(SQLQuery.class);
             } else if (db_type.getSelectedItem().equals(POLAR_DB) || db_type.getSelectedItem().equals(PG)) {
                 builder.dbQuery(new PostgreSqlQuery())
-                        .schema("domain")
+                        .schema(t_schema.getText())
                         .typeConvert(new PostgreSqlTypeConvert())
                         .keyWordsHandler(new PostgreSqlKeyWordsHandler())
                         .databaseQueryClass(SQLQuery.class);
             }
 
-            builder.dbQuery(new MySqlQuery()).typeConvert(new MySqlTypeConvert()).keyWordsHandler(new MySqlKeyWordsHandler()).databaseQueryClass(SQLQuery.class);
             DataSourceConfig dataSourceConfig = builder.build();
             TableQuery tableQuery = new TableQuery(dataSourceConfig);
-            db_tables.setModel(new DBTableModel(tableQuery.queryTables()));
-        }catch (Exception ex){
-            Messages.showErrorDialog(ex.getMessage(),"錯誤");
+            initTableGrid(tableQuery.queryTables());
+        } catch (Exception ex) {
+            Messages.showErrorDialog(ex.getMessage(), "錯誤");
         }
     }
 
     private void onOK() {
         // add your code here
+
         dispose();
     }
 
@@ -132,56 +249,7 @@ public class DomainGeneratorDialog extends JDialog {
         dispose();
     }
 
-    public static void main(String[] args) {
-        DomainGeneratorDialog dialog = new DomainGeneratorDialog();
-        dialog.pack();
-        dialog.setVisible(true);
-        System.exit(0);
-    }
-
-    class DBTableModel extends AbstractTableModel {
-
-        String[] n = { "表名", "表描述" };
-
-        Object[][] p = {};
-       public DBTableModel(List<TableInfo> tableInfoList){
-
-        }
-
-        @Override
-        public int getRowCount() {
-            return p.length;
-        }
-
-        @Override
-        public int getColumnCount() {
-            return n.length;
-        }
-
-        @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            return p[rowIndex][columnIndex];
-        }
-
-        @Override
-        public String getColumnName(int column) {
-            return n[column];
-        }
-
-        @Override
-        public Class<?> getColumnClass(int columnIndex) {
-            return getValueAt(0, columnIndex).getClass();
-        }
-
-        @Override
-        public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return true;
-        }
-
-        @Override
-        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            p[rowIndex][columnIndex] = aValue;
-            fireTableCellUpdated(rowIndex, columnIndex);
-        }
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
     }
 }

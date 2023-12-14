@@ -14,9 +14,15 @@ public class ToolMenu extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
-
-        DomainGeneratorDialog dialog = new DomainGeneratorDialog();
-        dialog.setLocationRelativeTo(dialog);//居中
+        try {
+            Class.forName ("com.mysql.jdbc.Driver");
+            Class.forName ("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        DomainGeneratorDialog dialog = null;
+        dialog = new DomainGeneratorDialog();
+        dialog.setLocationRelativeTo(null);//居中
         dialog.pack();
         dialog.setVisible(true);
     }
