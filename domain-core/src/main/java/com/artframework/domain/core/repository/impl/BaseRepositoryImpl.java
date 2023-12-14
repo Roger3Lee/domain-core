@@ -107,6 +107,16 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
     }
 
     /**
+     * 删除一行数据BYid
+     * @param id
+     * @return 受影响行数
+     */
+    @Override
+    public int deleteById(Serializable id){
+        return this.baseMapper.deleteById(id);
+    }
+
+    /**
      * 更新一条数据
      * @param item
      * @return 更新后数据

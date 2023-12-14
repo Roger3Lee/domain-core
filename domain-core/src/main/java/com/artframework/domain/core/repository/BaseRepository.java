@@ -37,6 +37,8 @@ public interface BaseRepository<DTO, DO> {
      */
     int delete(List<DTO> list);
 
+    int deleteById(Serializable id);
+
     /**
      * 更新一条数据
      *

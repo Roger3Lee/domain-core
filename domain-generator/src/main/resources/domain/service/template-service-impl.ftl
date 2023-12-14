@@ -56,6 +56,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     */
     @Override
     public ${dtoClassName} find(${domainName}FindRequest request){
+<#if (source.relatedTable?size>0)>
         ${dtoClassName} response = ${repositoryName}.query(request.getKey(), ${lambdaClassName}.doKeyLambda);
         if (ObjectUtil.isNotNull(request.getLoadFlag())) {
             <#list source.relatedTable as relateTable>
@@ -76,11 +77,13 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
                 response.${setRelatedProperty}(${NameUtils.getFieldName(relateRepositoryClassName)}.query(key, ${lambdaClassName}.${relatetargetLambda}));
                 </#if>
             }
-
             </#list>
         }
         response.setLoadFlag(request.getLoadFlag());
         return response;
+    <#else>
+        return ${repositoryName}.query(request.getKey(), ${lambdaClassName}.doKeyLambda);
+</#if>
     }
 
     /**
@@ -91,9 +94,6 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ${source.mainTable.keyType} insert(${domainName}CreateRequest request){
-        //插入数据
-        ${dtoClassName} dto = ${repositoryName}.insert(request);
-
     <#list source.relatedTable as relateTable>
         <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
         <#assign getter=NameUtils.genGetter(relateTable.name)/>
@@ -106,19 +106,21 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         //插入关联数据${relateTable.name}
         <#if relateTable.many>
         if(CollUtil.isNotEmpty(request.${getterList}())){
-            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(dto);
+            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
             request.${getterList}().forEach(x->${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key));
             ${NameUtils.getFieldName(relateRepositoryClassName)}.insert(request.${getterList}());
         }
         <#else>
         if(ObjectUtil.isNotNull(request.${getter}())){
-            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(dto);
+            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
             ${lambdaClassName}.${targetSetLambda}.accept(request.${getter}(),(${relateTable.fkTargetColumnType})key);
             ${NameUtils.getFieldName(relateRepositoryClassName)}.insert(request.${getter}());
         }
         </#if>
     </#list>
-        return (${source.mainTable.keyType}) UserLambdaExp.dtoKeyLambda.apply(dto);
+        //插入数据
+        ${dtoClassName} dto = ${repositoryName}.insert(request);
+        return (${source.mainTable.keyType}) ${lambdaClassName}.dtoKeyLambda.apply(dto);
     }
 
     /**
@@ -129,10 +131,10 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean update(${domainName}UpdateRequest request){
+<#if (source.relatedTable?size>0)>
         Serializable keyId = ${lambdaClassName}.dtoKeyLambda.apply(request);
         ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindRequest(keyId, request.getLoadFlag()));
-        //更新数据
-        ${repositoryName}.update(request);
+</#if>
 <#list source.relatedTable as relateTable>
     <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
     <#assign getter=NameUtils.genGetter(relateTable.name)/>
@@ -142,16 +144,18 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     <#assign targetSetLambda=NameUtils.fieldTargetSetLambda(relateFieldName)/>
     <#assign targetKeyLambda=NameUtils.fieldTargetKeyLambda(relateFieldName)/>
     <#assign setRelatedProperty=NameUtils.genSetter(relateTable.name)/>
+    <#assign loadProperty=NameUtils.getFieldWithPrefix(relateTable.name,"getLoad")/>
     <#assign setRelatedTargetProperty=NameUtils.genGetter(relateTable.fkTargetColumn)/>
         <#if relateTable.many>
         //更新关联数据${relateTable.name}
         if(CollUtil.isNotEmpty(request.${getterList}())){
             Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
             request.${getterList}().forEach(x->${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key));
-            this.merge(old.${getterList}(), request.${getterList}(), UserLambdaExp.${targetKeyLambda}, ${NameUtils.getFieldName(relateRepositoryClassName)});
+            this.merge(old.${getterList}(), request.${getterList}(), ${lambdaClassName}.${targetKeyLambda}, ${NameUtils.getFieldName(relateRepositoryClassName)});
         }
         <#else>
-        if(ObjectUtil.isNotNull(request.${getter}())){
+        if(ObjectUtil.isNotNull(request.getLoadFlag()) && request.getLoadFlag().${loadProperty}()
+            && ObjectUtil.isNotNull(request.${getter}())){
             Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
             ${lambdaClassName}.${targetSetLambda}.accept(request.${getter}(),(${relateTable.fkTargetColumnType})key);
             if(BooleanUtil.isTrue(request.${getter}().getChanged())){
@@ -160,6 +164,8 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         }
         </#if>
 </#list>
+        //更新数据
+        ${repositoryName}.update(request);
         return true;
     }
 
@@ -171,6 +177,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(${source.mainTable.keyType} id){
+<#if (source.relatedTable?size>0)>
         ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindRequest(id ,new ${dtoClassName}.LoadFlag()));
 
 <#list source.relatedTable as relateTable>
@@ -188,7 +195,9 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         }
         </#if>
 </#list>
-
         return ${repositoryName}.delete(CollUtil.newArrayList(old)) > 0;
+<#else>
+        return ${repositoryName}.deleteById(id) > 0;
+</#if>
     }
 }
