@@ -92,13 +92,9 @@ public class GlobalSetting {
             column.setKey(tableField.isKeyFlag());
             column.setComment(tableField.getComment());
             column.setName(tableField.getName());
-            if(StringUtils.isNoneBlank(tableField.getColumnType().getPkg())){
-                if(tableField.getColumnType().getPkg().equals("java.time.LocalDateTime")){
-                    column.setType("java.util.Date");
-                }else{
-                    column.setType(tableField.getColumnType().getPkg());
-                }
-            }else{
+            if (StringUtils.isNoneBlank(tableField.getColumnType().getPkg())) {
+                column.setType(tableField.getColumnType().getPkg());
+            } else {
                 column.setType(tableField.getColumnType().getType());
             }
             if(tableField.isKeyFlag()){

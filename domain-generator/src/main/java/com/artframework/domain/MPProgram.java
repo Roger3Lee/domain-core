@@ -1,15 +1,10 @@
 package com.artframework.domain;
 
 import com.artframework.domain.config.GlobalSetting;
-import com.artframework.domain.datasource.TableQuery;
+import com.artframework.domain.typeconverts.MyPostgreSqlTypeConvert;
 import com.artframework.domain.utils.GenerateUtils;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
-import com.baomidou.mybatisplus.generator.config.converts.MySqlTypeConvert;
-import com.baomidou.mybatisplus.generator.config.converts.PostgreSqlTypeConvert;
-import com.baomidou.mybatisplus.generator.config.po.TableInfo;
-import com.baomidou.mybatisplus.generator.config.querys.MySqlQuery;
 import com.baomidou.mybatisplus.generator.config.querys.PostgreSqlQuery;
-import com.baomidou.mybatisplus.generator.keywords.MySqlKeyWordsHandler;
 import com.baomidou.mybatisplus.generator.keywords.PostgreSqlKeyWordsHandler;
 import com.baomidou.mybatisplus.generator.query.SQLQuery;
 
@@ -23,10 +18,10 @@ public class MPProgram {
 
     public static void main(String[] args) throws IOException, JAXBException {
         // 数据源配置
-        DataSourceConfig dataSourceConfig= new DataSourceConfig.Builder("jdbc:postgresql://127.0.0.1:5432/service_mesh","postgres","123456")
+        DataSourceConfig dataSourceConfig= new DataSourceConfig.Builder("jdbc:postgresql://127.0.0.1:5432/postgres","postgres","123456")
                 .dbQuery(new PostgreSqlQuery())
                 .schema("public")
-                .typeConvert(new PostgreSqlTypeConvert())
+                .typeConvert(new MyPostgreSqlTypeConvert())
                 .keyWordsHandler(new PostgreSqlKeyWordsHandler())
                 .databaseQueryClass(SQLQuery.class)
                 .build();
