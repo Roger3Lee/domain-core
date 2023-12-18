@@ -2,8 +2,9 @@ package com.artframework.domain.core.repository.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.artframework.domain.core.dto.BaseLoadFlag;
 import com.artframework.domain.core.repository.BaseRepository;
-import com.artframework.domain.core.MPFieldLambda;
+import com.artframework.domain.core.uitls.FiltersUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,13 +26,13 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
     }
 
     @Override
-    public DTO query(Serializable id, SFunction<DO, Serializable> idWrap, Map<String, Object> filters){
+    public DTO query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.FilterDTO> filters){
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
                 .eq(idWrap, id);
         //額外的filter
         if (ObjectUtil.isNotNull(filters)) {
-            for (Map.Entry<String, Object> filter : filters.entrySet()) {
-                wrapper = wrapper.eq(new MPFieldLambda(this.getDOClass(), filter.getKey()).fieldLambda(), filter.getValue());
+            for (BaseLoadFlag.FilterDTO filter : filters) {
+                wrapper = FiltersUtils.buildWrapper(wrapper,filter, this.getDOClass());
             }
         }
         wrapper = wrapper.last("limit 1");
@@ -48,14 +48,14 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
     }
 
     @Override
-    public List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap, Map<String, Object> filters){
+    public List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.FilterDTO> filters){
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
                 .eq(wrap, id);
 
         //額外的filter
         if (ObjectUtil.isNotNull(filters)) {
-            for (Map.Entry<String, Object> filter : filters.entrySet()) {
-                wrapper = wrapper.eq(new MPFieldLambda(this.getDOClass(),filter.getKey()).fieldLambda(), filter.getValue());
+            for (BaseLoadFlag.FilterDTO filter : filters) {
+                wrapper = FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
             }
         }
 

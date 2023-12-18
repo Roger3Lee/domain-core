@@ -1,6 +1,6 @@
 package com.artframework.sample.domains.user.dto;
 
-import com.artframework.domain.core.dto.BaseDTO;
+import com.artframework.domain.core.dto.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,7 +14,7 @@ import java.util.Map;
 *
 * @author auto
 * @version v1.0
-* @date 2023-12-18 12:46:32
+* @date 2023-12-18 15:14:41
 */
 @Getter
 @Setter
@@ -149,7 +149,7 @@ public class UserDTO extends BaseDTO {
     @Getter
     @Setter
     @ToString
-    public static class LoadFlag{
+    public static class LoadFlag extends BaseLoadFlag{
 
         /**
         *
@@ -160,10 +160,5 @@ public class UserDTO extends BaseDTO {
         *
         */
         private Boolean loadUserFamilyMember = false;
-
-        /**
-         * 過濾條件
-         */
-        private Map<String, Object> filters = new HashMap<>();
     }
 }

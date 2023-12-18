@@ -1,18 +1,18 @@
 package com.artframework.domain.core.repository;
 
+import com.artframework.domain.core.dto.BaseLoadFlag;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 public interface BaseRepository<DTO, DO> {
     DTO query(Serializable id, SFunction<DO, Serializable> idWrap);
-    DTO query(Serializable id, SFunction<DO, Serializable> idWrap, Map<String, Object> filters);
+    DTO query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.FilterDTO> filters);
 
     List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap);
 
-    List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap, Map<String, Object> filters);
+    List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.FilterDTO> filters);
     /**
      * 插入一条数据
      *

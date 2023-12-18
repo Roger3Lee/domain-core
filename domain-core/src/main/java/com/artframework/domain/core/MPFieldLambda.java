@@ -20,7 +20,7 @@ public class MPFieldLambda<T> {
     private Class<T> zClass;
     private String fieldName;
 
-    public MPFieldLambda(Class<T> doClass, String key) {
+    private  MPFieldLambda(Class<T> doClass, String key) {
         this.zClass = doClass;
         this.fieldName = key;
     }
@@ -43,6 +43,11 @@ public class MPFieldLambda<T> {
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static <T, R> SSFunction<T, R> fieldLambda(Class<T> doClass, String key) {
+        MPFieldLambda fieldLambda = new MPFieldLambda(doClass, key);
+        return fieldLambda.fieldLambda();
     }
 
     @FunctionalInterface

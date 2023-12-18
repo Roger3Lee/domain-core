@@ -69,6 +69,10 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
 <#else>
 <#if (source.relatedTable?size>0)>
         ${dtoClassName} response = ${repositoryName}.query(request.getKey(), ${lambdaClassName}.doKeyLambda);
+        if(ObjectUtil.isNull(response)){
+            return response;
+        }
+
         if (ObjectUtil.isNotNull(request.getLoadFlag())) {
             <#list source.relatedTable as relateTable>
                 <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
@@ -83,7 +87,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
                 Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(response);
                 <#if relateTable.many>
                 response.${setRelatedPropertyList}(${NameUtils.getFieldName(relateRepositoryClassName)}.queryList(key, ${lambdaClassName}.${relatetargetLambda},
-                                LoadFiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(),"${relateName}")));
+                                FiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(),"${relateName}")));
                 <#else>
                 response.${setRelatedProperty}(${NameUtils.getFieldName(relateRepositoryClassName)}.query(key, ${lambdaClassName}.${relatetargetLambda}));
                 </#if>
@@ -107,6 +111,10 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     @Override
     public ${dtoClassName} find(${domainName}FindRequest request, Boolean loadAggregate){
         ${dtoClassName} response = ${repositoryName}.query(request.getKey(), ${lambdaClassName}.doKeyLambda);
+        if(ObjectUtil.isNull(response)){
+            return response;
+        }
+
 <#if (source.relatedTable?size>0)>
         if (ObjectUtil.isNotNull(request.getLoadFlag())) {
             <#list source.relatedTable as relateTable>

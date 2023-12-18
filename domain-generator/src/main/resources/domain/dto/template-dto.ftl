@@ -1,6 +1,6 @@
 package ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto;
 
-import com.artframework.domain.core.dto.BaseDTO;
+import com.artframework.domain.core.dto.*;
 <#if source.aggregate??>
 import com.fasterxml.jackson.annotation.JsonIgnore;
 </#if>
@@ -101,19 +101,14 @@ public class ${className} extends BaseDTO {
     @Getter
     @Setter
     @ToString
-    public static class LoadFlag{
+    public static class LoadFlag extends BaseLoadFlag{
     <#list source.relatedTable as relateTable>
 
         /**
         *
         */
         private Boolean ${NameUtils.getFieldWithPrefix(relateTable.name,"load")} = false;
-        </#list>
-
-        /**
-         * 過濾條件
-         */
-        private Map<String, Object> filters = new HashMap<>();
+    </#list>
     }
 </#if>
 }

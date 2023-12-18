@@ -48,6 +48,10 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
     @Override
     public UserDTO find(UserFindRequest request){
         UserDTO response = userRepository.query(request.getKey(), UserLambdaExp.doKeyLambda);
+        if(ObjectUtil.isNull(response)){
+            return response;
+        }
+
         if (ObjectUtil.isNotNull(request.getLoadFlag())) {
             if(request.getLoadFlag().getLoadUserAddress()){
                 Serializable key = UserLambdaExp.userAddressSourceLambda.apply(response);
@@ -56,7 +60,7 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
             if(request.getLoadFlag().getLoadUserFamilyMember()){
                 Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(response);
                 response.setUserFamilyMemberList(userFamilyMemberRepository.queryList(key, UserLambdaExp.userFamilyMemberTargetLambda,
-                                LoadFiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(),"UserFamilyMember")));
+                                FiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(),"UserFamilyMember")));
             }
         }
         response.setLoadFlag(request.getLoadFlag());
