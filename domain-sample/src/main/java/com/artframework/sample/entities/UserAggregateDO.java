@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
-* user_family_member
+* user_aggregate
 *
 * @author auto
 * @version v1.0
@@ -15,8 +15,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@TableName("user_family_member")
-public class UserFamilyMemberDO  {
+@TableName("user_aggregate")
+public class UserAggregateDO  {
 
 
     /**
@@ -32,13 +32,8 @@ public class UserFamilyMemberDO  {
     /**
     * 姓名
     */
-    @TableField("name")
-    private String name;
-    /**
-    * 家属关系
-    */
-    @TableField("rel_type")
-    private String relType;
+    @TableField("famliy_member_count")
+    private Integer famliyMemberCount;
     /**
     * 创建人
     */

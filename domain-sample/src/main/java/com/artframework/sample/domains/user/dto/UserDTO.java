@@ -1,4 +1,4 @@
-package com.artframework.sample.domain.user.dto;
+package com.artframework.sample.domains.user.dto;
 
 import com.artframework.domain.core.dto.BaseDTO;
 import lombok.Getter;
@@ -14,44 +14,40 @@ import java.util.Map;
 *
 * @author auto
 * @version v1.0
-* @date 2023-12-11 17:03:15
+* @date 2023-12-18 12:46:32
 */
 @Getter
 @Setter
 @ToString
 public class UserDTO extends BaseDTO {
     /**
-    * 主鍵
+    * 自增主键
     */
-    private java.lang.Long id;
+    private Integer id;
     /**
-    * 名字
+    * 名称
     */
-    private java.lang.String name;
+    private String name;
     /**
     * 手机
     */
-    private java.lang.String phone;
+    private String phone;
     /**
-    * 家庭成員總數
+    * 创建人
     */
-    private java.lang.Integer familyMemberCount;
+    private String createdBy;
     /**
-    * 創建時間
+    * 创建时间
     */
     private java.util.Date createdTime;
     /**
-    * 創建用戶
+    * 更新人
     */
-    private java.lang.String createdBy;
+    private String updatedBy;
     /**
-    * 創建時間
+    * 更新时间
     */
     private java.util.Date updatedTime;
-    /**
-    * 創建用戶
-    */
-    private java.lang.String updatedBy;
 
     /**
     * RELATE user_address
@@ -61,6 +57,7 @@ public class UserDTO extends BaseDTO {
     * RELATE user_family_member
     */
     private java.util.List<UserFamilyMemberDTO> userFamilyMemberList;
+
 
     /**
     * 加载数据对象
@@ -77,33 +74,33 @@ public class UserDTO extends BaseDTO {
         private Boolean changed = false;
 
         /**
-        * 主鍵
+        * 自增主键
         */
-        private java.lang.Long id;
+        private Integer id;
         /**
         * 关联用户
         */
-        private java.lang.Long userId;
+        private Integer userId;
         /**
         * 地址
         */
-        private java.lang.String addressName;
+        private String addressName;
         /**
-        * 創建時間
+        * 创建人
+        */
+        private String createdBy;
+        /**
+        * 创建时间
         */
         private java.util.Date createdTime;
         /**
-        * 創建用戶
+        * 更新人
         */
-        private java.lang.String createdBy;
+        private String updatedBy;
         /**
-        * 創建時間
+        * 更新时间
         */
         private java.util.Date updatedTime;
-        /**
-        * 創建用戶
-        */
-        private java.lang.String updatedBy;
     }
     @Getter
     @Setter
@@ -115,38 +112,39 @@ public class UserDTO extends BaseDTO {
         private Boolean changed = false;
 
         /**
-        * 主鍵
+        * 自增主键
         */
-        private java.lang.Long id;
+        private Integer id;
         /**
-        * 唯一键
+        * 用户ID
         */
-        private java.lang.Long userId;
+        private Integer userId;
         /**
         * 姓名
         */
-        private java.lang.String name;
+        private String name;
         /**
         * 家属关系
         */
-        private java.lang.String relType;
+        private String relType;
         /**
-        * 創建時間
+        * 创建人
+        */
+        private String createdBy;
+        /**
+        * 创建时间
         */
         private java.util.Date createdTime;
         /**
-        * 創建用戶
+        * 更新人
         */
-        private java.lang.String createdBy;
+        private String updatedBy;
         /**
-        * 創建時間
+        * 更新时间
         */
         private java.util.Date updatedTime;
-        /**
-        * 創建用戶
-        */
-        private java.lang.String updatedBy;
     }
+
 
     @Getter
     @Setter

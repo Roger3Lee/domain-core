@@ -90,4 +90,40 @@ public class ${repositoryImplClassName} extends BaseRepositoryImpl<${dtoClassNam
         }
     }
     </#list>
+
+    <#--    聚合-->
+    <#if source.aggregate??>
+       <#assign relateDOClassName= NameUtils.dataObjectName(source.aggregate.name)/>
+       <#assign relateDTOClassName= dtoClassName+"."+ NameUtils.dataTOName(source.aggregate.name)/>
+       <#assign relateMapperClassName=NameUtils.mapperName(source.aggregate.name)/>
+       <#assign relateMapperName=NameUtils.getFieldName(relateMapperClassName)/>
+       <#assign relateFieldName=NameUtils.getFieldName(source.aggregate.name)/>
+       <#assign relateRepositoryClassName=NameUtils.repositoryName(source.aggregate.name)/>
+       <#assign relateRepositoryImplClassName=NameUtils.repositoryImplName(source.aggregate.name)/>
+       <#assign fieldName=NameUtils.getFieldName(source.aggregate.name)/>
+       <#assign relateName=NameUtils.getName(source.aggregate.name)/>
+           @Repository
+           public static class ${relateRepositoryImplClassName} extends BaseRepositoryImpl<${relateDTOClassName},${relateDOClassName}>  implements ${relateRepositoryClassName} {
+
+               @Override
+               public List<${relateDOClassName}> convert2DO(List<${relateDTOClassName}> list) {
+                   return ${covertName}.INSTANCE.convert2${relateName}DO(list);
+               }
+
+               @Override
+               public List<${relateDTOClassName}> convert2DTO(List<${relateDOClassName}> list) {
+                   return ${covertName}.INSTANCE.convert2${relateName}DTO(list);
+               }
+
+               @Override
+               public SFunction<${relateDTOClassName}, Serializable> keyLambda() {
+                   return ${lambdaClassName}.${NameUtils.fieldTargetKeyLambda(fieldName)};
+               }
+
+               @Override
+               public Class<${relateDOClassName}> getDOClass() {
+                   return ${relateDOClassName}.class;
+               }
+           }
+    </#if>
 }

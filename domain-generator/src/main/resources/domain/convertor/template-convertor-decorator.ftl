@@ -20,4 +20,11 @@ public class ${decoratorName} {
     @AfterMapping
     public void after(${dtoClassName} dtoRequest, @MappingTarget ${doClassName} doRequest) {
     }
+ <#if source.aggregate??>
+    <#assign relateDTOClassName= NameUtils.dataTOName(source.aggregate.name)/>
+    <#assign relateDOClassName= NameUtils.dataObjectName(source.aggregate.name)/>
+    <#assign relateName= NameUtils.getName(source.aggregate.name)/>
+    public static void convertAggregate(${dtoClassName} dtoRequest, @MappingTarget ${dtoClassName}.${relateDTOClassName} aggregateDTO){
+    }
+</#if>
 }

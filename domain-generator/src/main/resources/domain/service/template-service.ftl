@@ -24,6 +24,15 @@ public interface ${serviceClassName} extends BaseDomainService {
     */
     ${dtoClassName} find(${domainName}FindRequest request);
 
+    <#if source.aggregate??>
+    /**
+     * 查找
+     * @param request 请求体
+     * @return
+     */
+    ${dtoClassName} find(${domainName}FindRequest request, Boolean loadAggregate);
+    </#if>
+
     /**
     * 新增
     * @param request 请求体

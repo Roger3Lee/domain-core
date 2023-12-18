@@ -1,7 +1,7 @@
-package com.artframework.sample.domain.user.service;
+package com.artframework.sample.domains.user.service;
 
-import com.artframework.sample.domain.user.dto.request.*;
-import com.artframework.sample.domain.user.dto.*;
+import com.artframework.sample.domains.user.dto.request.*;
+import com.artframework.sample.domains.user.dto.*;
 import com.artframework.domain.core.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -21,12 +21,13 @@ public interface UserService extends BaseDomainService {
     */
     UserDTO find(UserFindRequest request);
 
+
     /**
     * 新增
     * @param request 请求体
     * @return
     */
-    java.lang.Long insert(UserCreateRequest request);
+    Integer insert(UserCreateRequest request);
 
     /**
     * 修改
@@ -40,5 +41,5 @@ public interface UserService extends BaseDomainService {
     * @param key 数据ID
     * @return 成功OR失败
     */
-    Boolean delete(java.lang.Long key);
+    Boolean delete(Integer key);
 }

@@ -15,10 +15,29 @@ import java.util.List;
  **/
 @Getter
 public class DomainMetaInfo {
+    /**
+     * 域名稱
+     */
     private String name;
+    /**
+     * 域描述
+     */
     private String description;
+
+    /**
+     * 實體
+     */
     private String mainTable;
+
+    /**
+     * 引用屬性
+     */
     private List<RelatedTableMetaInfo> relatedList=new ArrayList<>();
+
+    /**
+     * 聚合實體
+     */
+    private RelatedTableMetaInfo aggregate;
 
     @XmlAttribute(name = "name")
     public void setName(String name) {
@@ -38,5 +57,10 @@ public class DomainMetaInfo {
     @XmlElement(name = "related")
     public void setRelatedList(List<RelatedTableMetaInfo> relatedList) {
         this.relatedList = relatedList;
+    }
+
+    @XmlElement(name = "aggregate")
+    public void setAggregate(RelatedTableMetaInfo aggregate) {
+        this.aggregate = aggregate;
     }
 }

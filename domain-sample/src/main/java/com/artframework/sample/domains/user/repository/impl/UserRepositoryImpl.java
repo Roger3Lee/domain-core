@@ -1,10 +1,10 @@
-package com.artframework.sample.domain.user.repository.impl;
+package com.artframework.sample.domains.user.repository.impl;
 
-import com.artframework.sample.domain.user.convertor.*;
-import com.artframework.sample.domain.user.lambdaexp.*;
-import com.artframework.sample.domain.user.dto.*;
-import com.artframework.sample.domain.user.dto.request.*;
-import com.artframework.sample.domain.user.repository.*;
+import com.artframework.sample.domains.user.convertor.*;
+import com.artframework.sample.domains.user.lambdaexp.*;
+import com.artframework.sample.domains.user.dto.*;
+import com.artframework.sample.domains.user.dto.request.*;
+import com.artframework.sample.domains.user.repository.*;
 import com.artframework.sample.entities.*;
 import com.artframework.domain.core.repository.impl.*;
 
@@ -93,4 +93,5 @@ public class UserRepositoryImpl extends BaseRepositoryImpl<UserDTO,UserInfoDO>  
             return UserFamilyMemberDO.class;
         }
     }
+
 }

@@ -29,4 +29,13 @@ public interface ${repositoryClassName} extends BaseRepository<${dtoClassName}, 
     public interface ${relateRepositoryClassName} extends BaseRepository<${dtoClassName}.${relateDtoClassName}, ${relateDoClassName}> {
     }
 </#list>
+
+<#--    聚合-->
+<#if source.aggregate??>
+    <#assign relateRepositoryClassName=NameUtils.repositoryName(source.aggregate.name)/>
+    <#assign relateDtoClassName=NameUtils.dataTOName(source.aggregate.name)/>
+    <#assign relateDoClassName=NameUtils.dataObjectName(source.aggregate.name)/>
+    public interface ${relateRepositoryClassName} extends BaseRepository<${dtoClassName}.${relateDtoClassName}, ${relateDoClassName}> {
+    }
+</#if>
 }

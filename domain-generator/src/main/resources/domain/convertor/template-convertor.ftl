@@ -38,4 +38,14 @@ public interface  ${covertName}{
     ${relateDOClassName} convert2${relateName}DO(${dtoClassName}.${relateDTOClassName} request);
     List<${relateDOClassName}> convert2${relateName}DO(List<${dtoClassName}.${relateDTOClassName}>  request);
     </#list>
+
+    <#if source.aggregate??>
+    <#assign relateDTOClassName= NameUtils.dataTOName(source.aggregate.name)/>
+    <#assign relateDOClassName= NameUtils.dataObjectName(source.aggregate.name)/>
+    <#assign relateName= NameUtils.getName(source.aggregate.name)/>
+    ${dtoClassName}.${relateDTOClassName} convert2${relateName}DTO(${relateDOClassName} request);
+    List<${dtoClassName}.${relateDTOClassName}> convert2${relateName}DTO(List<${relateDOClassName}>  request);
+    ${relateDOClassName} convert2${relateName}DO(${dtoClassName}.${relateDTOClassName} request);
+    List<${relateDOClassName}> convert2${relateName}DO(List<${dtoClassName}.${relateDTOClassName}>  request);
+    </#if>
 }

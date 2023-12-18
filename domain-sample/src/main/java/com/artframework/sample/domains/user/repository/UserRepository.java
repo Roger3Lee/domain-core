@@ -1,9 +1,8 @@
-package com.artframework.sample.domain.user.repository;
+package com.artframework.sample.domains.user.repository;
 
-import com.artframework.sample.domain.user.dto.request.*;
-import com.artframework.sample.domain.user.dto.*;
+import com.artframework.sample.domains.user.dto.request.*;
+import com.artframework.sample.domains.user.dto.*;
 import com.artframework.sample.entities.*;
-import com.artframework.sample.mappers.*;
 import com.artframework.domain.core.repository.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -22,4 +21,5 @@ public interface UserRepository extends BaseRepository<UserDTO, UserInfoDO> {
     }
     public interface UserFamilyMemberRepository extends BaseRepository<UserDTO.UserFamilyMemberDTO, UserFamilyMemberDO> {
     }
+
 }

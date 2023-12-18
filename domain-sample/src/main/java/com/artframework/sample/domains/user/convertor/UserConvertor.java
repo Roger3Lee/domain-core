@@ -1,7 +1,7 @@
 
-package com.artframework.sample.domain.user.convertor;
+package com.artframework.sample.domains.user.convertor;
 
-import com.artframework.sample.domain.user.dto.*;
+import com.artframework.sample.domains.user.dto.*;
 import com.artframework.sample.entities.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -27,4 +27,5 @@ public interface  UserConvertor{
     List<UserDTO.UserFamilyMemberDTO> convert2UserFamilyMemberDTO(List<UserFamilyMemberDO>  request);
     UserFamilyMemberDO convert2UserFamilyMemberDO(UserDTO.UserFamilyMemberDTO request);
     List<UserFamilyMemberDO> convert2UserFamilyMemberDO(List<UserDTO.UserFamilyMemberDTO>  request);
+
 }

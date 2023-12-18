@@ -1,6 +1,9 @@
 package ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto;
 
 import com.artframework.domain.core.dto.BaseDTO;
+<#if source.aggregate??>
+import com.fasterxml.jackson.annotation.JsonIgnore;
+</#if>
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -42,6 +45,17 @@ public class ${className} extends BaseDTO {
     private <#if relateTable.many>java.util.List<${relateDtoClassName}> ${fieldNameList};<#else>${relateDtoClassName} ${fieldName};</#if>
     </#list>
 
+<#--    聚合-->
+    <#if source.aggregate??>
+        <#assign relateDtoClassName=NameUtils.dataTOName(source.aggregate.name)/>
+        <#assign fieldName=NameUtils.getFieldName(source.aggregate.name)/>
+    /**
+    * aggregate ${source.aggregate.name} ,不需要序列化給接口輸出
+    */
+    @JsonIgnore
+    private ${relateDtoClassName} ${fieldName};
+    </#if>
+
     /**
     * 加载数据对象
     */
@@ -67,6 +81,22 @@ public class ${className} extends BaseDTO {
     </#list>
     }
     </#list>
+
+<#--    聚合-->
+<#if source.aggregate??>
+    <#assign relateClassName= NameUtils.dataTOName(source.aggregate.name)/>
+    @Getter
+    @Setter
+    @ToString
+    public static class ${relateClassName} extends BaseDTO{
+    <#list source.aggregate.column as column>
+        /**
+        * ${column.comment}
+        */
+        private ${column.type} ${NameUtils.getFieldName(column.name)};
+    </#list>
+    }
+</#if>
 
     @Getter
     @Setter

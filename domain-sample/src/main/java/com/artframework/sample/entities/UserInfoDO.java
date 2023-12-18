@@ -10,33 +10,48 @@ import lombok.ToString;
 *
 * @author auto
 * @version v1.0
-* @date 2023-12-11 17:03:15
+* @date 2023-12-18 12:46:32
 */
 @Getter
 @Setter
 @ToString
 @TableName("user_info")
-public class UserInfoDO  extends BaseDO {
+public class UserInfoDO  {
 
 
     /**
-    * 主鍵
+    * 自增主键
     */
     @TableId(value = "id", type = IdType.AUTO)
-    private java.lang.Long id;
+    private Integer id;
     /**
-    * 名字
+    * 名称
     */
     @TableField("name")
-    private java.lang.String name;
+    private String name;
     /**
     * 手机
     */
     @TableField("phone")
-    private java.lang.String phone;
+    private String phone;
     /**
-    * 家庭成員總數
+    * 创建人
     */
-    @TableField("family_member_count")
-    private java.lang.Integer familyMemberCount;
+    @TableField("created_by")
+    private String createdBy;
+    /**
+    * 创建时间
+    */
+    @TableField("created_time")
+    private java.util.Date createdTime;
+    /**
+    * 更新人
+    */
+    @TableField("updated_by")
+    private String updatedBy;
+    /**
+    * 更新时间
+    */
+    @TableField("updated_time")
+    private java.util.Date updatedTime;
 }

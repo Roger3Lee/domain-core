@@ -1,8 +1,8 @@
-package com.artframework.sample.controller;
+package com.artframework.sample.controllers;
 
-import com.artframework.sample.domain.user.dto.*;
-import com.artframework.sample.domain.user.dto.request.*;
-import com.artframework.sample.domain.user.service.*;
+import com.artframework.sample.domains.user.dto.*;
+import com.artframework.sample.domains.user.dto.request.*;
+import com.artframework.sample.domains.user.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,7 @@ public class UserController {
     /**
     * 分页查询
     * @param request 请求体
-    * @return
+    * @return IPage<UserDTO>
     */
     @PostMapping("page")
     public IPage<UserDTO> page(@RequestBody UserPageRequest request){
@@ -27,7 +27,7 @@ public class UserController {
     /**
     * 查找
     * @param request 请求体
-    * @return
+    * @return UserDTO
     */
     @PostMapping("/query")
     public UserDTO find(@RequestBody UserFindRequest request){
@@ -37,10 +37,10 @@ public class UserController {
     /**
     * 新增
     * @param request 请求体
-    * @return
+    * @return Integer
     */
     @PutMapping()
-    public java.lang.Long insert(@RequestBody UserCreateRequest request){
+    public Integer insert(@RequestBody UserCreateRequest request){
         return userService.insert(request);
     }
 
@@ -60,7 +60,7 @@ public class UserController {
     * @return 成功OR失败
     */
     @DeleteMapping
-    public Boolean delete(@RequestParam("key") java.lang.Long key){
+    public Boolean delete(@RequestParam("key") Integer key){
         return userService.delete(key);
     }
 }

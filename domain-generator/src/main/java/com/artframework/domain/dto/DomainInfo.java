@@ -1,10 +1,12 @@
 package com.artframework.domain.dto;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.artframework.domain.config.GlobalSetting;
 import com.artframework.domain.meta.domain.DomainMetaInfo;
 import com.artframework.domain.meta.domain.RelatedTableMetaInfo;
 import com.artframework.domain.meta.table.ColumnMetaInfo;
+import com.sun.org.apache.xml.internal.utils.StringComparable;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,6 +23,7 @@ public class DomainInfo {
 
     private TableInfo mainTable;
     private List<RelateTableInfo> relatedTable;
+    private RelateTableInfo aggregate;
 
     public String nameSuffix(String suffix) {
         return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", this.name))) + suffix;
@@ -34,6 +37,7 @@ public class DomainInfo {
                 .description(domainMetaInfo.getDescription())
                 .mainTable(tableInfo)
                 .relatedTable(domainMetaInfo.getRelatedList().stream().map(RelateTableInfo::convert).collect(Collectors.toList()))
+                .aggregate(RelateTableInfo.convert(domainMetaInfo.getAggregate()))
                 .build();
     }
 
@@ -47,6 +51,9 @@ public class DomainInfo {
         private String fkTargetColumn;
 
         public static RelateTableInfo convert(RelatedTableMetaInfo relatedTableMetaInfo) {
+            if(ObjectUtil.isNull(relatedTableMetaInfo)){
+                return null;
+            }
             RelateTableInfo tableInfo = new RelateTableInfo();
             tableInfo.setName(relatedTableMetaInfo.getTable());
             tableInfo.setColumn(GlobalSetting.INSTANCE.getTableColumns(relatedTableMetaInfo.getTable()));
@@ -59,10 +66,10 @@ public class DomainInfo {
             tableInfo.setMany(relatedTableMetaInfo.getMany());
             String[] strings = relatedTableMetaInfo.getFk().split(":");
             tableInfo.setFkSourceColumn(strings[0]);
-            tableInfo.setFkSourceColumnType(tableInfo.getColumn().stream().filter(x->x.getName().equals(strings[0]))
+            tableInfo.setFkSourceColumnType(tableInfo.getColumn().stream().filter(x->StringUtils.equalsAnyIgnoreCase(x.getName(),strings[0]))
                     .map(ColumnMetaInfo::getType).findFirst().orElse(""));
             tableInfo.setFkTargetColumn(strings[1]);
-            tableInfo.setFkTargetColumnType(tableInfo.getColumn().stream().filter(x->x.getName().equals(strings[1]))
+            tableInfo.setFkTargetColumnType(tableInfo.getColumn().stream().filter(x->StringUtils.equalsAnyIgnoreCase(x.getName(),strings[1]))
                     .map(ColumnMetaInfo::getType).findFirst().orElse(""));
             return tableInfo;
         }

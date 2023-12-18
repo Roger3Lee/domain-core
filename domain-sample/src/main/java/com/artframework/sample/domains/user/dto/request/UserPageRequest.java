@@ -1,4 +1,4 @@
-package com.artframework.sample.domain.user.dto.request;
+package com.artframework.sample.domains.user.dto.request;
 
 import com.artframework.domain.core.dto.request.*;
 import lombok.Getter;

@@ -9,7 +9,7 @@ import com.artframework.sample.entities.*;
 *
 * @author auto
 * @version v1.0
-* @date 2023-12-11 17:03:15
+* @date 2023-12-18 12:46:32
 */
 public interface UserFamilyMemberMapper extends BaseMapper<UserFamilyMemberDO> {
 }

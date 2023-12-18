@@ -1,6 +1,6 @@
-package com.artframework.sample.domain.user.convertor;
+package com.artframework.sample.domains.user.convertor;
 
-import com.artframework.sample.domain.user.dto.*;
+import com.artframework.sample.domains.user.dto.*;
 import com.artframework.sample.entities.*;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.BeforeMapping;

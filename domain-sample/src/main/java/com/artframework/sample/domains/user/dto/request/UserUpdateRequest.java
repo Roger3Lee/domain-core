@@ -1,10 +1,10 @@
-package com.artframework.sample.domain.user.dto.request;
+package com.artframework.sample.domains.user.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import com.artframework.sample.domain.user.dto.*;
+import com.artframework.sample.domains.user.dto.*;
 
 @Getter
 @Setter
