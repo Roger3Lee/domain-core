@@ -42,5 +42,9 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
             repository.update(updateList);
         }
     }
+
+    public <DTO> String getEntityName(Class<DTO> dtoClass) {
+        return dtoClass.getSimpleName().replace("DTO", "").replace("DO", "");
+    }
 }
     

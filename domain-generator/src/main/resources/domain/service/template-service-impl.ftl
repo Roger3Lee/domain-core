@@ -83,11 +83,12 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
                 <#assign relatetargetLambda=NameUtils.fieldTargetLambda(relateFieldName)/>
                 <#assign setRelatedProperty=NameUtils.genSetter(relateTable.name)/>
                 <#assign setRelatedPropertyList=NameUtils.genListSetter(relateTable.name)/>
+                <#assign relatedDtoClassName=NameUtils.dataTOName(relateTable.name)/>
             if(request.getLoadFlag().${loadProperty}()){
                 Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(response);
                 <#if relateTable.many>
                 response.${setRelatedPropertyList}(${NameUtils.getFieldName(relateRepositoryClassName)}.queryList(key, ${lambdaClassName}.${relatetargetLambda},
-                                FiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(),"${relateName}")));
+                                FiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(), this.getEntityName(${dtoClassName}.${relatedDtoClassName}.class))));
                 <#else>
                 response.${setRelatedProperty}(${NameUtils.getFieldName(relateRepositoryClassName)}.query(key, ${lambdaClassName}.${relatetargetLambda}));
                 </#if>

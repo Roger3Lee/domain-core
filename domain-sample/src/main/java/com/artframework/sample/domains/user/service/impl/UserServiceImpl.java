@@ -60,7 +60,7 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
             if(request.getLoadFlag().getLoadUserFamilyMember()){
                 Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(response);
                 response.setUserFamilyMemberList(userFamilyMemberRepository.queryList(key, UserLambdaExp.userFamilyMemberTargetLambda,
-                                FiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(),"UserFamilyMember")));
+                                FiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(), this.getEntityName(UserDTO.UserFamilyMemberDTO.class))));
             }
         }
         response.setLoadFlag(request.getLoadFlag());

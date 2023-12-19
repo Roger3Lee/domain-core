@@ -16,7 +16,6 @@ import java.io.Serializable;
 *
 * @author auto
 * @version v1.0
-* @date ${.now}
 */
 @Getter
 @Setter
