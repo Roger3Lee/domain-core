@@ -1,7 +1,6 @@
 package com.artframework.domain.core.constants;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import lombok.Data;
 
 /**
  * @author li.pengcheng
