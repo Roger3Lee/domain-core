@@ -23,3 +23,7 @@ mybatis-plus:
     db-config:
       id-type: AUTO
     banner: false
+
+logging:
+  level:
+    com.artframework.sample.mappers: DEBUG

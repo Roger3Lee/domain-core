@@ -20,18 +20,30 @@ public enum Op {
     GT(StringPool.RIGHT_CHEV),
     GE(">="),
     LT(StringPool.LEFT_CHEV),
-    LE("<="),;
+    LE("<="),
+    ;
 
     private String code;
 
-    Op(String code){
-        this.code=code;
+    Op(String code) {
+        this.code = code;
     }
+
 
     public String getCode() {
         return code;
     }
+
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public static Op getOp(String op) {
+        for (Op item : Op.values()) {
+            if (item.getCode().equals(op)) {
+                return item;
+            }
+        }
+        return Op.EQ;
     }
 }

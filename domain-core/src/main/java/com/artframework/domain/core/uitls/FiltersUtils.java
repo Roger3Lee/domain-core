@@ -39,13 +39,47 @@ public class FiltersUtils {
     }
 
     public static <DO, T> LambdaQueryWrapper<DO> buildWrapper(LambdaQueryWrapper<DO> wrapper, BaseLoadFlag.FilterDTO filter, Class<DO> doClass) {
-//        switch (filter.getOp()) {
-//            case Op.EQ.getCode():
-//                wrapper.eq(MPFieldLambda.fieldLambda(doClass, filter.getField()), filter.getValue());
-//                break;
-//            default:
+        Op op = Op.getOp(filter.getOp());
+        switch (op) {
+            case IN:
+                if (filter.getValue() instanceof Iterable) {
+                    wrapper.in(MPFieldLambda.fieldLambda(doClass, filter.getField()), ListUtil.toList((Iterable) filter.getValue()));
+                } else {
+                    wrapper.in(MPFieldLambda.fieldLambda(doClass, filter.getField()), ListUtil.toList(filter.getValue()));
+                }
+                break;
+            case NOT_IN:
+                if (filter.getValue() instanceof Iterable) {
+                    wrapper.notIn(MPFieldLambda.fieldLambda(doClass, filter.getField()), ListUtil.toList((Iterable) filter.getValue()));
+                } else {
+                    wrapper.notIn(MPFieldLambda.fieldLambda(doClass, filter.getField()), ListUtil.toList(filter.getValue()));
+                }
+                break;
+            case LIKE:
+                wrapper.like(MPFieldLambda.fieldLambda(doClass, filter.getField()), filter.getValue());
+                break;
+            case NOT_LIKE:
+                wrapper.notLike(MPFieldLambda.fieldLambda(doClass, filter.getField()), filter.getValue());
+                break;
+            case NE:
+                wrapper.ne(MPFieldLambda.fieldLambda(doClass, filter.getField()), filter.getValue());
+                break;
+            case GT:
+                wrapper.gt(MPFieldLambda.fieldLambda(doClass, filter.getField()), filter.getValue());
+                break;
+            case GE:
+                wrapper.ge(MPFieldLambda.fieldLambda(doClass, filter.getField()), filter.getValue());
+                break;
+            case LT:
+                wrapper.lt(MPFieldLambda.fieldLambda(doClass, filter.getField()), filter.getValue());
+                break;
+            case LE:
+                wrapper.le(MPFieldLambda.fieldLambda(doClass, filter.getField()), filter.getValue());
+                break;
+            default:
+            //EQ
                 wrapper.eq(MPFieldLambda.fieldLambda(doClass, filter.getField()), filter.getValue());
-//        }
+        }
         return wrapper;
     }
 }

@@ -55,7 +55,7 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
         //額外的filter
         if (ObjectUtil.isNotNull(filters)) {
             for (BaseLoadFlag.FilterDTO filter : filters) {
-                wrapper = FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
+                FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
             }
         }
 
