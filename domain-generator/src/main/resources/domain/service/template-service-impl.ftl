@@ -163,6 +163,8 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ${source.mainTable.keyType} insert(${domainName}CreateDomain request){
+        //插入数据
+        ${dtoClassName} domain = ${repositoryName}.insert(request);
     <#list source.relatedTable as relateTable>
         <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
         <#assign getter=NameUtils.genGetter(relateTable.name)/>
@@ -172,16 +174,17 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         <#assign targetSetLambda=NameUtils.fieldTargetSetLambda(relateFieldName)/>
         <#assign setRelatedProperty=NameUtils.genSetter(relateTable.name)/>
         <#assign setRelatedTargetProperty=NameUtils.genGetter(relateTable.fkTargetColumn)/>
+
         //插入关联数据${relateTable.name}
         <#if relateTable.many>
         if(CollUtil.isNotEmpty(request.${getterList}())){
-            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
+            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(domain);
             request.${getterList}().forEach(x->${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key));
             ${NameUtils.getFieldName(relateRepositoryClassName)}.insert(request.${getterList}());
         }
         <#else>
         if(ObjectUtil.isNotNull(request.${getter}())){
-            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
+            Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(domain);
             ${lambdaClassName}.${targetSetLambda}.accept(request.${getter}(),(${relateTable.fkTargetColumnType})key);
             ${NameUtils.getFieldName(relateRepositoryClassName)}.insert(request.${getter}());
         }
@@ -197,9 +200,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         ${decoratorName}.convertAggregate(request, aggregateDTO);
         ${NameUtils.getFieldName(relateRepositoryClassName)}.insert(aggregateDTO);
      </#if>
-        //插入数据
-        ${dtoClassName} dto = ${repositoryName}.insert(request);
-        return (${source.mainTable.keyType}) ${lambdaClassName}.dtoKeyLambda.apply(dto);
+        return (${source.mainTable.keyType}) ${lambdaClassName}.dtoKeyLambda.apply(domain);
     }
 
     /**

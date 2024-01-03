@@ -75,21 +75,23 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public java.lang.Long insert(UserCreateDomain request){
+        //插入数据
+        UserDomain domain = userRepository.insert(request);
+
         //插入关联数据user_address
         if(ObjectUtil.isNotNull(request.getUserAddress())){
-            Serializable key = UserLambdaExp.userAddressSourceLambda.apply(request);
+            Serializable key = UserLambdaExp.userAddressSourceLambda.apply(domain);
             UserLambdaExp.userAddressTargetSetLambda.accept(request.getUserAddress(),(java.lang.Long)key);
             userAddressRepository.insert(request.getUserAddress());
         }
+
         //插入关联数据user_family_member
         if(CollUtil.isNotEmpty(request.getUserFamilyMemberList())){
-            Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(request);
+            Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(domain);
             request.getUserFamilyMemberList().forEach(x->UserLambdaExp.userFamilyMemberTargetSetLambda.accept(x,(java.lang.Long)key));
             userFamilyMemberRepository.insert(request.getUserFamilyMemberList());
         }
-        //插入数据
-        UserDomain dto = userRepository.insert(request);
-        return (java.lang.Long) UserLambdaExp.dtoKeyLambda.apply(dto);
+        return (java.lang.Long) UserLambdaExp.dtoKeyLambda.apply(domain);
     }
 
     /**
