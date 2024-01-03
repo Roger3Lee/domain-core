@@ -5,8 +5,6 @@ import com.artframework.sample.entities.*;
 import com.artframework.domain.core.repository.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
-import java.util.List;
-
 public interface UserRepository extends BaseRepository<UserDomain, UserInfoDO> {
 
     /**
