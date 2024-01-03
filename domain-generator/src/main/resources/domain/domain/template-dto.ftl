@@ -1,6 +1,6 @@
-package ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto;
+package ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain;
 
-import com.artframework.domain.core.dto.*;
+import mo.gov.dsaj.domain.core.domain.*;
 <#if source.aggregate??>
 import com.fasterxml.jackson.annotation.JsonIgnore;
 </#if>
@@ -23,7 +23,7 @@ import java.util.Map;
 @ToString
 <#assign className=NameUtils.dataTOName(source.name)/>
 <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
-public class ${className} extends BaseDTO {
+public class ${className} extends BaseDomain {
 <#if source.mainTable??>
     <#list source.mainTable.column as column>
     /**
@@ -66,7 +66,7 @@ public class ${className} extends BaseDTO {
     @Getter
     @Setter
     @ToString
-    public static class ${relateClassName} extends BaseDTO{
+    public static class ${relateClassName} extends BaseDomain{
         /**
         * 是否有变化
         */
@@ -87,7 +87,7 @@ public class ${className} extends BaseDTO {
     @Getter
     @Setter
     @ToString
-    public static class ${relateClassName} extends BaseDTO{
+    public static class ${relateClassName} extends BaseDomain{
     <#list source.aggregate.column as column>
         /**
         * ${column.comment}

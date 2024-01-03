@@ -38,7 +38,7 @@ public class NameUtils {
     }
 
     public static String dataTOName(String name) {
-        return getNameWithSuffix(name, "DTO");
+        return getNameWithSuffix(name, "Domain");
     }
 
     public static String mapperName(String name) {

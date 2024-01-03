@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import mo.gov.dsaj.parent.core.mybatis.dataobject.ContainsId;
 
 /**
 * ${source.name}
@@ -17,11 +18,11 @@ import lombok.ToString;
 <#if !source.basic>
 @TableName("${source.name}")
 </#if>
-<#if source.keyGenerator>
+<#if (source.keyGenerator==false)>
 @KeySequence("seq_${source.name}_id")
 </#if>
 <#assign className=NameUtils.dataObjectName(source.name)/>
-public class ${className} <#if source.inherit??> extends ${NameUtils.dataObjectName(source.inherit)}</#if> {
+public class ${className} <#if source.inherit??> extends ${NameUtils.dataObjectName(source.inherit)}</#if> implements ContainsId {
 
 <#--<#if !source.basic>-->
 <#--    /**-->
@@ -35,7 +36,7 @@ public class ${className} <#if source.inherit??> extends ${NameUtils.dataObjectN
     * ${column.comment}
     */
     <#if column.key>
-    @TableId(value = "${column.name}", type = IdType.<#if column.keyGenerator>AUTO<#else>INPUT</#if>)
+    @TableId(value = "${column.name}", type = IdType.<#if source.keyGenerator>AUTO<#else>INPUT</#if>)
     <#else>
     @TableField("${column.name}")
     </#if>

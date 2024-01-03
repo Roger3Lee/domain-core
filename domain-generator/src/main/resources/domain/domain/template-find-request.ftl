@@ -1,17 +1,15 @@
-package ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.request;
+package ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain;
 
 import lombok.*;
 
 import java.io.Serializable;
-
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.*;
 
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ${NameUtils.getName(source.name)}FindRequest {
+public class ${NameUtils.getName(source.name)}FindDomain {
 <#--    private ${source.mainTable.keyType} key;-->
     private Serializable key;
 

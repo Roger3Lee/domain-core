@@ -1,11 +1,10 @@
 package com.artframework.sample.domains.user.service.impl;
 
 import com.artframework.sample.domains.user.service.*;
-import com.artframework.sample.domains.user.dto.request.*;
-import com.artframework.sample.domains.user.dto.*;
+import com.artframework.sample.domains.user.domain.*;
 import com.artframework.sample.domains.user.repository.*;
-import com.artframework.domain.core.service.impl.*;
-import com.artframework.domain.core.uitls.*;
+import mo.gov.dsaj.domain.core.service.impl.*;
+import mo.gov.dsaj.domain.core.uitls.*;
 
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -36,7 +35,7 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
     * @return
     */
     @Override
-    public IPage<UserDTO> page(UserPageRequest request){
+    public IPage<UserDomain> page(UserPageDomain request){
         return userRepository.page(request);
     }
 
@@ -46,8 +45,8 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
     * @return
     */
     @Override
-    public UserDTO find(UserFindRequest request){
-        UserDTO response = userRepository.query(request.getKey(), UserLambdaExp.doKeyLambda);
+    public UserDomain find(UserFindDomain request){
+        UserDomain response = userRepository.query(request.getKey(), UserLambdaExp.doKeyLambda);
         if(ObjectUtil.isNull(response)){
             return response;
         }
@@ -60,7 +59,7 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
             if(request.getLoadFlag().getLoadUserFamilyMember()){
                 Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(response);
                 response.setUserFamilyMemberList(userFamilyMemberRepository.queryList(key, UserLambdaExp.userFamilyMemberTargetLambda,
-                                FiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(), this.getEntityName(UserDTO.UserFamilyMemberDTO.class))));
+                                FiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(), this.getEntityName(UserDomain.UserFamilyMemberDomain.class))));
             }
         }
         response.setLoadFlag(request.getLoadFlag());
@@ -75,22 +74,22 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer insert(UserCreateRequest request){
+    public java.lang.Long insert(UserCreateDomain request){
         //插入关联数据user_address
         if(ObjectUtil.isNotNull(request.getUserAddress())){
             Serializable key = UserLambdaExp.userAddressSourceLambda.apply(request);
-            UserLambdaExp.userAddressTargetSetLambda.accept(request.getUserAddress(),(Integer)key);
+            UserLambdaExp.userAddressTargetSetLambda.accept(request.getUserAddress(),(java.lang.Long)key);
             userAddressRepository.insert(request.getUserAddress());
         }
         //插入关联数据user_family_member
         if(CollUtil.isNotEmpty(request.getUserFamilyMemberList())){
             Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(request);
-            request.getUserFamilyMemberList().forEach(x->UserLambdaExp.userFamilyMemberTargetSetLambda.accept(x,(Integer)key));
+            request.getUserFamilyMemberList().forEach(x->UserLambdaExp.userFamilyMemberTargetSetLambda.accept(x,(java.lang.Long)key));
             userFamilyMemberRepository.insert(request.getUserFamilyMemberList());
         }
         //插入数据
-        UserDTO dto = userRepository.insert(request);
-        return (Integer) UserLambdaExp.dtoKeyLambda.apply(dto);
+        UserDomain dto = userRepository.insert(request);
+        return (java.lang.Long) UserLambdaExp.dtoKeyLambda.apply(dto);
     }
 
     /**
@@ -100,13 +99,13 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean update(UserUpdateRequest request){
+    public Boolean update(UserUpdateDomain request){
         Serializable keyId = UserLambdaExp.dtoKeyLambda.apply(request);
-        UserDTO old = find(new UserFindRequest(keyId, request.getLoadFlag()));
+        UserDomain old = find(new UserFindDomain(keyId, request.getLoadFlag()));
         if(ObjectUtil.isNotNull(request.getLoadFlag()) && request.getLoadFlag().getLoadUserAddress()
             && ObjectUtil.isNotNull(request.getUserAddress())){
             Serializable key = UserLambdaExp.userAddressSourceLambda.apply(request);
-            UserLambdaExp.userAddressTargetSetLambda.accept(request.getUserAddress(),(Integer)key);
+            UserLambdaExp.userAddressTargetSetLambda.accept(request.getUserAddress(),(java.lang.Long)key);
             if(BooleanUtil.isTrue(request.getUserAddress().getChanged())){
                 userAddressRepository.update(request.getUserAddress());
             }
@@ -114,7 +113,7 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
         //更新关联数据user_family_member
         if(CollUtil.isNotEmpty(request.getUserFamilyMemberList())){
             Serializable key = UserLambdaExp.userFamilyMemberSourceLambda.apply(request);
-            request.getUserFamilyMemberList().forEach(x->UserLambdaExp.userFamilyMemberTargetSetLambda.accept(x,(Integer)key));
+            request.getUserFamilyMemberList().forEach(x->UserLambdaExp.userFamilyMemberTargetSetLambda.accept(x,(java.lang.Long)key));
             this.merge(old.getUserFamilyMemberList(), request.getUserFamilyMemberList(), UserLambdaExp.userFamilyMemberKeyLambda, userFamilyMemberRepository);
         }
 
@@ -131,8 +130,8 @@ public class UserServiceImpl extends BaseDomainServiceImpl implements UserServic
     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean delete(Integer id){
-        UserDTO old = find(new UserFindRequest(id ,new UserDTO.LoadFlag()));
+    public Boolean delete(java.lang.Long id){
+        UserDomain old = find(new UserFindDomain(id ,new UserDomain.LoadFlag()));
 
         //删除关联数据user_address
         if(ObjectUtil.isNotNull(old.getUserAddress())){

@@ -1,6 +1,5 @@
 package com.artframework.domain.config;
 
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.datasource.TableQuery;
 import com.artframework.domain.meta.domain.DomainCollection;
@@ -10,6 +9,7 @@ import com.artframework.domain.meta.table.TableCollection;
 import com.artframework.domain.meta.table.TableMetaInfo;
 import com.artframework.domain.utils.StreamUtils;
 import com.artframework.domain.utils.XmlUtils;
+import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
 import com.baomidou.mybatisplus.generator.config.po.TableField;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
@@ -75,8 +75,11 @@ public class GlobalSetting {
 
         TableQuery tableQuery = new TableQuery(dataSourceConfig);
         List<TableInfo> tableInfos = tableQuery.queryTables();
-        INSTANCE.tableMetaInfoMap = tableInfos.stream().map(GlobalSetting::convert).collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
-
+        List<TableMetaInfo> tableMetaInfos = tableInfos.stream().map(GlobalSetting::convert).collect(Collectors.toList());
+        if (dataSourceConfig.getDbType().equals(DbType.POSTGRE_SQL) || dataSourceConfig.getDbType().equals(DbType.ORACLE)) {
+            tableMetaInfos.forEach(x -> x.setKeyGenerator(false));
+        }
+        INSTANCE.tableMetaInfoMap =  tableMetaInfos.stream().collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
         DomainCollection domainCollection = XmlUtils.xmlToBean(StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())), DomainCollection.class);
        if(ObjectUtil.isNotEmpty(domainCollection)){
            INSTANCE.domainMetaInfoList = domainCollection.getDomain();
@@ -97,9 +100,7 @@ public class GlobalSetting {
             } else {
                 column.setType(tableField.getColumnType().getType());
             }
-            if(tableField.isKeyFlag()){
-                column.setKeyGenerator(true);
-            }
+
             columnMetaInfos.add(column);
         }
         table.setColumn(columnMetaInfos);

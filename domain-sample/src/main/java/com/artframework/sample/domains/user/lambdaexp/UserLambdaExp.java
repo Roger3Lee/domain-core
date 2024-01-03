@@ -5,7 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.artframework.sample.domains.user.dto.*;
+import com.artframework.sample.domains.user.domain.*;
 import com.artframework.sample.entities.*;
 
 import java.util.function.*;
@@ -24,7 +24,7 @@ public class UserLambdaExp{
     /**
     * KEY  lambda
     */
-    public static SFunction<UserDTO, Serializable> dtoKeyLambda= UserDTO::getId;
+    public static SFunction<UserDomain, Serializable> dtoKeyLambda= UserDomain::getId;
 
     /**
     * KEY  lambda
@@ -35,19 +35,19 @@ public class UserLambdaExp{
     /**
     *  user_address lambda
     */
-    public static SFunction<UserDTO.UserAddressDTO, Serializable> userAddressKeyLambda = UserDTO.UserAddressDTO::getId;
+    public static SFunction<UserDomain.UserAddressDomain, Serializable> userAddressKeyLambda = UserDomain.UserAddressDomain::getId;
 
 
     /**
     * RELATE user_address lambda
     */
-    public static SFunction<UserDTO, Serializable> userAddressSourceLambda = UserDTO::getId;
+    public static SFunction<UserDomain, Serializable> userAddressSourceLambda = UserDomain::getId;
 
 
     /**
     * RELATE user_address lambda
     */
-    public static BiConsumer<UserDTO.UserAddressDTO,Integer> userAddressTargetSetLambda =UserDTO.UserAddressDTO::setUserId;
+    public static BiConsumer<UserDomain.UserAddressDomain,java.lang.Long> userAddressTargetSetLambda =UserDomain.UserAddressDomain::setUserId;
 
     /**
     * RELATE user_address lambda
@@ -57,19 +57,19 @@ public class UserLambdaExp{
     /**
     *  user_family_member lambda
     */
-    public static SFunction<UserDTO.UserFamilyMemberDTO, Serializable> userFamilyMemberKeyLambda = UserDTO.UserFamilyMemberDTO::getId;
+    public static SFunction<UserDomain.UserFamilyMemberDomain, Serializable> userFamilyMemberKeyLambda = UserDomain.UserFamilyMemberDomain::getId;
 
 
     /**
     * RELATE user_family_member lambda
     */
-    public static SFunction<UserDTO, Serializable> userFamilyMemberSourceLambda = UserDTO::getId;
+    public static SFunction<UserDomain, Serializable> userFamilyMemberSourceLambda = UserDomain::getId;
 
 
     /**
     * RELATE user_address lambda
     */
-    public static BiConsumer<UserDTO.UserFamilyMemberDTO,Integer> userFamilyMemberTargetSetLambda =UserDTO.UserFamilyMemberDTO::setUserId;
+    public static BiConsumer<UserDomain.UserFamilyMemberDomain,java.lang.Long> userFamilyMemberTargetSetLambda =UserDomain.UserFamilyMemberDomain::setUserId;
 
     /**
     * RELATE user_family_member lambda

@@ -2,11 +2,10 @@ package com.artframework.sample.domains.user.repository.impl;
 
 import com.artframework.sample.domains.user.convertor.*;
 import com.artframework.sample.domains.user.lambdaexp.*;
-import com.artframework.sample.domains.user.dto.*;
-import com.artframework.sample.domains.user.dto.request.*;
+import com.artframework.sample.domains.user.domain.*;
 import com.artframework.sample.domains.user.repository.*;
 import com.artframework.sample.entities.*;
-import com.artframework.domain.core.repository.impl.*;
+import mo.gov.dsaj.domain.core.repository.impl.*;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -18,20 +17,20 @@ import java.io.Serializable;
 import java.util.List;
 
 @Repository
-public class UserRepositoryImpl extends BaseRepositoryImpl<UserDTO,UserInfoDO>  implements UserRepository {
+public class UserRepositoryImpl extends BaseRepositoryImpl<UserDomain,UserInfoDO>  implements UserRepository {
 
     @Override
-    public List<UserInfoDO> convert2DO(List<UserDTO> list) {
+    public List<UserInfoDO> convert2DO(List<UserDomain> list) {
         return UserConvertor.INSTANCE.convert2DO(list);
     }
 
     @Override
-    public List<UserDTO> convert2DTO(List<UserInfoDO> list) {
+    public List<UserDomain> convert2DTO(List<UserInfoDO> list) {
         return UserConvertor.INSTANCE.convert2DTO(list);
     }
 
     @Override
-    public SFunction<UserDTO, Serializable> keyLambda() {
+    public SFunction<UserDomain, Serializable> keyLambda() {
         return UserLambdaExp.dtoKeyLambda;
     }
 
@@ -41,27 +40,27 @@ public class UserRepositoryImpl extends BaseRepositoryImpl<UserDTO,UserInfoDO>  
     }
 
     @Override
-    public IPage<UserDTO> page(UserPageRequest request){
+    public IPage<UserDomain> page(UserPageDomain request){
         IPage<UserInfoDO> page=new Page<>(request.getPageNum(), request.getPageSize());
         LambdaQueryWrapper<UserInfoDO> wrapper =new LambdaQueryWrapper<UserInfoDO>();
         return this.baseMapper.selectPage(page,wrapper).convert(UserConvertor.INSTANCE::convert2DTO);
     }
 
     @Repository
-    public static class UserAddressRepositoryImpl extends BaseRepositoryImpl<UserDTO.UserAddressDTO,UserAddressDO>  implements UserAddressRepository {
+    public static class UserAddressRepositoryImpl extends BaseRepositoryImpl<UserDomain.UserAddressDomain,UserAddressDO>  implements UserAddressRepository {
 
         @Override
-        public List<UserAddressDO> convert2DO(List<UserDTO.UserAddressDTO> list) {
+        public List<UserAddressDO> convert2DO(List<UserDomain.UserAddressDomain> list) {
             return UserConvertor.INSTANCE.convert2UserAddressDO(list);
         }
 
         @Override
-        public List<UserDTO.UserAddressDTO> convert2DTO(List<UserAddressDO> list) {
+        public List<UserDomain.UserAddressDomain> convert2DTO(List<UserAddressDO> list) {
             return UserConvertor.INSTANCE.convert2UserAddressDTO(list);
         }
 
         @Override
-        public SFunction<UserDTO.UserAddressDTO, Serializable> keyLambda() {
+        public SFunction<UserDomain.UserAddressDomain, Serializable> keyLambda() {
             return UserLambdaExp.userAddressKeyLambda;
         }
 
@@ -71,20 +70,20 @@ public class UserRepositoryImpl extends BaseRepositoryImpl<UserDTO,UserInfoDO>  
         }
     }
     @Repository
-    public static class UserFamilyMemberRepositoryImpl extends BaseRepositoryImpl<UserDTO.UserFamilyMemberDTO,UserFamilyMemberDO>  implements UserFamilyMemberRepository {
+    public static class UserFamilyMemberRepositoryImpl extends BaseRepositoryImpl<UserDomain.UserFamilyMemberDomain,UserFamilyMemberDO>  implements UserFamilyMemberRepository {
 
         @Override
-        public List<UserFamilyMemberDO> convert2DO(List<UserDTO.UserFamilyMemberDTO> list) {
+        public List<UserFamilyMemberDO> convert2DO(List<UserDomain.UserFamilyMemberDomain> list) {
             return UserConvertor.INSTANCE.convert2UserFamilyMemberDO(list);
         }
 
         @Override
-        public List<UserDTO.UserFamilyMemberDTO> convert2DTO(List<UserFamilyMemberDO> list) {
+        public List<UserDomain.UserFamilyMemberDomain> convert2DTO(List<UserFamilyMemberDO> list) {
             return UserConvertor.INSTANCE.convert2UserFamilyMemberDTO(list);
         }
 
         @Override
-        public SFunction<UserDTO.UserFamilyMemberDTO, Serializable> keyLambda() {
+        public SFunction<UserDomain.UserFamilyMemberDomain, Serializable> keyLambda() {
             return UserLambdaExp.userFamilyMemberKeyLambda;
         }
 

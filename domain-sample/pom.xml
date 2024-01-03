@@ -19,14 +19,33 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>mo.gov.dsaj</groupId>
+            <artifactId>audit-trail-producer-dependencies</artifactId>
+            <version>1.9.3-SNAPSHOT</version>
+            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>mo.gov.dsaj</groupId>
+            <artifactId>dsaj-parent-dependencies</artifactId>
+            <version>1.26.4-SNAPSHOT</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
             <groupId>com.artframework</groupId>
             <artifactId>domain-dependencies</artifactId>
             <version>1.0-SNAPSHOT</version>
             <type>pom</type>
         </dependency>
         <dependency>
-            <groupId>com.artframework</groupId>
+            <groupId>mo.gov.dsaj.common</groupId>
             <artifactId>domain-core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>mo.gov.dsaj</groupId>
+            <artifactId>dsaj-parent-core</artifactId>
+            <version>1.26.4-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -83,6 +102,11 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.28</version>
         </dependency>
     </dependencies>
 

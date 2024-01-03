@@ -26,9 +26,9 @@ public class MPProgram {
                 .databaseQueryClass(SQLQuery.class)
                 .build();
 
-        String path = "D:\\github\\service-mesh\\service-mesh-be\\service-mesh-boot\\src\\main\\java\\com\\artframework\\servicemesh\\";
+        String path = "C:\\work\\demo\\artframework.domain\\domain-sample\\src\\main\\java\\com\\artframework\\sample";
         GlobalSetting.loadFromDB(dataSourceConfig,
-                new File("D:\\github\\service-mesh\\service-mesh-be\\config\\domain.xml"));
+                new File("C:\\work\\demo\\artframework.domain\\config\\domain-config.xml"));
 
         Map<String, String> packageParam=new HashMap<>();
         packageParam.put("tablePackage","com.artframework.servicemesh.entities");

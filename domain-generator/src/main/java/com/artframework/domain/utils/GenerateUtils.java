@@ -21,20 +21,20 @@ public class GenerateUtils {
             DomainGenerator domainDtoGenerator = new DomainGenerator();
             domainDtoGenerator.putParam(packageParam);
             domainDtoGenerator.setTemplateFilePath(FTLConstants.DTO_PATH);
-            FileUtils.saveFile(path+ "domains\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "dto\\", domainInfo.nameSuffix("DTO") + ".java", domainDtoGenerator.generate(domainInfo));
+            FileUtils.saveFile(path+ "domains\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "domain\\", domainInfo.nameSuffix("Domain") + ".java", domainDtoGenerator.generate(domainInfo));
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.FIND_REQUEST_PATH);
-            FileUtils.saveFile(path+ "domains\\"+  NameUtils.packageName(domainInfo.getName()) + "\\" + "dto\\request\\", domainInfo.nameSuffix("FindRequest") + ".java", domainDtoGenerator.generate(domainInfo));
+            FileUtils.saveFile(path+ "domains\\"+  NameUtils.packageName(domainInfo.getName()) + "\\" + "domain\\", domainInfo.nameSuffix("FindDomain") + ".java", domainDtoGenerator.generate(domainInfo));
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.PAGE_REQUEST_PATH);
-            FileUtils.saveFile(path+ "domains\\"+  NameUtils.packageName(domainInfo.getName()) + "\\" + "dto\\request\\", domainInfo.nameSuffix("PageRequest") + ".java", domainDtoGenerator.generate(domainInfo));
+            FileUtils.saveFile(path+ "domains\\"+  NameUtils.packageName(domainInfo.getName()) + "\\" + "domain\\", domainInfo.nameSuffix("PageDomain") + ".java", domainDtoGenerator.generate(domainInfo));
 
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.UPDATE_REQUEST_PATH);
-            FileUtils.saveFile(path+ "domains\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "dto\\request\\", domainInfo.nameSuffix("UpdateRequest") + ".java", domainDtoGenerator.generate(domainInfo));
+            FileUtils.saveFile(path+ "domains\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "domain\\", domainInfo.nameSuffix("UpdateDomain") + ".java", domainDtoGenerator.generate(domainInfo));
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.CREATE_REQUEST_PATH);
-            FileUtils.saveFile(path+ "domains\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "dto\\request\\", domainInfo.nameSuffix("CreateRequest") + ".java", domainDtoGenerator.generate(domainInfo));
+            FileUtils.saveFile(path+ "domains\\" + NameUtils.packageName(domainInfo.getName()) + "\\" + "domain\\", domainInfo.nameSuffix("CreateDomain") + ".java", domainDtoGenerator.generate(domainInfo));
 
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_PATH);

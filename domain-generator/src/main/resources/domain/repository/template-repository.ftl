@@ -1,9 +1,8 @@
 package ${domainPackage!''}.${NameUtils.packageName(source.name)}.repository;
 
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.request.*;
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
 import ${tablePackage!''}.*;
-import com.artframework.domain.core.repository.*;
+import mo.gov.dsaj.domain.core.repository.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public interface ${repositoryClassName} extends BaseRepository<${dtoClassName}, 
     * @param request 请求体
     * @return 返回数据
     */
-    IPage<${dtoClassName}> page(${domainName}PageRequest request);
+    IPage<${dtoClassName}> page(${domainName}PageDomain request);
 
 <#--    关联实体类-->
 <#list source.relatedTable as relateTable>

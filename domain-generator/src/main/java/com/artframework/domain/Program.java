@@ -29,7 +29,7 @@ public class Program {
         Map<String, String> packageParam=new HashMap<>();
         packageParam.put("tablePackage","com.artframework.sample.entities");
         packageParam.put("mapperPackage","com.artframework.sample.mappers");
-        packageParam.put("domainPackage","com.artframework.sample.domain");
+        packageParam.put("domainPackage","com.artframework.sample.domains");
         packageParam.put("controllerPackage","com.artframework.sample.controller");
 
         GenerateUtils.generateTables(path,GlobalSetting.INSTANCE.getTableList(),packageParam);

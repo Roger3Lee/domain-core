@@ -1,7 +1,6 @@
 package ${controllerPackage!''};
 
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.*;
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.request.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.name)}.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,7 @@ public class ${controllerClassName} {
     * @return IPage<${dtoClassName}>
     */
     @PostMapping("page")
-    public IPage<${dtoClassName}> page(@RequestBody ${NameUtils.getName(source.name)}PageRequest request){
+    public IPage<${dtoClassName}> page(@RequestBody ${NameUtils.getName(source.name)}PageDomain request){
         return ${serviceFieldName}.page(request);
     }
 
@@ -34,7 +33,7 @@ public class ${controllerClassName} {
     * @return ${dtoClassName}
     */
     @PostMapping("/query")
-    public ${dtoClassName} find(@RequestBody ${NameUtils.getName(source.name)}FindRequest request){
+    public ${dtoClassName} find(@RequestBody ${NameUtils.getName(source.name)}FindDomain request){
         return ${serviceFieldName}.find(request);
     }
 
@@ -44,7 +43,7 @@ public class ${controllerClassName} {
     * @return ${source.mainTable.keyType}
     */
     @PutMapping()
-    public ${source.mainTable.keyType} insert(@RequestBody ${NameUtils.getName(source.name)}CreateRequest request){
+    public ${source.mainTable.keyType} insert(@RequestBody ${NameUtils.getName(source.name)}CreateDomain request){
         return ${serviceFieldName}.insert(request);
     }
 
@@ -54,7 +53,7 @@ public class ${controllerClassName} {
     * @return 成功OR失败
     */
     @PostMapping()
-    public Boolean update(@RequestBody ${NameUtils.getName(source.name)}UpdateRequest request){
+    public Boolean update(@RequestBody ${NameUtils.getName(source.name)}UpdateDomain request){
         return ${serviceFieldName}.update(request);
     }
 

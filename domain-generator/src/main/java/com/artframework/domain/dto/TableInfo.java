@@ -13,6 +13,7 @@ public class TableInfo {
     private String name;
     private Boolean basic = false;
     private String inherit;
+    private Boolean keyGenerator = true;
     private List<ColumnMetaInfo> column;
 
     private String keyType;

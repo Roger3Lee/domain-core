@@ -18,6 +18,7 @@ public class TableMetaInfo {
     private Boolean basic = false;
     private String inherit;
     private List<ColumnMetaInfo> column;
+    private Boolean keyGenerator = true;
 
     @XmlAttribute(name = "name")
     public void setName(String name) {
@@ -34,5 +35,10 @@ public class TableMetaInfo {
     @XmlElement(name = "column")
     public void setColumn(List<ColumnMetaInfo> column) {
         this.column = column;
+    }
+
+    @XmlAttribute(name = "keyGenerator")
+    public void setKeyGenerator(Boolean keyGenerator) {
+        this.keyGenerator = keyGenerator;
     }
 }

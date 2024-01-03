@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import mo.gov.dsaj.parent.core.mybatis.dataobject.ContainsId;
 
 /**
 * user_address
@@ -15,42 +16,22 @@ import lombok.ToString;
 @Setter
 @ToString
 @TableName("user_address")
-public class UserAddressDO  {
+public class UserAddressDO  extends BaseDO implements ContainsId {
 
 
     /**
-    * 自增主键
+    * 主鍵
     */
     @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    private java.lang.Long id;
     /**
     * 关联用户
     */
     @TableField("user_id")
-    private Integer userId;
+    private java.lang.Long userId;
     /**
     * 地址
     */
     @TableField("address_name")
-    private String addressName;
-    /**
-    * 创建人
-    */
-    @TableField("created_by")
-    private String createdBy;
-    /**
-    * 创建时间
-    */
-    @TableField("created_time")
-    private java.util.Date createdTime;
-    /**
-    * 更新人
-    */
-    @TableField("updated_by")
-    private String updatedBy;
-    /**
-    * 更新时间
-    */
-    @TableField("updated_time")
-    private java.util.Date updatedTime;
+    private java.lang.String addressName;
 }

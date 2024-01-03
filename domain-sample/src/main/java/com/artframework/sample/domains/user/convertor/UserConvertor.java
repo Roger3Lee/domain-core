@@ -1,7 +1,7 @@
 
 package com.artframework.sample.domains.user.convertor;
 
-import com.artframework.sample.domains.user.dto.*;
+import com.artframework.sample.domains.user.domain.*;
 import com.artframework.sample.entities.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -12,20 +12,20 @@ import java.util.List;
 public interface  UserConvertor{
     UserConvertor INSTANCE= Mappers.getMapper(UserConvertor.class);
 
-    UserDTO convert2DTO(UserInfoDO request);
-    List<UserDTO> convert2DTO(List<UserInfoDO> request);
+    UserDomain convert2DTO(UserInfoDO request);
+    List<UserDomain> convert2DTO(List<UserInfoDO> request);
 
     @BeanMapping(qualifiedByName = { "UserConvertorDecorator"})
-    UserInfoDO convert2DO(UserDTO request);
-    List<UserInfoDO> convert2DO(List<UserDTO> request);
+    UserInfoDO convert2DO(UserDomain request);
+    List<UserInfoDO> convert2DO(List<UserDomain> request);
 
-    UserDTO.UserAddressDTO convert2UserAddressDTO(UserAddressDO request);
-    List<UserDTO.UserAddressDTO> convert2UserAddressDTO(List<UserAddressDO>  request);
-    UserAddressDO convert2UserAddressDO(UserDTO.UserAddressDTO request);
-    List<UserAddressDO> convert2UserAddressDO(List<UserDTO.UserAddressDTO>  request);
-    UserDTO.UserFamilyMemberDTO convert2UserFamilyMemberDTO(UserFamilyMemberDO request);
-    List<UserDTO.UserFamilyMemberDTO> convert2UserFamilyMemberDTO(List<UserFamilyMemberDO>  request);
-    UserFamilyMemberDO convert2UserFamilyMemberDO(UserDTO.UserFamilyMemberDTO request);
-    List<UserFamilyMemberDO> convert2UserFamilyMemberDO(List<UserDTO.UserFamilyMemberDTO>  request);
+    UserDomain.UserAddressDomain convert2UserAddressDTO(UserAddressDO request);
+    List<UserDomain.UserAddressDomain> convert2UserAddressDTO(List<UserAddressDO>  request);
+    UserAddressDO convert2UserAddressDO(UserDomain.UserAddressDomain request);
+    List<UserAddressDO> convert2UserAddressDO(List<UserDomain.UserAddressDomain>  request);
+    UserDomain.UserFamilyMemberDomain convert2UserFamilyMemberDTO(UserFamilyMemberDO request);
+    List<UserDomain.UserFamilyMemberDomain> convert2UserFamilyMemberDTO(List<UserFamilyMemberDO>  request);
+    UserFamilyMemberDO convert2UserFamilyMemberDO(UserDomain.UserFamilyMemberDomain request);
+    List<UserFamilyMemberDO> convert2UserFamilyMemberDO(List<UserDomain.UserFamilyMemberDomain>  request);
 
 }

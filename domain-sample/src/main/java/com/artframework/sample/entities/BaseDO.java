@@ -4,18 +4,18 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import mo.gov.dsaj.parent.core.mybatis.dataobject.ContainsId;
 
 /**
 * base
 *
 * @author auto
 * @version v1.0
-* @date 2023-12-11 17:03:15
 */
 @Getter
 @Setter
 @ToString
-public class BaseDO  {
+public class BaseDO {
 
 
     /**

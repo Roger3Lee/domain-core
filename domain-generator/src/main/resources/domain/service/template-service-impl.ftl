@@ -4,11 +4,10 @@ package ${domainPackage!''}.${NameUtils.packageName(source.name)}.service.impl;
 import ${domainPackage!''}.${NameUtils.packageName(source.name)}.convertor.*;
 </#if>
 import ${domainPackage!''}.${NameUtils.packageName(source.name)}.service.*;
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.request.*;
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.name)}.repository.*;
-import com.artframework.domain.core.service.impl.*;
-import com.artframework.domain.core.uitls.*;
+import mo.gov.dsaj.domain.core.service.impl.*;
+import mo.gov.dsaj.domain.core.uitls.*;
 
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -53,7 +52,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     * @return
     */
     @Override
-    public IPage<${dtoClassName}> page(${domainName}PageRequest request){
+    public IPage<${dtoClassName}> page(${domainName}PageDomain request){
         return ${repositoryName}.page(request);
     }
 
@@ -63,7 +62,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     * @return
     */
     @Override
-    public ${dtoClassName} find(${domainName}FindRequest request){
+    public ${dtoClassName} find(${domainName}FindDomain request){
 <#if source.aggregate??>
     return this.find(request,false);
 <#else>
@@ -110,7 +109,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
      * @return
      */
     @Override
-    public ${dtoClassName} find(${domainName}FindRequest request, Boolean loadAggregate){
+    public ${dtoClassName} find(${domainName}FindDomain request, Boolean loadAggregate){
         ${dtoClassName} response = ${repositoryName}.query(request.getKey(), ${lambdaClassName}.doKeyLambda);
         if(ObjectUtil.isNull(response)){
             return response;
@@ -163,7 +162,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ${source.mainTable.keyType} insert(${domainName}CreateRequest request){
+    public ${source.mainTable.keyType} insert(${domainName}CreateDomain request){
     <#list source.relatedTable as relateTable>
         <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
         <#assign getter=NameUtils.genGetter(relateTable.name)/>
@@ -210,10 +209,10 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean update(${domainName}UpdateRequest request){
+    public Boolean update(${domainName}UpdateDomain request){
 <#if (source.relatedTable?size>0)>
         Serializable keyId = ${lambdaClassName}.dtoKeyLambda.apply(request);
-        ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindRequest(keyId, request.getLoadFlag())<#if source.aggregate??>,true</#if>);
+        ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindDomain(keyId, request.getLoadFlag())<#if source.aggregate??>,true</#if>);
 </#if>
 <#list source.relatedTable as relateTable>
     <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
@@ -271,7 +270,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(${source.mainTable.keyType} id){
 <#if (source.relatedTable?size>0)>
-        ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindRequest(id ,new ${dtoClassName}.LoadFlag())<#if source.aggregate??>,true</#if>);
+        ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindDomain(id ,new ${dtoClassName}.LoadFlag())<#if source.aggregate??>,true</#if>);
 
 <#list source.relatedTable as relateTable>
 <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>

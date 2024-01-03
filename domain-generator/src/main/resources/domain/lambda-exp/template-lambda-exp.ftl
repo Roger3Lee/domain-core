@@ -5,7 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.dto.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
 import ${tablePackage!''}.*;
 
 import java.util.function.*;
