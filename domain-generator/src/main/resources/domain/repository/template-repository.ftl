@@ -5,8 +5,6 @@ import ${tablePackage!''}.*;
 import com.artframework.domain.core.repository.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
-import java.util.List;
-
 <#assign dtoClassName=NameUtils.dataTOName(source.name)/>
 <#assign doClassName=NameUtils.dataObjectName(source.mainTable.name)/>
 <#assign domainName=NameUtils.getName(source.name)/>
