@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import mo.gov.dsaj.parent.core.mybatis.dataobject.ContainsId;
 
 /**
 * base
@@ -15,7 +14,8 @@ import mo.gov.dsaj.parent.core.mybatis.dataobject.ContainsId;
 @Getter
 @Setter
 @ToString
-public class BaseDO {
+@KeySequence("seq_base_id")
+public class BaseDO  {
 
 
     /**

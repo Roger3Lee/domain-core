@@ -4,7 +4,7 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.MPFieldLambda;
 import com.artframework.domain.core.constants.Op;
-import com.artframework.domain.core.dto.BaseLoadFlag;
+import com.artframework.domain.core.domain.BaseLoadFlag;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import java.util.ArrayList;
@@ -26,10 +26,10 @@ public class FiltersUtils {
      * @param entity
      * @return
      */
-    public static List<BaseLoadFlag.FilterDTO> getEntityFilters(List<BaseLoadFlag.FilterDTO> filters, String entity) {
-        List<BaseLoadFlag.FilterDTO> filterDTOS = new ArrayList<>();
+    public static List<BaseLoadFlag.Filter> getEntityFilters(List<BaseLoadFlag.Filter> filters, String entity) {
+        List<BaseLoadFlag.Filter> filterDTOS = new ArrayList<>();
         if (ObjectUtil.isNotNull(filters)) {
-            for (BaseLoadFlag.FilterDTO entry : filters) {
+            for (BaseLoadFlag.Filter entry : filters) {
                 if (entity.equals(entry.getEntity())) {
                     filterDTOS.add(entry);
                 }
@@ -38,7 +38,7 @@ public class FiltersUtils {
         return filterDTOS;
     }
 
-    public static <DO, T> LambdaQueryWrapper<DO> buildWrapper(LambdaQueryWrapper<DO> wrapper, BaseLoadFlag.FilterDTO filter, Class<DO> doClass) {
+    public static <DO, T> LambdaQueryWrapper<DO> buildWrapper(LambdaQueryWrapper<DO> wrapper, BaseLoadFlag.Filter filter, Class<DO> doClass) {
         Op op = Op.getOp(filter.getOp());
         switch (op) {
             case IN:

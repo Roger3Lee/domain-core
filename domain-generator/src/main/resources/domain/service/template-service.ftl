@@ -1,7 +1,7 @@
 package ${domainPackage!''}.${NameUtils.packageName(source.name)}.service;
 
 import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
-import mo.gov.dsaj.domain.core.service.*;
+import com.artframework.domain.core.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 <#assign serviceClassName=NameUtils.serviceName(source.name)/>

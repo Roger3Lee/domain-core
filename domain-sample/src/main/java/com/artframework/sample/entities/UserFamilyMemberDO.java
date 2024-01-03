@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import mo.gov.dsaj.parent.core.mybatis.dataobject.ContainsId;
 
 /**
 * user_family_member
@@ -16,7 +15,7 @@ import mo.gov.dsaj.parent.core.mybatis.dataobject.ContainsId;
 @Setter
 @ToString
 @TableName("user_family_member")
-public class UserFamilyMemberDO  extends BaseDO implements ContainsId {
+public class UserFamilyMemberDO  extends BaseDO {
 
 
     /**

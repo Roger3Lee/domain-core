@@ -2,7 +2,7 @@ package com.artframework.domain.core.service;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.artframework.domain.core.dto.BaseDTO;
+import com.artframework.domain.core.domain.BaseDomain;
 import com.artframework.domain.core.repository.BaseRepository;
 import com.artframework.domain.core.repository.impl.BaseRepositoryImpl;
 import com.artframework.domain.core.uitls.CompareUtil;
@@ -21,5 +21,5 @@ public interface BaseDomainService {
      * @param repository
      * @param
      */
-     <T extends BaseDTO> void merge(List<T> oldList, List<T> newList, Function<T, Serializable> keyWrap, BaseRepository repository);
+     <T extends BaseDomain> void merge(List<T> oldList, List<T> newList, Function<T, Serializable> keyWrap, BaseRepository repository);
 }

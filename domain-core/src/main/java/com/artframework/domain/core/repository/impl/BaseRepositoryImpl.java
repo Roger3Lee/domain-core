@@ -2,7 +2,7 @@ package com.artframework.domain.core.repository.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.artframework.domain.core.dto.BaseLoadFlag;
+import com.artframework.domain.core.domain.BaseLoadFlag;
 import com.artframework.domain.core.repository.BaseRepository;
 import com.artframework.domain.core.uitls.FiltersUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -26,12 +26,12 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
     }
 
     @Override
-    public DTO query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.FilterDTO> filters){
+    public DTO query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.Filter> filters){
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
                 .eq(idWrap, id);
         //額外的filter
         if (ObjectUtil.isNotNull(filters)) {
-            for (BaseLoadFlag.FilterDTO filter : filters) {
+            for (BaseLoadFlag.Filter filter : filters) {
                 wrapper = FiltersUtils.buildWrapper(wrapper,filter, this.getDOClass());
             }
         }
@@ -48,13 +48,13 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
     }
 
     @Override
-    public List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.FilterDTO> filters){
+    public List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.Filter> filters){
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
                 .eq(wrap, id);
 
         //額外的filter
         if (ObjectUtil.isNotNull(filters)) {
-            for (BaseLoadFlag.FilterDTO filter : filters) {
+            for (BaseLoadFlag.Filter filter : filters) {
                 FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
             }
         }

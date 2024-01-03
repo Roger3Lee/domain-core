@@ -2,9 +2,8 @@ package com.artframework.domain.core.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.artframework.domain.core.dto.BaseDTO;
+import com.artframework.domain.core.domain.*;
 import com.artframework.domain.core.repository.BaseRepository;
-import com.artframework.domain.core.repository.impl.BaseRepositoryImpl;
 import com.artframework.domain.core.service.BaseDomainService;
 import com.artframework.domain.core.uitls.CompareUtil;
 
@@ -23,7 +22,7 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
      * @param
      */
     @Override
-    public <T extends BaseDTO> void merge(List<T> oldList, List<T> newList, Function<T, Serializable> keyWrap, BaseRepository repository) {
+    public <T extends BaseDomain> void merge(List<T> oldList, List<T> newList, Function<T, Serializable> keyWrap, BaseRepository repository) {
         CompareUtil.CompareResult<T> compareList = CompareUtil.compareList(oldList, newList, keyWrap);
 
         //新增

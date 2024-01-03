@@ -5,7 +5,7 @@ import ${domainPackage!''}.${NameUtils.packageName(source.name)}.lambdaexp.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.name)}.repository.*;
 import ${tablePackage!''}.*;
-import mo.gov.dsaj.domain.core.repository.impl.*;
+import com.artframework.domain.core.repository.impl.*;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;

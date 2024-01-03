@@ -2,7 +2,7 @@ package ${domainPackage!''}.${NameUtils.packageName(source.name)}.repository;
 
 import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
 import ${tablePackage!''}.*;
-import mo.gov.dsaj.domain.core.repository.*;
+import com.artframework.domain.core.repository.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.util.List;

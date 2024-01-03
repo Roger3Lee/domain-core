@@ -1,7 +1,7 @@
 package com.artframework.sample.domains.user.service;
 
 import com.artframework.sample.domains.user.domain.*;
-import mo.gov.dsaj.domain.core.service.*;
+import com.artframework.domain.core.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 public interface UserService extends BaseDomainService {

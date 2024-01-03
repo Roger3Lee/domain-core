@@ -1,6 +1,5 @@
-package com.artframework.domain.core.dto;
+package com.artframework.domain.core.domain;
 
-import cn.hutool.core.collection.ListUtil;
 import com.artframework.domain.core.constants.Op;
 import lombok.Data;
 
@@ -14,10 +13,10 @@ import java.util.List;
  **/
 @Data
 public class BaseLoadFlag {
-    private List<FilterDTO> filters = new ArrayList<>();
+    private List<Filter> filters = new ArrayList<>();
 
     @Data
-    public static class FilterDTO {
+    public static class Filter {
         private String entity;
         private String field;
         private String op = Op.EQ.getCode();

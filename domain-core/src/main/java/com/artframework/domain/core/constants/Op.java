@@ -7,8 +7,6 @@ import com.baomidou.mybatisplus.core.toolkit.StringPool;
  * @version V1.0
  * @date 2023/12/18
  **/
-
-
 public enum Op {
     IN("IN"),
     NOT_IN("NOTIN"),

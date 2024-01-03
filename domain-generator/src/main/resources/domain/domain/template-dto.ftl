@@ -1,6 +1,6 @@
 package ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain;
 
-import mo.gov.dsaj.domain.core.domain.*;
+import com.artframework.domain.core.domain.*;
 <#if source.aggregate??>
 import com.fasterxml.jackson.annotation.JsonIgnore;
 </#if>

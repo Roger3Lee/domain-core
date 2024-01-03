@@ -6,8 +6,8 @@ import ${domainPackage!''}.${NameUtils.packageName(source.name)}.convertor.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.name)}.service.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.name)}.repository.*;
-import mo.gov.dsaj.domain.core.service.impl.*;
-import mo.gov.dsaj.domain.core.uitls.*;
+import com.artframework.domain.core.service.impl.*;
+import com.artframework.domain.core.uitls.*;
 
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.collection.CollUtil;
