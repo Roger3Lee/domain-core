@@ -33,9 +33,4 @@ public class UserInfoDO  extends BaseDO {
     */
     @TableField("phone")
     private java.lang.String phone;
-    /**
-    * 家庭成員總數
-    */
-    @TableField("family_member_count")
-    private java.lang.Integer familyMemberCount;
 }

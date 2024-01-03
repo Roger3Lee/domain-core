@@ -32,10 +32,6 @@ public class UserDomain extends BaseDomain {
     */
     private java.lang.String phone;
     /**
-    * 家庭成員總數
-    */
-    private java.lang.Integer familyMemberCount;
-    /**
     * 創建時間
     */
     private java.util.Date createdTime;

@@ -9,7 +9,6 @@
         <column name="id" type="java.lang.Long" comment="主鍵" key="true"/>
         <column name="name" type="java.lang.String" comment="名字"/>
         <column name="phone" type="java.lang.String" comment="手机"/>
-        <column name="family_member_count" type="java.lang.Integer" comment="家庭成員總數"/>
     </table>
     <table name="user_address" inherit="base"  keyGenerator="true">
         <column name="id" type="java.lang.Long" comment="主鍵" key="true" keyGenerator="false"/>
