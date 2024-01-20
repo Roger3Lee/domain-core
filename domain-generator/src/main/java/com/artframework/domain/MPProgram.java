@@ -39,6 +39,6 @@ public class MPProgram {
                 ,"C:\\work\\Coding\\FW\\public-notarial\\public-notarial-be\\infra\\dal\\src\\main\\java\\mo\\gov\\dsaj\\notarial\\dal\\dataobject\\",
                 GlobalSetting.INSTANCE.getTableList(),packageParam, true, false);
         GenerateUtils.generateDomains("C:\\work\\Coding\\FW\\public-notarial\\public-notarial-be\\business\\core\\src\\main\\java\\mo\\gov\\dsaj\\notarial\\core\\application\\",
-                GlobalSetting.INSTANCE.getDomainList(),packageParam);
+                GlobalSetting.INSTANCE.getDomainList(),packageParam,false);
     }
 }
