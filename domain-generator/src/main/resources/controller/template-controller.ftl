@@ -1,7 +1,7 @@
 package ${controllerPackage!''};
 
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.service.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

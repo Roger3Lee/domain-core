@@ -1,9 +1,11 @@
-package ${domainPackage!''}.${NameUtils.packageName(source.name)}.repository;
+package ${domainPackage!''}.${NameUtils.packageName(source.folder)}.repository;
 
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain.*;
 import ${tablePackage!''}.*;
-import com.artframework.domain.core.repository.*;
+import ${corePackage}.repository.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+
+import java.util.List;
 
 <#assign dtoClassName=NameUtils.dataTOName(source.name)/>
 <#assign doClassName=NameUtils.dataObjectName(source.mainTable.name)/>
@@ -17,22 +19,4 @@ public interface ${repositoryClassName} extends BaseRepository<${dtoClassName}, 
     * @return 返回数据
     */
     IPage<${dtoClassName}> page(${domainName}PageDomain request);
-
-<#--    关联实体类-->
-<#list source.relatedTable as relateTable>
-    <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
-    <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
-    <#assign relateDoClassName=NameUtils.dataObjectName(relateTable.name)/>
-    public interface ${relateRepositoryClassName} extends BaseRepository<${dtoClassName}.${relateDtoClassName}, ${relateDoClassName}> {
-    }
-</#list>
-
-<#--    聚合-->
-<#if source.aggregate??>
-    <#assign relateRepositoryClassName=NameUtils.repositoryName(source.aggregate.name)/>
-    <#assign relateDtoClassName=NameUtils.dataTOName(source.aggregate.name)/>
-    <#assign relateDoClassName=NameUtils.dataObjectName(source.aggregate.name)/>
-    public interface ${relateRepositoryClassName} extends BaseRepository<${dtoClassName}.${relateDtoClassName}, ${relateDoClassName}> {
-    }
-</#if>
 }

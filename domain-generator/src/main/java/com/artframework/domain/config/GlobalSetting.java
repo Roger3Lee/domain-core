@@ -1,6 +1,7 @@
 package com.artframework.domain.config;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.artframework.domain.datasource.TableQuery;
 import com.artframework.domain.meta.domain.DomainCollection;
 import com.artframework.domain.meta.domain.DomainMetaInfo;
@@ -13,7 +14,6 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
 import com.baomidou.mybatisplus.generator.config.po.TableField;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -34,7 +34,26 @@ public class GlobalSetting {
     }
 
     public List<TableMetaInfo> getTableList() {
-        return new ArrayList<>(tableMetaInfoMap.values());
+        if (INSTANCE.getDomainList().size()>0) {
+            List<TableMetaInfo> tableMetaInfos = new ArrayList<>();
+            for (DomainMetaInfo domainMetaInfo : INSTANCE.getDomainList()) {
+                if (INSTANCE.tableMetaInfoMap.containsKey(domainMetaInfo.getMainTable())) {
+                    tableMetaInfos.add(INSTANCE.tableMetaInfoMap.get(domainMetaInfo.getMainTable()));
+                }
+                if (null != domainMetaInfo.getAggregate() && INSTANCE.tableMetaInfoMap.containsKey(domainMetaInfo.getAggregate().getTable())) {
+                    tableMetaInfos.add(INSTANCE.tableMetaInfoMap.get(domainMetaInfo.getAggregate().getTable()));
+                }
+
+                domainMetaInfo.getRelatedList().forEach(x -> {
+                    if (INSTANCE.tableMetaInfoMap.containsKey(x.getTable())) {
+                        tableMetaInfos.add(INSTANCE.tableMetaInfoMap.get(x.getTable()));
+                    }
+                });
+            }
+            return tableMetaInfos;
+        }else{
+            return new ArrayList<>(INSTANCE.tableMetaInfoMap.values());
+        }
     }
 
     public List<ColumnMetaInfo> getTableColumns(String tableName) {
@@ -45,7 +64,7 @@ public class GlobalSetting {
                     .collect(Collectors.toMap(ColumnMetaInfo::getName, x -> x, (x, y) -> x));
 
             //有继承关系
-            if (StringUtils.isNoneBlank(tableMetaInfo.getInherit())) {
+            if (StrUtil.isNotBlank(tableMetaInfo.getInherit())) {
                 List<ColumnMetaInfo> columnMetaInfos = getTableColumns(tableMetaInfo.getInherit());
                 for (ColumnMetaInfo item:columnMetaInfos) {
                     if(!columns.containsKey(item.getName())){
@@ -90,12 +109,19 @@ public class GlobalSetting {
         TableMetaInfo table = new TableMetaInfo();
         table.setName(tableInfo.getName());
         List<ColumnMetaInfo> columnMetaInfos = new ArrayList<>();
+
+        Set<String> colset=new HashSet<>();
         for (TableField tableField : tableInfo.getFields()) {
+            if(colset.contains(tableField.getName())){
+                continue;
+            }else{
+                colset.add(tableField.getName());
+            }
             ColumnMetaInfo column = new ColumnMetaInfo();
             column.setKey(tableField.isKeyFlag());
             column.setComment(tableField.getComment());
             column.setName(tableField.getName());
-            if (StringUtils.isNoneBlank(tableField.getColumnType().getPkg())) {
+            if (StrUtil.isNotBlank(tableField.getColumnType().getPkg())) {
                 column.setType(tableField.getColumnType().getPkg());
             } else {
                 column.setType(tableField.getColumnType().getType());

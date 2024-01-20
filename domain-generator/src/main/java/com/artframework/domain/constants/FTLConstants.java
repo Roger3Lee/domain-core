@@ -17,7 +17,10 @@ public class FTLConstants {
 
     public static final  String REPOSITORY_IMPL_PATH =  "domain/repository/template-repository-impl.ftl";
 
+    public static final  String REPOSITORY_RELATED_PATH =  "domain/repository/template-repository-related.ftl";
 
+
+    public static final  String REPOSITORY_IMPL_RELATED_PATH =  "domain/repository/template-repository-impl-related.ftl";
     public static final  String DOMAIN_SERVICE_PATH =  "domain/service/template-service.ftl";
 
 

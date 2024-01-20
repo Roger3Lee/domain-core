@@ -18,6 +18,11 @@ public enum Op {
     GE(">="),
     LT(StringPool.LEFT_CHEV),
     LE("<="),
+
+    /**
+     * 不過濾任何數據
+     */
+    NIL("NIL"),
     ;
 
     private String code;

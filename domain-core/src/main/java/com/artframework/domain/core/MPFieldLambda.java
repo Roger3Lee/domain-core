@@ -1,8 +1,10 @@
 package com.artframework.domain.core;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ReflectUtil;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import lombok.Data;
+import lombok.SneakyThrows;
 
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
@@ -24,25 +26,26 @@ public class MPFieldLambda<T> {
         this.zClass = doClass;
         this.fieldName = key;
     }
-    public <T, R> SSFunction<T, R> fieldLambda() {
-        try {
-            Field field = zClass.getDeclaredField(this.fieldName);
-            String instantiatedMethodType = String.format("(L%s;)L%s", zClass.getName(), field.getType().getName());
-            return new SSFunction<T, R>() {
-                @Override
-                public R apply(T t) {
-                    return null;
-                }
-
-                @Override
-                public Object writeReplace() {
-                    return new SerializedLambda(zClass, null, null, null, 0
-                            , zClass.getName(), CharSequenceUtil.genGetter(fieldName), null, instantiatedMethodType, new Object[0]);
-                }
-            };
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
+    @SneakyThrows
+    private <T, R> SSFunction<T, R> fieldLambda(){
+        Field field = ReflectUtil.getField(zClass, this.fieldName);
+        if (null == field) {
+            throw new NoSuchFieldException(this.fieldName);
         }
+
+        String instantiatedMethodType = String.format("(L%s;)L%s", zClass.getName(), field.getType().getName());
+        return new SSFunction<T, R>() {
+            @Override
+            public R apply(T t) {
+                return null;
+            }
+
+            @Override
+            public Object writeReplace() {
+                return new SerializedLambda(zClass, null, null, null, 0
+                        , zClass.getName(), CharSequenceUtil.genGetter(fieldName), null, instantiatedMethodType, new Object[0]);
+            }
+        };
     }
 
     public static <T, R> SSFunction<T, R> fieldLambda(Class<T> doClass, String key) {

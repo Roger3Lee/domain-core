@@ -70,20 +70,24 @@ public class NameUtils {
     }
 
     public static String fieldSourceLambda(String name) {
-        return getFieldWithSuffix(name, "SourceLambda");
+        return getFieldWithSuffix(name, "DomainEntitySourceLambda");
     }
 
 
     public static String fieldTargetKeyLambda(String name) {
-        return getFieldWithSuffix(name, "keyLambda");
+        return getFieldWithSuffix(name, "DomainKeyLambda");
     }
 
     public static String fieldTargetLambda(String name) {
-        return getFieldWithSuffix(name, "TargetLambda");
+        return getFieldWithSuffix(name, "DOTargetLambda");
+    }
+
+    public static String fieldTargetDomainLambda(String name) {
+        return getFieldWithSuffix(name, "DomainTargetLambda");
     }
 
     public static String fieldTargetSetLambda(String name) {
-        return getFieldWithSuffix(name, "TargetSetLambda");
+        return getFieldWithSuffix(name, "DomainTargetSetLambda");
     }
 
     public static String covertName(String name) {

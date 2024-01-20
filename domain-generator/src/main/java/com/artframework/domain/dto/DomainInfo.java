@@ -6,7 +6,7 @@ import com.artframework.domain.config.GlobalSetting;
 import com.artframework.domain.meta.domain.DomainMetaInfo;
 import com.artframework.domain.meta.domain.RelatedTableMetaInfo;
 import com.artframework.domain.meta.table.ColumnMetaInfo;
-import com.sun.org.apache.xml.internal.utils.StringComparable;
+import com.artframework.domain.utils.NameUtils;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,12 +18,21 @@ import java.util.stream.Collectors;
 @Data
 @Builder
 public class DomainInfo {
+    /**
+     * 文件夾
+     */
+    private String folder;
     private String name;
     private String description;
+    private String implement;
 
     private TableInfo mainTable;
     private List<RelateTableInfo> relatedTable;
     private RelateTableInfo aggregate;
+
+    public String getFolder(){
+        return StringUtils.isNotEmpty(this.folder) ? this.folder : NameUtils.packageName(this.getName());
+    }
 
     public String nameSuffix(String suffix) {
         return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", this.name))) + suffix;
@@ -33,6 +42,8 @@ public class DomainInfo {
         TableInfo tableInfo = TableInfo.convert(domainMetaInfo.getMainTable());
         return DomainInfo
                 .builder()
+                .folder(domainMetaInfo.getFolder())
+                .implement(domainMetaInfo.getImplement())
                 .name(domainMetaInfo.getName())
                 .description(domainMetaInfo.getDescription())
                 .mainTable(tableInfo)
@@ -55,6 +66,8 @@ public class DomainInfo {
                 return null;
             }
             RelateTableInfo tableInfo = new RelateTableInfo();
+            tableInfo.setImplement(relatedTableMetaInfo.getImplement());
+            tableInfo.setDeletable(relatedTableMetaInfo.getDeletable());
             tableInfo.setName(relatedTableMetaInfo.getTable());
             tableInfo.setColumn(GlobalSetting.INSTANCE.getTableColumns(relatedTableMetaInfo.getTable()));
             ColumnMetaInfo keyColumn = tableInfo.getColumn().stream().filter(ColumnMetaInfo::getKey).findFirst().orElse(null);
@@ -73,12 +86,18 @@ public class DomainInfo {
                     .map(ColumnMetaInfo::getType).findFirst().orElse(""));
             return tableInfo;
         }
+
+        public String nameSuffix(String suffix) {
+            return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", this.getName()))) + suffix;
+        }
     }
 
 
     @Data
     public static class TableInfo {
         private String name;
+        private String implement;
+        private Boolean deletable;
         private List<ColumnMetaInfo> column;
         private String keyType;
         private String keyColName;
@@ -87,7 +106,6 @@ public class DomainInfo {
             TableInfo tableInfo = new TableInfo();
             tableInfo.setName(tableName);
             tableInfo.setColumn(GlobalSetting.INSTANCE.getTableColumns(tableName));
-
             ColumnMetaInfo keyColumn = tableInfo.column.stream().filter(ColumnMetaInfo::getKey).findFirst().orElse(null);
             if (keyColumn != null) {
                 tableInfo.setKeyType(keyColumn.getType());

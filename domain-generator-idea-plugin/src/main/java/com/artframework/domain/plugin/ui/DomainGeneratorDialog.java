@@ -1,46 +1,46 @@
 package com.artframework.domain.plugin.ui;
 
-import com.artframework.domain.datasource.TableQuery;
-import com.artframework.domain.plugin.component.CheckBoxRenderer;
+import com.artframework.domain.config.GlobalSetting;
+import com.artframework.domain.customize.MyPostgreSqlQuery;
+import com.artframework.domain.customize.MyPostgreSqlTypeConvert;
+import com.artframework.domain.plugin.SettingsCache;
+import com.artframework.domain.utils.GenerateUtils;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
 import com.baomidou.mybatisplus.generator.config.converts.MySqlTypeConvert;
-import com.baomidou.mybatisplus.generator.config.converts.PostgreSqlTypeConvert;
-import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import com.baomidou.mybatisplus.generator.config.querys.MySqlQuery;
-import com.baomidou.mybatisplus.generator.config.querys.PostgreSqlQuery;
 import com.baomidou.mybatisplus.generator.keywords.MySqlKeyWordsHandler;
 import com.baomidou.mybatisplus.generator.keywords.PostgreSqlKeyWordsHandler;
 import com.baomidou.mybatisplus.generator.query.SQLQuery;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.ui.JBColor;
-import com.intellij.ui.SideBorder;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class DomainGeneratorDialog extends JDialog {
+    private AnActionEvent anActionEvent;
     private static final String MY_SQL = "Mysql";
     private static final String POLAR_DB = "Polar DB";
     private static final String PG = "Postgresql";
 
+
     private JPanel contentPane;
-    private JButton buttonOK;
-    private JButton buttonCancel;
+    private JButton btn_OK;
+    private JButton btn_Cancel;
     private JTextField db_url;
-    private JTable db_tables;
     private JTextField db_user;
     private JPasswordField db_password;
-    private JButton btn_loadTables;
     private JComboBox db_type;
     private JTextField t_schema;
     private JLabel l_schema;
-    private JCheckBox chk_mapper;
+    private JCheckBox chk_do;
     private JCheckBox chk_domain;
     private JTextField t_domainFile;
     private JButton btn_fileChoose;
@@ -53,30 +53,33 @@ public class DomainGeneratorDialog extends JDialog {
     private JTextField t_controller_package;
     private JTextField t_controller_save;
     private JCheckBox chk_controller;
+    private JCheckBox chk_entity_over;
+    private JCheckBox chk_mapper_over;
+    private JCheckBox chk_domain_over;
+    private JCheckBox chk_controller_over;
+    private JCheckBox chk_mapper;
+    private JButton btn_entity_save;
+    private JButton btn_mapper_save;
+    private JButton btn_domain_save;
+    private JButton btn_controller_save;
+    private JButton btn_test;
 
-
-    public DomainGeneratorDialog() {
+    public DomainGeneratorDialog(AnActionEvent anActionEvent) {
+        this.anActionEvent = anActionEvent;
         this.setTitle("DDD代碼生成器");
         setContentPane(contentPane);
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
+        getRootPane().setDefaultButton(btn_OK);
 
-        buttonOK.addActionListener(new ActionListener() {
+        btn_OK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onOK();
             }
         });
 
-        buttonCancel.addActionListener(new ActionListener() {
+        btn_Cancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
-            }
-        });
-
-        btn_loadTables.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadTables();
             }
         });
 
@@ -107,21 +110,40 @@ public class DomainGeneratorDialog extends JDialog {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        //
-        initTableGrid(new ArrayList<>());
         l_schema.setVisible(false);
         t_schema.setVisible(false);
 
         btn_fileChoose.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showFileChooseDialog();
+                showFileChooseDialog(JFileChooser.FILES_ONLY, t_domainFile);
+            }
+        });
+        btn_entity_save.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showFileChooseDialog(JFileChooser.DIRECTORIES_ONLY, t_entity_save);
             }
         });
 
-
-        db_tables.setBorder(new SideBorder(JBColor.BLACK, SideBorder.ALL));
-        db_tables.setVisible(true);
+        btn_mapper_save.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showFileChooseDialog(JFileChooser.DIRECTORIES_ONLY, t_mapper_save);
+            }
+        });
+        btn_domain_save.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showFileChooseDialog(JFileChooser.DIRECTORIES_ONLY, t_domain_save);
+            }
+        });
+        btn_controller_save.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showFileChooseDialog(JFileChooser.DIRECTORIES_ONLY, t_controller_save);
+            }
+        });
 
         chk_domain.addChangeListener(new ChangeListener() {
             @Override
@@ -129,9 +151,11 @@ public class DomainGeneratorDialog extends JDialog {
                 if (!chk_domain.isSelected()) {
                     setDisable(t_domain_package);
                     setDisable(t_domain_save);
+                    setDisable(chk_domain_over);
                 } else {
                     setEnable(t_domain_package);
-                    setEnable( t_domain_save);
+                    setEnable(t_domain_save);
+                    setEnable(chk_domain_over);
                 }
             }
         });
@@ -142,65 +166,80 @@ public class DomainGeneratorDialog extends JDialog {
                 if (!chk_controller.isSelected()) {
                     setDisable(t_controller_package);
                     setDisable(t_controller_save);
+                    setDisable(chk_controller_over);
                 } else {
                     setEnable(t_controller_package);
                     setEnable(t_controller_save);
+                    setEnable(chk_controller_over);
                 }
             }
         });
 
+        chk_do.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (!chk_do.isSelected()) {
+                    setDisable(t_eneity_package);
+                    setDisable(t_entity_save);
+                    setDisable(chk_entity_over);
+                } else {
+                    setEnable(t_eneity_package);
+                    setEnable(t_entity_save);
+                    setEnable(chk_entity_over);
+                }
+            }
+        });
         chk_mapper.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
                 if (!chk_mapper.isSelected()) {
-                    setDisable(t_eneity_package);
-                    setDisable(t_entity_save);
                     setDisable(t_mapper_package);
                     setDisable(t_mapper_save);
+                    setDisable(chk_mapper_over);
                 } else {
-                    setEnable(t_eneity_package);
-                    setEnable(t_entity_save);
                     setEnable(t_mapper_package);
                     setEnable(t_mapper_save);
+                    setEnable(chk_mapper_over);
                 }
             }
         });
+
+        btn_test.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                test_connect();
+            }
+        });
+
+        initView();
     }
 
-    public  void setDisable(JTextField textField){
+    private void setEnable(JCheckBox chk_domain_over) {
+        chk_domain_over.enable();
+    }
+
+    private void setDisable(JCheckBox chk_domain_over) {
+        chk_domain_over.disable();
+    }
+
+
+    public void setDisable(JTextField textField) {
         textField.disable();
         textField.setDisabledTextColor(Color.white);
     }
-    public  void setEnable(JTextField textField){
+
+    public void setEnable(JTextField textField) {
         textField.enable();
     }
 
-    private void showFileChooseDialog() {
+    private void showFileChooseDialog(Integer selectMode, JTextField textField) {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setFileSelectionMode(selectMode);
         fileChooser.setMultiSelectionEnabled(false);
-        int result = fileChooser.showDialog(null, "選擇文件");
+        int result = fileChooser.showDialog(this, "選擇");
         if (result == JFileChooser.APPROVE_OPTION) {
-            t_domainFile.setText(fileChooser.getSelectedFile().getPath());
+            textField.setText(fileChooser.getSelectedFile().getPath());
         }
-    }
-
-    private void initTableGrid(List<TableInfo> objects) {
-        String[] columnNames = {"選擇", "表名", "描述"};
-        Object[][] tableData = new Object[][]{};
-        for (int i = 0; i < objects.size(); i++) {
-            tableData[i + 1][1] = false;
-            tableData[i + 1][2] = objects.get(i).getName();
-            tableData[i + 1][3] = objects.get(i).getComment();
-            tableData[i + 1][4] = objects.get(i);
-        }
-
-        DefaultTableModel tableModel = new DefaultTableModel(tableData, columnNames);
-//        db_tables = new JBTable(tableModel);
-        db_tables.setModel(tableModel);
-        db_tables.getColumnModel().getColumn(0).setWidth(80);
-        db_tables.getColumnModel().getColumn(0).setCellRenderer(new CheckBoxRenderer());
-        db_tables.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(new JCheckBox()));
     }
 
     private void onDbTypeChange(String selectedItem) {
@@ -213,39 +252,130 @@ public class DomainGeneratorDialog extends JDialog {
         }
     }
 
-    private void loadTables() {
+    public void test_connect() {
         try {
             DataSourceConfig.Builder builder = new DataSourceConfig
                     .Builder(db_url.getText(), db_user.getText(), String.valueOf(db_password.getPassword()));
-            if (db_type.getSelectedItem().equals(MY_SQL)) {
+            if (Objects.equals(db_type.getSelectedItem(), MY_SQL)) {
                 builder.dbQuery(new MySqlQuery())
                         .typeConvert(new MySqlTypeConvert())
                         .keyWordsHandler(new MySqlKeyWordsHandler())
                         .databaseQueryClass(SQLQuery.class);
-            } else if (db_type.getSelectedItem().equals(POLAR_DB) || db_type.getSelectedItem().equals(PG)) {
-                builder.dbQuery(new PostgreSqlQuery())
+            } else if (Objects.equals(db_type.getSelectedItem(), POLAR_DB) || Objects.equals(db_type.getSelectedItem(), PG)) {
+                builder.dbQuery(new MyPostgreSqlQuery(t_schema.getText()))
                         .schema(t_schema.getText())
-                        .typeConvert(new PostgreSqlTypeConvert())
+                        .typeConvert(new MyPostgreSqlTypeConvert())
                         .keyWordsHandler(new PostgreSqlKeyWordsHandler())
                         .databaseQueryClass(SQLQuery.class);
             }
 
             DataSourceConfig dataSourceConfig = builder.build();
-            TableQuery tableQuery = new TableQuery(dataSourceConfig);
-            initTableGrid(tableQuery.queryTables());
+            dataSourceConfig.getConn();
+
+            Messages.showInfoMessage(this.contentPane, "鏈接成功", "提示");
         } catch (Exception ex) {
-            Messages.showErrorDialog(ex.getMessage(), "錯誤");
+//            Notification
+            Messages.showErrorDialog(this.contentPane, ex.getMessage(), "錯誤");
+        }
+    }
+
+    private void generate() {
+        try {
+            DataSourceConfig.Builder builder = new DataSourceConfig
+                    .Builder(db_url.getText(), db_user.getText(), String.valueOf(db_password.getPassword()));
+            if (Objects.equals(db_type.getSelectedItem(), MY_SQL)) {
+                builder.dbQuery(new MySqlQuery())
+                        .typeConvert(new MySqlTypeConvert())
+                        .keyWordsHandler(new MySqlKeyWordsHandler())
+                        .databaseQueryClass(SQLQuery.class);
+            } else if (Objects.equals(db_type.getSelectedItem(), POLAR_DB) || Objects.equals(db_type.getSelectedItem(), PG)) {
+                builder.dbQuery(new MyPostgreSqlQuery(t_schema.getText()))
+                        .schema(t_schema.getText())
+                        .typeConvert(new MyPostgreSqlTypeConvert())
+                        .keyWordsHandler(new PostgreSqlKeyWordsHandler())
+                        .databaseQueryClass(SQLQuery.class);
+            }
+
+            DataSourceConfig dataSourceConfig = builder.build();
+
+            GlobalSetting.loadFromDB(dataSourceConfig,
+                    new File(t_domainFile.getText()));
+
+            Map<String, String> packageParam = new HashMap<>();
+            packageParam.put("tablePackage", t_eneity_package.getText());
+            packageParam.put("mapperPackage", t_mapper_package.getText());
+            packageParam.put("domainPackage", t_domain_package.getText());
+            packageParam.put("controllerPackage", t_controller_package.getText());
+
+            GenerateUtils.generateTables(t_mapper_save.getText()
+                    , t_entity_save.getText()
+                    , GlobalSetting.INSTANCE.getTableList(), packageParam, chk_entity_over.isSelected(), chk_mapper_over.isSelected());
+            if (chk_domain_over.isSelected()) {
+                GenerateUtils.generateDomains(t_domain_save.getText(),
+                        GlobalSetting.INSTANCE.getDomainList(), packageParam);
+            }
+            if (chk_controller_over.isSelected()) {
+                GenerateUtils.generateController(t_controller_save.getText(),
+                        GlobalSetting.INSTANCE.getDomainList(), packageParam);
+            }
+        } catch (Exception ex) {
+//            Notification
+            Messages.showErrorDialog(this.contentPane, ex.getMessage(), "錯誤");
         }
     }
 
     private void onOK() {
         // add your code here
+        generate();
+    }
 
-        dispose();
+
+    private void initView() {
+        Map<String, String> cacheMap = SettingsCache.getInstance(anActionEvent.getProject()).cacheMap;
+        db_url.setText(cacheMap.getOrDefault("url", "jdbc:postgresql://polar02.o.polardb.rds.aliyuncs.com:1521/general_module_dev"));
+        db_user.setText(cacheMap.getOrDefault("user", "dev"));
+        db_password.setText(cacheMap.getOrDefault("password", "Whalecloud!!!"));
+        t_schema.setText(cacheMap.getOrDefault("schema", "public"));
+        db_type.setSelectedItem(cacheMap.getOrDefault("type", POLAR_DB));
+
+        t_eneity_package.setText(cacheMap.getOrDefault("t_eneity_package", "mo.gov.dsaj.notarial.dal.dataobject"));
+        t_mapper_package.setText(cacheMap.getOrDefault("t_mapper_package", "mo.gov.dsaj.notarial.dal.dao"));
+        t_domain_package.setText(cacheMap.getOrDefault("t_domain_package", "mo.gov.dsaj.notarial.core.application"));
+        t_controller_package.setText(cacheMap.getOrDefault("t_controller_package", "mo.gov.dsaj.notarial.server.controller"));
+        t_entity_save.setText(cacheMap.getOrDefault("t_entity_save", "C:\\work\\Coding\\FW\\public-notarial\\public-notarial-be\\infra\\dal\\src\\main\\java\\mo\\gov\\dsaj\\notarial\\dal\\dataobject"));
+        t_mapper_save.setText(cacheMap.getOrDefault("t_mapper_save", "C:\\work\\Coding\\FW\\public-notarial\\public-notarial-be\\infra\\dal\\src\\main\\java\\mo\\gov\\dsaj\\notarial\\dal\\dao"));
+        t_domain_save.setText(cacheMap.getOrDefault("t_domain_save", "C:\\work\\Coding\\FW\\public-notarial\\public-notarial-be\\business\\core\\src\\main\\java\\mo\\gov\\dsaj\\notarial\\core\\application"));
+        t_controller_save.setText(cacheMap.getOrDefault("t_controller_save", ""));
+
+        t_domainFile.setText(cacheMap.getOrDefault("t_domainFile", "C:\\work\\Coding\\FW\\public-notarial\\public-notarial-be\\1-domain\\domain-dynamic.xml"));
+        chk_mapper_over.setSelected(false);
+        chk_entity_over.setSelected(true);
+        chk_domain_over.setSelected(true);
+    }
+    @Override
+    public void dispose() {
+        // add your code here if necessary
+        Map<String, String> cacheMap = SettingsCache.getInstance(anActionEvent.getProject()).cacheMap;
+        cacheMap.put("url", db_url.getText());
+        cacheMap.put("user", db_user.getText());
+        cacheMap.put("password", db_password.getText());
+        cacheMap.put("schema", t_schema.getText());
+        cacheMap.put("type", db_type.getSelectedItem().toString());
+
+        cacheMap.put("t_eneity_package", t_eneity_package.getText());
+        cacheMap.put("t_mapper_package", t_mapper_package.getText());
+        cacheMap.put("t_domain_package", t_domain_package.getText());
+        cacheMap.put("t_controller_package", t_controller_package.getText());
+        cacheMap.put("t_entity_save", t_entity_save.getText());
+        cacheMap.put("t_mapper_save", t_mapper_save.getText());
+        cacheMap.put("t_domain_save", t_domain_save.getText());
+        cacheMap.put("t_controller_save", t_controller_save.getText());
+
+        cacheMap.put("t_domainFile", t_domainFile.getText());
+        super.dispose();
     }
 
     private void onCancel() {
-        // add your code here if necessary
         dispose();
     }
 

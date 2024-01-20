@@ -2,10 +2,10 @@ package com.artframework.domain.core.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.artframework.domain.core.domain.*;
-import com.artframework.domain.core.repository.BaseRepository;
-import com.artframework.domain.core.service.BaseDomainService;
-import com.artframework.domain.core.uitls.CompareUtil;
+import mo.gov.dsaj.domain.core.domain.BaseDomain;
+import mo.gov.dsaj.domain.core.repository.BaseRepository;
+import mo.gov.dsaj.domain.core.service.BaseDomainService;
+import mo.gov.dsaj.domain.core.uitls.CompareUtil;
 
 import java.io.Serializable;
 import java.util.List;
@@ -22,8 +22,8 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
      * @param
      */
     @Override
-    public <T extends BaseDomain> void merge(List<T> oldList, List<T> newList, Function<T, Serializable> keyWrap, BaseRepository repository) {
-        CompareUtil.CompareResult<T> compareList = CompareUtil.compareList(oldList, newList, keyWrap);
+    public <D extends BaseDomain> void merge(List<D> oldList, List<D> newList, Function<D, Serializable> keyWrap, BaseRepository repository) {
+        CompareUtil.CompareResult<D> compareList = CompareUtil.compareList(oldList, newList, keyWrap);
 
         //新增
         if(CollUtil.isNotEmpty(compareList.getAddList())){
@@ -35,15 +35,11 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
         }
         //修改
         if (CollUtil.isNotEmpty(compareList.getUpdateList())) {
-            List<T> updateList = compareList.getUpdateList().stream()
+            List<D> updateList = compareList.getUpdateList().stream()
                     .filter(x -> ObjectUtil.isNull(x.getChanged()) || x.getChanged())
                     .collect(Collectors.toList());
             repository.update(updateList);
         }
-    }
-
-    public <DTO> String getEntityName(Class<DTO> dtoClass) {
-        return dtoClass.getSimpleName().replace("DTO", "").replace("DO", "");
     }
 }
     

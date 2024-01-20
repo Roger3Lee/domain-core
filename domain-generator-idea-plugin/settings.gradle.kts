@@ -1,1 +1,1 @@
-rootProject.name = "domain-plugin"
+rootProject.name = "Domain-Code-Generator-Plugin"

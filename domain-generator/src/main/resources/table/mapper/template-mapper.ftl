@@ -1,6 +1,6 @@
 package ${mapperPackage!''};
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 import ${tablePackage!''}.*;
 
@@ -10,5 +10,6 @@ import ${tablePackage!''}.*;
 * @author auto
 * @version v1.0
 */
-public interface ${NameUtils.mapperName(source.name)} extends BaseMapper<${NameUtils.dataObjectName(source.name)}> {
+@Mapper
+public interface ${NameUtils.mapperName(source.name)} extends ${baseMapperClass}<${NameUtils.dataObjectName(source.name)}> {
 }

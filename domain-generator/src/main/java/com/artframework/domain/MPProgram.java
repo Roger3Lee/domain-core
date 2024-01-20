@@ -1,10 +1,10 @@
 package com.artframework.domain;
 
 import com.artframework.domain.config.GlobalSetting;
-import com.artframework.domain.typeconverts.MyPostgreSqlTypeConvert;
+import com.artframework.domain.customize.MyPostgreSqlQuery;
+import com.artframework.domain.customize.MyPostgreSqlTypeConvert;
 import com.artframework.domain.utils.GenerateUtils;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
-import com.baomidou.mybatisplus.generator.config.querys.PostgreSqlQuery;
 import com.baomidou.mybatisplus.generator.keywords.PostgreSqlKeyWordsHandler;
 import com.baomidou.mybatisplus.generator.query.SQLQuery;
 
@@ -18,25 +18,27 @@ public class MPProgram {
 
     public static void main(String[] args) throws IOException, JAXBException {
         // 数据源配置
-        DataSourceConfig dataSourceConfig= new DataSourceConfig.Builder("jdbc:postgresql://127.0.0.1:5432/postgres","postgres","123456")
-                .dbQuery(new PostgreSqlQuery())
+        DataSourceConfig dataSourceConfig= new DataSourceConfig.Builder("jdbc:postgresql://polar02.o.polardb.rds.aliyuncs.com:1521/general_module_dev","dev","Whalecloud!!!")
+                .dbQuery(new MyPostgreSqlQuery("public"))
                 .schema("public")
                 .typeConvert(new MyPostgreSqlTypeConvert())
                 .keyWordsHandler(new PostgreSqlKeyWordsHandler())
                 .databaseQueryClass(SQLQuery.class)
                 .build();
 
-        String path = "C:\\work\\demo\\artframework.domain\\domain-sample\\src\\main\\java\\com\\artframework\\sample";
         GlobalSetting.loadFromDB(dataSourceConfig,
-                new File("C:\\work\\demo\\artframework.domain\\config\\domain-config.xml"));
+                new File("C:\\work\\Coding\\FW\\public-notarial\\public-notarial-be\\1-domain\\domain-dynamic.xml"));
 
         Map<String, String> packageParam=new HashMap<>();
-        packageParam.put("tablePackage","com.artframework.servicemesh.entities");
-        packageParam.put("mapperPackage","com.artframework.servicemesh.mappers");
-        packageParam.put("domainPackage","com.artframework.servicemesh.domains");
-        packageParam.put("controllerPackage","com.artframework.servicemesh.controllers");
+        packageParam.put("tablePackage","mo.gov.dsaj.notarial.dal.dataobject");
+        packageParam.put("mapperPackage","mo.gov.dsaj.notarial.dal.dao");
+        packageParam.put("domainPackage","mo.gov.dsaj.notarial.core.application");
+        packageParam.put("controllerPackage","mo.gov.dsaj.notarial.server.controller");
 
-        GenerateUtils.generateTables(path,GlobalSetting.INSTANCE.getTableList(),packageParam);
-        GenerateUtils.generateDomains(path,GlobalSetting.INSTANCE.getDomainList(),packageParam);
+        GenerateUtils.generateTables("C:\\work\\Coding\\FW\\public-notarial\\public-notarial-be\\infra\\dal\\src\\main\\java\\mo\\gov\\dsaj\\notarial\\dal\\dao\\"
+                ,"C:\\work\\Coding\\FW\\public-notarial\\public-notarial-be\\infra\\dal\\src\\main\\java\\mo\\gov\\dsaj\\notarial\\dal\\dataobject\\",
+                GlobalSetting.INSTANCE.getTableList(),packageParam, true, false);
+        GenerateUtils.generateDomains("C:\\work\\Coding\\FW\\public-notarial\\public-notarial-be\\business\\core\\src\\main\\java\\mo\\gov\\dsaj\\notarial\\core\\application\\",
+                GlobalSetting.INSTANCE.getDomainList(),packageParam);
     }
 }

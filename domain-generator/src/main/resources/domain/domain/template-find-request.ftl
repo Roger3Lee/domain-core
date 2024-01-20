@@ -1,4 +1,4 @@
-package ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain;
+package ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain;
 
 import lombok.*;
 
@@ -9,6 +9,7 @@ import java.io.Serializable;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ${NameUtils.getName(source.name)}FindDomain {
 <#--    private ${source.mainTable.keyType} key;-->
     private Serializable key;
@@ -16,5 +17,6 @@ public class ${NameUtils.getName(source.name)}FindDomain {
     /**
     * 默认加载所有
     */
+    @Builder.Default
     private ${NameUtils.dataTOName(source.name)}.LoadFlag loadFlag = new ${NameUtils.dataTOName(source.name)}.LoadFlag();
 }

@@ -5,15 +5,15 @@
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>Domain</name>
+    <name>Domain-Code-Generator</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="support@yourcompany.com" url="https://www.yourcompany.com">YourCompany</vendor>
+    <vendor email="support@artframework.com" url="https://XXX">Art Framework</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
-    <description>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</description>
+    <description>此插件基于DDD领域设计的概念，用于生成领域模型相关代码，改变传统的基于MVC分层的编码方式，详细信息参见：https://XXX</description>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
@@ -31,4 +31,7 @@
             <action class="com.artframework.domain.plugin.ToolMenu" id="tool-menu" text="Generator" description="代碼生成器"/>
         </group>
     </actions>
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="com.artframework.domain.plugin.SettingsCache"></projectService>
+    </extensions>
 </idea-plugin>

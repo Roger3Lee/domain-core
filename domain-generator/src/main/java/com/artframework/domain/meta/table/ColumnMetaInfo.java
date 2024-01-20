@@ -1,9 +1,8 @@
 package com.artframework.domain.meta.table;
 
-import cn.hutool.Hutool;
 import cn.hutool.core.util.StrUtil;
-import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
@@ -19,6 +18,9 @@ public class ColumnMetaInfo {
     private String comment;
     private Boolean key = false;
 
+    @Setter
+    private Boolean inherit = false;
+
     @XmlAttribute(name = "name")
     public void setName(String name) {
         this.name = name;
@@ -32,6 +34,10 @@ public class ColumnMetaInfo {
     @XmlAttribute(name = "comment")
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public String getComment(){
+       return StrUtil.replace(this.comment, "\"","");
     }
 
     @XmlAttribute(name = "key")

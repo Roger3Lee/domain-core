@@ -1,7 +1,7 @@
 
-package ${domainPackage!''}.${NameUtils.packageName(source.name)}.convertor;
+package ${domainPackage!''}.${NameUtils.packageName(source.folder)}.convertor;
 
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain.*;
 import ${tablePackage!''}.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -23,7 +23,9 @@ public interface  ${covertName}{
     ${domainName}Convertor INSTANCE= Mappers.getMapper(${domainName}Convertor.class);
 
     ${dtoClassName} convert2DTO(${doClassName} request);
+    void convert2DTO(${doClassName} request, @MappingTarget ${dtoClassName} target);
     List<${dtoClassName}> convert2DTO(List<${doClassName}> request);
+
 
     @BeanMapping(qualifiedByName = { "${decoratorName}"})
     ${doClassName} convert2DO(${dtoClassName} request);
@@ -34,6 +36,7 @@ public interface  ${covertName}{
     <#assign relateDOClassName= NameUtils.dataObjectName(relateTable.name)/>
     <#assign relateName= NameUtils.getName(relateTable.name)/>
     ${dtoClassName}.${relateDTOClassName} convert2${relateName}DTO(${relateDOClassName} request);
+    void convert2${relateName}DTO(${relateDOClassName} request, @MappingTarget ${dtoClassName}.${relateDTOClassName} target);
     List<${dtoClassName}.${relateDTOClassName}> convert2${relateName}DTO(List<${relateDOClassName}>  request);
     ${relateDOClassName} convert2${relateName}DO(${dtoClassName}.${relateDTOClassName} request);
     List<${relateDOClassName}> convert2${relateName}DO(List<${dtoClassName}.${relateDTOClassName}>  request);

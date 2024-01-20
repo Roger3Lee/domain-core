@@ -1,25 +1,26 @@
 package com.artframework.domain.core.repository;
 
-import com.artframework.domain.core.domain.BaseLoadFlag;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import mo.gov.dsaj.domain.core.domain.BaseLoadFlag;
+import mo.gov.dsaj.parent.core.mybatis.dataobject.ContainsId;
 
 import java.io.Serializable;
 import java.util.List;
 
-public interface BaseRepository<DTO, DO> {
-    DTO query(Serializable id, SFunction<DO, Serializable> idWrap);
-    DTO query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.Filter> filters);
+public interface BaseRepository<D, DO extends ContainsId> {
+    D query(Serializable id, SFunction<DO, Serializable> idWrap);
+    D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters);
 
-    List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap);
+    List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap);
 
-    List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.Filter> filters);
+    List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters);
     /**
      * 插入一条数据
      *
      * @param item
      * @return 新增后数据
      */
-    DTO insert(DTO item);
+    D insert(D item);
 
     /**
      * 新增列表
@@ -27,7 +28,7 @@ public interface BaseRepository<DTO, DO> {
      * @param list
      * @return 新增后数据列表
      */
-    List<DTO> insert(List<DTO> list);
+    List<D> insert(List<D> list);
 
     /**
      * 批量删除
@@ -35,7 +36,14 @@ public interface BaseRepository<DTO, DO> {
      * @param list
      * @return 受影响行数
      */
-    int delete(List<DTO> list);
+    int delete(List<D> list);
+
+    /**
+     * 通過Filter刪除數據
+     * @param filters
+     * @return
+     */
+    int deleteByFilter(List<BaseLoadFlag.DOFilter> filters);
 
     int deleteById(Serializable id);
 
@@ -45,7 +53,7 @@ public interface BaseRepository<DTO, DO> {
      * @param item
      * @return 更新后数据
      */
-    DTO update(DTO item);
+    int update(D item);
 
     /**
      * 更新列表
@@ -53,5 +61,5 @@ public interface BaseRepository<DTO, DO> {
      * @param list
      * @return 更新后数据列表
      */
-    List<DTO> update(List<DTO> list);
+    int update(List<D> list);
 }

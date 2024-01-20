@@ -21,7 +21,8 @@ public class ToolMenu extends AnAction {
             throw new RuntimeException(e);
         }
         DomainGeneratorDialog dialog = null;
-        dialog = new DomainGeneratorDialog();
+        dialog = new DomainGeneratorDialog(anActionEvent);
+        dialog.setSize(1000,350);
         dialog.setLocationRelativeTo(null);//居中
         dialog.pack();
         dialog.setVisible(true);

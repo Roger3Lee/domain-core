@@ -1,11 +1,11 @@
-package ${domainPackage!''}.${NameUtils.packageName(source.name)}.repository.impl;
+package ${domainPackage!''}.${NameUtils.packageName(source.folder)}.repository.impl;
 
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.convertor.*;
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.lambdaexp.*;
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.repository.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.convertor.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.lambdaexp.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.repository.*;
 import ${tablePackage!''}.*;
-import com.artframework.domain.core.repository.impl.*;
+import ${corePackage}.repository.impl.*;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -16,7 +16,6 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import java.io.Serializable;
 import java.util.List;
 
-@Repository
 <#assign dtoClassName=NameUtils.dataTOName(source.name)/>
 <#assign doClassName=NameUtils.dataObjectName(source.mainTable.name)/>
 <#assign mapperClassName=NameUtils.mapperName(source.mainTable.name)/>
@@ -26,6 +25,7 @@ import java.util.List;
 <#assign repositoryImplClassName=NameUtils.repositoryImplName(source.name)/>
 <#assign covertName=NameUtils.covertName(source.name)/>
 <#assign lambdaClassName=NameUtils.lambdaExpName(source.name)/>
+@Repository(value="${source.name}-${repositoryImplClassName}")
 public class ${repositoryImplClassName} extends BaseRepositoryImpl<${dtoClassName},${doClassName}>  implements ${repositoryClassName} {
 
     @Override
@@ -36,6 +36,11 @@ public class ${repositoryImplClassName} extends BaseRepositoryImpl<${dtoClassNam
     @Override
     public List<${dtoClassName}> convert2DTO(List<${doClassName}> list) {
         return ${covertName}.INSTANCE.convert2DTO(list);
+    }
+
+    @Override
+    public void convert2DTO(${doClassName} item ,${dtoClassName} targetItem){
+        ${covertName}.INSTANCE.convert2DTO(item,targetItem);
     }
 
     @Override
@@ -51,78 +56,7 @@ public class ${repositoryImplClassName} extends BaseRepositoryImpl<${dtoClassNam
     @Override
     public IPage<${dtoClassName}> page(${domainName}PageDomain request){
         IPage<${doClassName}> page=new Page<>(request.getPageNum(), request.getPageSize());
-        LambdaQueryWrapper<${doClassName}> wrapper =new LambdaQueryWrapper<${doClassName}>();
+        LambdaQueryWrapper<${doClassName}> wrapper =new LambdaQueryWrapper<>();
         return this.baseMapper.selectPage(page,wrapper).convert(${covertName}.INSTANCE::convert2DTO);
     }
-
-    <#list source.relatedTable as relateTable>
-        <#assign relateDOClassName= NameUtils.dataObjectName(relateTable.name)/>
-        <#assign relateDTOClassName= dtoClassName+"."+ NameUtils.dataTOName(relateTable.name)/>
-        <#assign relateMapperClassName=NameUtils.mapperName(relateTable.name)/>
-        <#assign relateMapperName=NameUtils.getFieldName(relateMapperClassName)/>
-        <#assign relateFieldName=NameUtils.getFieldName(relateTable.name)/>
-        <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
-        <#assign relateRepositoryImplClassName=NameUtils.repositoryImplName(relateTable.name)/>
-        <#assign fieldName=NameUtils.getFieldName(relateTable.name)/>
-        <#assign relateName=NameUtils.getName(relateTable.name)/>
-    @Repository
-    public static class ${relateRepositoryImplClassName} extends BaseRepositoryImpl<${relateDTOClassName},${relateDOClassName}>  implements ${relateRepositoryClassName} {
-
-        @Override
-        public List<${relateDOClassName}> convert2DO(List<${relateDTOClassName}> list) {
-            return ${covertName}.INSTANCE.convert2${relateName}DO(list);
-        }
-
-        @Override
-        public List<${relateDTOClassName}> convert2DTO(List<${relateDOClassName}> list) {
-            return ${covertName}.INSTANCE.convert2${relateName}DTO(list);
-        }
-
-        @Override
-        public SFunction<${relateDTOClassName}, Serializable> keyLambda() {
-            return ${lambdaClassName}.${NameUtils.fieldTargetKeyLambda(fieldName)};
-        }
-
-        @Override
-        public Class<${relateDOClassName}> getDOClass() {
-            return ${relateDOClassName}.class;
-        }
-    }
-    </#list>
-
-    <#--    聚合-->
-    <#if source.aggregate??>
-       <#assign relateDOClassName= NameUtils.dataObjectName(source.aggregate.name)/>
-       <#assign relateDTOClassName= dtoClassName+"."+ NameUtils.dataTOName(source.aggregate.name)/>
-       <#assign relateMapperClassName=NameUtils.mapperName(source.aggregate.name)/>
-       <#assign relateMapperName=NameUtils.getFieldName(relateMapperClassName)/>
-       <#assign relateFieldName=NameUtils.getFieldName(source.aggregate.name)/>
-       <#assign relateRepositoryClassName=NameUtils.repositoryName(source.aggregate.name)/>
-       <#assign relateRepositoryImplClassName=NameUtils.repositoryImplName(source.aggregate.name)/>
-       <#assign fieldName=NameUtils.getFieldName(source.aggregate.name)/>
-       <#assign relateName=NameUtils.getName(source.aggregate.name)/>
-           @Repository
-           public static class ${relateRepositoryImplClassName} extends BaseRepositoryImpl<${relateDTOClassName},${relateDOClassName}>  implements ${relateRepositoryClassName} {
-
-               @Override
-               public List<${relateDOClassName}> convert2DO(List<${relateDTOClassName}> list) {
-                   return ${covertName}.INSTANCE.convert2${relateName}DO(list);
-               }
-
-               @Override
-               public List<${relateDTOClassName}> convert2DTO(List<${relateDOClassName}> list) {
-                   return ${covertName}.INSTANCE.convert2${relateName}DTO(list);
-               }
-
-               @Override
-               public SFunction<${relateDTOClassName}, Serializable> keyLambda() {
-                   return ${lambdaClassName}.${NameUtils.fieldTargetKeyLambda(fieldName)};
-               }
-
-               @Override
-               public Class<${relateDOClassName}> getDOClass() {
-                   return ${relateDOClassName}.class;
-               }
-           }
-    </#if>
 }

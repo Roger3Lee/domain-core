@@ -1,8 +1,3 @@
-# Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=/Roger3Lee/artframework.domain&type=Date)](https://star-history.com/#Rufus31415/Simple-WebXR-Unity&Date)
-
-
 # 简介
 ## 功能
 此框架提供基于DDD（领域驱动）脚手架功能，开发者可根据业务需要定义好领域模型来生成包含:实体（Entity）、聚合及聚合根（Aggregate，Aggregate Root）、仓储（Repository）、领域服务（Domain Service）在内的代码。

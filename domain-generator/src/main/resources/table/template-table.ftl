@@ -15,13 +15,13 @@ import lombok.ToString;
 @Setter
 @ToString
 <#if !source.basic>
-@TableName("${source.name}")
+@TableName(value="${source.name}", autoResultMap = true)
 </#if>
 <#if (source.keyGenerator==false)>
 @KeySequence("seq_${source.name}_id")
 </#if>
 <#assign className=NameUtils.dataObjectName(source.name)/>
-public class ${className} <#if source.inherit??> extends ${NameUtils.dataObjectName(source.inherit)}</#if> {
+public class ${className} <#if source.inheritBaseEntity>extends ${source.baseEntity}<#else><#if source.inherit??> extends ${NameUtils.dataObjectName(source.inherit)}</#if></#if> {
 
 <#--<#if !source.basic>-->
 <#--    /**-->
@@ -31,6 +31,7 @@ public class ${className} <#if source.inherit??> extends ${NameUtils.dataObjectN
 <#--</#if>-->
 
 <#list source.column as column>
+    <#if !(column.inherit)>
     /**
     * ${column.comment}
     */
@@ -40,5 +41,6 @@ public class ${className} <#if source.inherit??> extends ${NameUtils.dataObjectN
     @TableField("${column.name}")
     </#if>
     private ${column.type} ${NameUtils.getFieldName(column.name)};
+    </#if>
 </#list>
 }

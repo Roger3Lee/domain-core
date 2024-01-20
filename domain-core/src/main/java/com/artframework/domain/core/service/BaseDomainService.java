@@ -1,16 +1,11 @@
 package com.artframework.domain.core.service;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ObjectUtil;
-import com.artframework.domain.core.domain.BaseDomain;
-import com.artframework.domain.core.repository.BaseRepository;
-import com.artframework.domain.core.repository.impl.BaseRepositoryImpl;
-import com.artframework.domain.core.uitls.CompareUtil;
+import mo.gov.dsaj.domain.core.domain.BaseDomain;
+import mo.gov.dsaj.domain.core.repository.BaseRepository;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public interface BaseDomainService {
 
@@ -21,5 +16,5 @@ public interface BaseDomainService {
      * @param repository
      * @param
      */
-     <T extends BaseDomain> void merge(List<T> oldList, List<T> newList, Function<T, Serializable> keyWrap, BaseRepository repository);
+     <D extends BaseDomain> void merge(List<D> oldList, List<D> newList, Function<D, Serializable> keyWrap, BaseRepository repository);
 }

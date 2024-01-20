@@ -16,6 +16,10 @@ import java.util.List;
 @Getter
 public class DomainMetaInfo {
     /**
+     * 文件夾
+     */
+    private String folder;
+    /**
      * 域名稱
      */
     private String name;
@@ -29,16 +33,26 @@ public class DomainMetaInfo {
      */
     private String mainTable;
 
+    private String implement;
+
     /**
      * 引用屬性
      */
-    private List<RelatedTableMetaInfo> relatedList=new ArrayList<>();
+    private List<RelatedTableMetaInfo> relatedList = new ArrayList<>();
 
     /**
      * 聚合實體
      */
     private RelatedTableMetaInfo aggregate;
 
+    @XmlAttribute(name = "folder")
+    public void setFolder(String folder) {
+        this.folder = folder;
+    }
+    @XmlAttribute(name = "implement")
+    public void setImplement(String implement) {
+        this.implement = implement;
+    }
     @XmlAttribute(name = "name")
     public void setName(String name) {
         this.name = name;

@@ -1,11 +1,11 @@
-package ${domainPackage!''}.${NameUtils.packageName(source.name)}.lambdaexp;
+package ${domainPackage!''}.${NameUtils.packageName(source.folder)}.lambdaexp;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import ${domainPackage!''}.${NameUtils.packageName(source.name)}.domain.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain.*;
 import ${tablePackage!''}.*;
 
 import java.util.function.*;
@@ -56,9 +56,15 @@ public class ${className}{
 
 
     /**
-    * RELATE user_address lambda
+    * RELATE ${relateTable.name} lambda
     */
     public static BiConsumer<${relateDtoClassName},${relateTable.fkTargetColumnType}> ${NameUtils.fieldTargetSetLambda(fieldName)} =${relateDtoClassName}::${NameUtils.genSetter(relateTable.fkTargetColumn)};
+
+  /**
+    * RELATE ${relateTable.name} lambda
+    */
+    public static SFunction<${relateDtoClassName},Serializable> ${NameUtils.fieldTargetDomainLambda(fieldName)} =${relateDtoClassName}::${NameUtils.genGetter(relateTable.fkTargetColumn)};
+
 
     /**
     * RELATE ${relateTable.name} lambda
@@ -88,6 +94,11 @@ public class ${className}{
     * RELATE ${source.aggregate.name} lambda
     */
     public static BiConsumer<${relateDtoClassName},${source.aggregate.fkTargetColumnType}> ${NameUtils.fieldTargetSetLambda(fieldName)} =${relateDtoClassName}::${NameUtils.genSetter(source.aggregate.fkTargetColumn)};
+
+    /**
+    * RELATE ${relateTable.name} lambda
+    */
+    public static SFunction<${relateDtoClassName},Serializable> ${NameUtils.fieldTargetDomainLambda(fieldName)} =${relateDtoClassName}::${NameUtils.genGetter(relateTable.fkTargetColumn)};
 
     /**
     * RELATE ${source.aggregate.name} lambda

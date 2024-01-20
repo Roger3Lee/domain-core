@@ -1,5 +1,6 @@
 package com.artframework.domain.generator;
 
+import com.artframework.domain.constants.BaseEntityConstants;
 import com.artframework.domain.utils.FreeMakerTplUtil;
 import com.artframework.domain.utils.StreamUtils;
 import lombok.Setter;
@@ -16,9 +17,9 @@ public abstract class AbstractGenerator {
     @Setter
     protected String templateFilePath;
 
-    private Map<String,String> params=new HashMap();
+    private Map<String,Object> params=new HashMap();
 
-    public void putParam(String key, String value) {
+    public void putParam(String key, Object value) {
         this.params.put(key, value);
     }
     public void putParam(Map<String,String> params) {
@@ -30,6 +31,8 @@ public abstract class AbstractGenerator {
             String template = StreamUtils.readAsString(inputStream);
             Map<String, Object> paramMap = new HashMap<>();
             paramMap.put("basePackage",this.basePackage);
+            paramMap.put("corePackage", BaseEntityConstants.DOMAIN_CORE_PACKAGE);
+            paramMap.put("baseMapperClass",BaseEntityConstants.BASE_MAPPER);
             paramMap.putAll(params);
             paramMap.put("source", buildParam(source));
             return FreeMakerTplUtil.process(template, paramMap);

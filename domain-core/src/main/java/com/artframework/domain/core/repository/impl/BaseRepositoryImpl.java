@@ -1,60 +1,82 @@
 package com.artframework.domain.core.repository.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.artframework.domain.core.domain.BaseLoadFlag;
-import com.artframework.domain.core.repository.BaseRepository;
-import com.artframework.domain.core.uitls.FiltersUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import lombok.extern.slf4j.Slf4j;
+import mo.gov.dsaj.domain.core.constants.Op;
+import mo.gov.dsaj.domain.core.domain.BaseLoadFlag;
+import mo.gov.dsaj.domain.core.repository.BaseRepository;
+import mo.gov.dsaj.domain.core.uitls.FiltersUtils;
+import mo.gov.dsaj.parent.core.mybatis.CustomBaseMapper;
+import mo.gov.dsaj.parent.core.mybatis.dataobject.ContainsId;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO, DO> {
+@Slf4j
+public abstract class BaseRepositoryImpl<D, DO extends ContainsId> implements BaseRepository<D, DO> {
     @Autowired
     protected BaseMapper<DO> baseMapper;
 
+    @PostConstruct
+    public void init(){
+        log.info(this.getDOClass().getSimpleName() +" repository init successfully.");
+    }
+
     @Override
-    public DTO query(Serializable id, SFunction<DO, Serializable> idWrap) {
+    public D query(Serializable id, SFunction<DO, Serializable> idWrap) {
         return query(id, idWrap, null);
     }
 
     @Override
-    public DTO query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.Filter> filters){
+    public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters){
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
                 .eq(idWrap, id);
         //額外的filter
         if (ObjectUtil.isNotNull(filters)) {
-            for (BaseLoadFlag.Filter filter : filters) {
+            //儅不需要查詢出數據時，返回空
+            if (filters.stream().anyMatch(x -> Op.NIL.getCode().equals(x.getOp()))) {
+                return null;
+            }
+
+            for (BaseLoadFlag.DOFilter filter : filters) {
                 wrapper = FiltersUtils.buildWrapper(wrapper,filter, this.getDOClass());
             }
         }
         wrapper = wrapper.last("limit 1");
-        List<DTO> list = convert2DTO(this.baseMapper.selectList(wrapper));
+        List<D> list = convert2DTO(this.baseMapper.selectList(wrapper));
         if (CollUtil.isEmpty(list)) {
             return null;
         }
         return list.get(0);
     }
     @Override
-    public List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap) {
+    public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap) {
         return queryList(id, wrap, null);
     }
 
     @Override
-    public List<DTO> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.Filter> filters){
+    public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters){
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
                 .eq(wrap, id);
 
         //額外的filter
         if (ObjectUtil.isNotNull(filters)) {
-            for (BaseLoadFlag.Filter filter : filters) {
+            //儅不需要查詢出數據時，返回空列表
+            if (filters.stream().anyMatch(x -> Op.NIL.getCode().equals(x.getOp()))) {
+                return ListUtil.empty();
+            }
+
+            for (BaseLoadFlag.DOFilter filter : filters) {
                 FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
             }
         }
@@ -68,8 +90,8 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
      * @return 新增后数据
      */
     @Override
-    public DTO insert(DTO item) {
-        List<DTO> insertResponse = insert(CollUtil.newArrayList(item));
+    public D insert(D item) {
+        List<D> insertResponse = insert(CollUtil.newArrayList(item));
         return insertResponse.get(0);
     }
 
@@ -80,15 +102,27 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
      * @return 新增后数据列表
      */
     @Override
-    public List<DTO> insert(List<DTO> list) {
+    public List<D> insert(List<D> list) {
         if (CollUtil.isEmpty(list)) {
             return Collections.emptyList();
         }
         List<DO> tList = convert2DO(list);
-        for (DO item : tList) {
-            this.baseMapper.insert(item);
+        if (list.size()== 1) {
+            this.baseMapper.insert(tList.get(0));
+        } else {
+            if(CustomBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())){
+                ((CustomBaseMapper)this.baseMapper).insertBatch(tList);
+            }else{
+                for (DO d : tList) {
+                    this.baseMapper.insert(d);
+                }
+            }
         }
-        return convert2DTO(tList);
+        //覆蓋列表， 目的是將自賦值的字段的值返回
+        for (int i = 0; i < list.size(); i++) {
+            convert2DTO(tList.get(i), list.get(i));
+        }
+        return list;
     }
 
 
@@ -98,12 +132,33 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
      * @return 受影响行数
      */
     @Override
-    public int delete(List<DTO> list) {
+    public int delete(List<D> list) {
         if (CollUtil.isEmpty(list)) {
             return 0;
         }
         List<Serializable> keyList = list.stream().map(x -> keyLambda().apply(x)).collect(Collectors.toList());
         return this.baseMapper.deleteBatchIds(keyList);
+    }
+
+    /**
+     * 通過實體的過濾條件刪除數據
+     * @param filters
+     * @return
+     */
+    @Override
+    public int deleteByFilter(List<BaseLoadFlag.DOFilter> filters){
+        //額外的filter
+        if (ObjectUtil.isNotNull(filters)) {
+            LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
+            for (BaseLoadFlag.DOFilter filter : filters) {
+                FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
+            }
+
+            return this.baseMapper.delete(wrapper);
+        } else {
+            log.error("無過濾條件刪除數據，系統忽略此刪除操作");
+            return 0;
+        }
     }
 
     /**
@@ -122,9 +177,8 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
      * @return 更新后数据
      */
     @Override
-    public DTO update(DTO item) {
-        List<DTO> response = update(CollUtil.newArrayList(item));
-        return response.get(0);
+    public int update(D item) {
+        return update(CollUtil.newArrayList(item));
     }
 
     /**
@@ -134,22 +188,32 @@ public abstract class BaseRepositoryImpl<DTO, DO> implements BaseRepository<DTO,
      * @return 更新后数据列表
      */
     @Override
-    public List<DTO> update(List<DTO> list) {
+    public int update(List<D> list) {
         if (CollUtil.isEmpty(list)) {
-            return Collections.emptyList();
+            return 0;
         }
         List<DO> tList = convert2DO(list);
-        for (DO item : tList) {
-            this.baseMapper.updateById(item);
+        if (list.size() == 1) {
+            return this.baseMapper.updateById(tList.get(0));
+        } else {
+            if(CustomBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())){
+                return ((CustomBaseMapper) this.baseMapper).updateSomeColumnBatchById(tList);
+            }else{
+                for (DO d : tList) {
+                    this.baseMapper.updateById(d);
+                }
+                return tList.size();
+            }
         }
-        return convert2DTO(tList);
     }
 
-    public abstract List<DO> convert2DO(List<DTO> list);
+    public abstract List<DO> convert2DO(List<D> list);
 
-    public abstract List<DTO> convert2DTO(List<DO> list);
+    public abstract List<D> convert2DTO(List<DO> list);
 
-    public abstract Function<DTO, Serializable> keyLambda();
+    public abstract void convert2DTO(DO item ,D targetItem);
+
+    public abstract Function<D, Serializable> keyLambda();
 
     public abstract Class<DO> getDOClass();
 }

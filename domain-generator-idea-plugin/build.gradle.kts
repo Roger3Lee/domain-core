@@ -44,8 +44,15 @@ tasks {
 }
 
 dependencies {
+//    api(fileTree("/libs") { include("*.jar") })
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation("com.baomidou:mybatis-plus-generator:3.5.3.1")
-    implementation("com.baomidou:mybatis-plus-core:3.5.3.1")
     implementation("org.postgresql:postgresql:42.5.0")
+    implementation ("mysql:mysql-connector-java:8.0.28")
+    implementation ("com.baomidou:mybatis-plus-core:3.5.3.1")
+    implementation ("com.baomidou:mybatis-plus-generator:3.5.3.1")
+    implementation ("com.baomidou:mybatis-plus-annotation:3.5.3.1")
+    implementation ("org.slf4j:slf4j-api:2.0.7")
+    implementation ("org.freemarker:freemarker:2.3.31")
+    implementation ("cn.hutool:hutool-all:5.7.16")
+    implementation ("org.apache.commons:commons-lang3:3.12.0")
 }
