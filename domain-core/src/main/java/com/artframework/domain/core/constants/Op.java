@@ -19,6 +19,9 @@ public enum Op {
     LT(StringPool.LEFT_CHEV),
     LE("<="),
 
+    ISNULL("ISNULL"),
+    NOTNULL("NOTNULL"),
+
     /**
      * 不過濾任何數據
      */

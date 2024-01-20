@@ -14,6 +14,7 @@ import ${corePackage}.repository.BaseRepository;
 import cn.hutool.core.collection.*;
 import cn.hutool.core.util.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -198,6 +199,17 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         return response;
     }
     </#if>
+
+    /**
+     * 查找
+     * @param request 请求体
+     * @param keyLambda 請求key參數對應的字段的lambda表達式
+     * @return
+     */
+    @Override
+    public ${dtoClassName} findByKey(${domainName}FindDomain request, SFunction<${dtoClassName}, Serializable> keyLambda){
+        return find(request, ${repositoryName}.queryByKey(request.getKey(), keyLambda));
+    }
 
     /**
     * 新增

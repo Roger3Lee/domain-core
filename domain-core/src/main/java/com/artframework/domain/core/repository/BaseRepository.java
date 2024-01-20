@@ -7,6 +7,13 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface BaseRepository<D, DO> {
+    /**
+     * 通過非主鍵字段查詢唯一一條數據
+     * @param key
+     * @param keyWarp
+     * @return
+     */
+    D queryByKey(Serializable key, SFunction<D, Serializable> keyWarp);
     D query(Serializable id, SFunction<DO, Serializable> idWrap);
     D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters);
 

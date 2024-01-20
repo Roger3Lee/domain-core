@@ -32,6 +32,11 @@ public abstract class BaseRepositoryImpl<D, DO> implements BaseRepository<D, DO>
     }
 
     @Override
+    public D queryByKey(Serializable key, SFunction<D, Serializable> keyWarp) {
+        return query(key, FiltersUtils.DOLambda(this.getDOClass(), keyWarp));
+    }
+
+    @Override
     public D query(Serializable id, SFunction<DO, Serializable> idWrap) {
         return query(id, idWrap, null);
     }

@@ -5,8 +5,10 @@ import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain.*;
 import ${corePackage}.domain.*;
 import ${corePackage}.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
 import java.util.List;
+import java.io.Serializable;
 
 <#assign serviceClassName=NameUtils.serviceName(source.name)/>
 <#assign domainName=NameUtils.getName(source.name)/>
@@ -44,6 +46,13 @@ public interface ${serviceClassName} extends BaseDomainService {
      */
     ${dtoClassName} find(${domainName}FindDomain request, ${dtoClassName} domain, Boolean loadAggregate);
     </#if>
+
+    /**
+     * 查找
+     * @param request 请求体
+     * @return
+     */
+    ${dtoClassName} findByKey(${domainName}FindDomain request, SFunction<${dtoClassName}, Serializable> keyLambda);
 
     /**
     * 新增
