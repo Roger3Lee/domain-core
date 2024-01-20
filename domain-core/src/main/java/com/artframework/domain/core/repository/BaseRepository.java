@@ -1,13 +1,12 @@
 package com.artframework.domain.core.repository;
 
+import com.artframework.domain.core.domain.BaseLoadFlag;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import mo.gov.dsaj.domain.core.domain.BaseLoadFlag;
-import mo.gov.dsaj.parent.core.mybatis.dataobject.ContainsId;
 
 import java.io.Serializable;
 import java.util.List;
 
-public interface BaseRepository<D, DO extends ContainsId> {
+public interface BaseRepository<D, DO> {
     D query(Serializable id, SFunction<DO, Serializable> idWrap);
     D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters);
 

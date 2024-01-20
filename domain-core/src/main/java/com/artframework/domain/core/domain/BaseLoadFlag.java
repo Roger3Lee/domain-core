@@ -1,5 +1,6 @@
 package com.artframework.domain.core.domain;
 
+import com.artframework.domain.core.constants.Op;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,7 +37,7 @@ public class BaseLoadFlag {
     @Data
     public static class DOFilter{
         private String field;
-        private String op = mo.gov.dsaj.domain.core.constants.Op.EQ.getCode();
+        private String op = Op.EQ.getCode();
         private Object value;
     }
 }

@@ -3,16 +3,15 @@ package com.artframework.domain.core.repository.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.artframework.domain.core.mapper.BatchBaseMapper;
+import com.artframework.domain.core.constants.Op;
+import com.artframework.domain.core.domain.BaseLoadFlag;
+import com.artframework.domain.core.repository.BaseRepository;
+import com.artframework.domain.core.uitls.FiltersUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import lombok.extern.slf4j.Slf4j;
-import mo.gov.dsaj.domain.core.constants.Op;
-import mo.gov.dsaj.domain.core.domain.BaseLoadFlag;
-import mo.gov.dsaj.domain.core.repository.BaseRepository;
-import mo.gov.dsaj.domain.core.uitls.FiltersUtils;
-import mo.gov.dsaj.parent.core.mybatis.CustomBaseMapper;
-import mo.gov.dsaj.parent.core.mybatis.dataobject.ContainsId;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -23,7 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class BaseRepositoryImpl<D, DO extends ContainsId> implements BaseRepository<D, DO> {
+public abstract class BaseRepositoryImpl<D, DO> implements BaseRepository<D, DO> {
     @Autowired
     protected BaseMapper<DO> baseMapper;
 
@@ -110,8 +109,8 @@ public abstract class BaseRepositoryImpl<D, DO extends ContainsId> implements Ba
         if (list.size()== 1) {
             this.baseMapper.insert(tList.get(0));
         } else {
-            if(CustomBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())){
-                ((CustomBaseMapper)this.baseMapper).insertBatch(tList);
+            if(BatchBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())){
+                ((BatchBaseMapper)this.baseMapper).insertBatch(tList);
             }else{
                 for (DO d : tList) {
                     this.baseMapper.insert(d);
@@ -196,8 +195,8 @@ public abstract class BaseRepositoryImpl<D, DO extends ContainsId> implements Ba
         if (list.size() == 1) {
             return this.baseMapper.updateById(tList.get(0));
         } else {
-            if(CustomBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())){
-                return ((CustomBaseMapper) this.baseMapper).updateSomeColumnBatchById(tList);
+            if(BatchBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())){
+                return ((BatchBaseMapper) this.baseMapper).batchUpdate(tList);
             }else{
                 for (DO d : tList) {
                     this.baseMapper.updateById(d);

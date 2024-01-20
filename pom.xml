@@ -19,6 +19,7 @@
     </properties>
 
     <modules>
+        <module>domain-core</module>
         <module>domain-dependencies</module>
         <module>domain-generator</module>
         <module>domain-sample</module>

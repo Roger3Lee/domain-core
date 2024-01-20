@@ -6,9 +6,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.LambdaUtils;
 import com.baomidou.mybatisplus.core.toolkit.support.LambdaMeta;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import mo.gov.dsaj.domain.core.MPFieldLambda;
-import mo.gov.dsaj.domain.core.constants.Op;
-import mo.gov.dsaj.domain.core.domain.BaseLoadFlag;
+import com.artframework.domain.core.MPFieldLambda;
+import com.artframework.domain.core.constants.Op;
+import com.artframework.domain.core.domain.BaseLoadFlag;
 import org.apache.ibatis.reflection.property.PropertyNamer;
 
 import java.io.Serializable;

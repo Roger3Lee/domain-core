@@ -1,7 +1,7 @@
 package com.artframework.domain.core.service;
 
-import mo.gov.dsaj.domain.core.domain.BaseDomain;
-import mo.gov.dsaj.domain.core.repository.BaseRepository;
+import com.artframework.domain.core.domain.BaseDomain;
+import com.artframework.domain.core.repository.BaseRepository;
 
 import java.io.Serializable;
 import java.util.List;
