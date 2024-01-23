@@ -17,6 +17,6 @@ public class BaseEntityConstants {
             , "soft_delete", "soft_delete_time", "soft_delete_user_account", "soft_delete_user_name_pt", "soft_delete_user_name_hant");
 
     public static final String BASE_ENTITY = "mo.gov.dsaj.parent.core.mybatis.dataobject.BaseEntityDO";
-    public static final String DOMAIN_CORE_PACKAGE = "mo.gov.dsaj.domain.core";
-    public static final String BASE_MAPPER="mo.gov.dsaj.parent.core.mybatis.CustomBaseMapper";
+    public static final String DOMAIN_CORE_PACKAGE = "com.artframework.domain.core";
+    public static final String BASE_MAPPER="com.baomidou.mybatisplus.core.mapper.BaseMapper";
 }
