@@ -39,7 +39,7 @@ public class UserController {
     * @return java.lang.Long
     */
     @PutMapping()
-    public java.lang.Long insert(@RequestBody UserCreateDomain request){
+    public java.lang.Long insert(@RequestBody UserDomain request){
         return userService.insert(request);
     }
 
@@ -49,7 +49,7 @@ public class UserController {
     * @return 成功OR失败
     */
     @PostMapping()
-    public Boolean update(@RequestBody UserUpdateDomain request){
+    public Boolean update(@RequestBody UserDomain request){
         return userService.update(request);
     }
 

@@ -14,7 +14,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@TableName("user_address")
+@TableName(value="user_address", autoResultMap = true)
 public class UserAddressDO  extends BaseDO {
 
 

@@ -21,10 +21,10 @@ public class Program {
         packageParam.put("domainPackage", "com.artframework.sample.domains");
         packageParam.put("controllerPackage", "com.artframework.sample.controller");
 
-        GenerateUtils.generateTables("C:\\work\\demo\\artframework.domain\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\mappers",
-                "C:\\work\\demo\\artframework.domain\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\entities",
+        GenerateUtils.generateTables("C:\\work\\demo\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\mappers",
+                "C:\\work\\demo\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\entities",
                 GlobalSetting.INSTANCE.getTableList(), packageParam, false, false);
-        GenerateUtils.generateDomains("C:\\work\\demo\\artframework.domain\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\domains\\",
+        GenerateUtils.generateDomains("C:\\work\\demo\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\domains\\",
                 GlobalSetting.INSTANCE.getDomainList(), packageParam, false);
     }
 }

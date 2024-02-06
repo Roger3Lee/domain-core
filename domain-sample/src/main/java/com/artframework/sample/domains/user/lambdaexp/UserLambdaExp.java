@@ -35,45 +35,57 @@ public class UserLambdaExp{
     /**
     *  user_address lambda
     */
-    public static SFunction<UserDomain.UserAddressDomain, Serializable> userAddressKeyLambda = UserDomain.UserAddressDomain::getId;
+    public static SFunction<UserDomain.UserAddressDomain, Serializable> userAddressDomainKeyLambda = UserDomain.UserAddressDomain::getId;
 
 
     /**
     * RELATE user_address lambda
     */
-    public static SFunction<UserDomain, Serializable> userAddressSourceLambda = UserDomain::getId;
+    public static SFunction<UserDomain, Serializable> userAddressDomainEntitySourceLambda = UserDomain::getId;
 
 
     /**
     * RELATE user_address lambda
     */
-    public static BiConsumer<UserDomain.UserAddressDomain,java.lang.Long> userAddressTargetSetLambda =UserDomain.UserAddressDomain::setUserId;
+    public static BiConsumer<UserDomain.UserAddressDomain,java.lang.Long> userAddressDomainTargetSetLambda =UserDomain.UserAddressDomain::setUserId;
+
+  /**
+    * RELATE user_address lambda
+    */
+    public static SFunction<UserDomain.UserAddressDomain,Serializable> userAddressDomainTargetLambda =UserDomain.UserAddressDomain::getUserId;
+
 
     /**
     * RELATE user_address lambda
     */
-    public static SFunction<UserAddressDO,Serializable> userAddressTargetLambda =UserAddressDO::getUserId;
+    public static SFunction<UserAddressDO,Serializable> userAddressDOTargetLambda =UserAddressDO::getUserId;
 
     /**
     *  user_family_member lambda
     */
-    public static SFunction<UserDomain.UserFamilyMemberDomain, Serializable> userFamilyMemberKeyLambda = UserDomain.UserFamilyMemberDomain::getId;
+    public static SFunction<UserDomain.UserFamilyMemberDomain, Serializable> userFamilyMemberDomainKeyLambda = UserDomain.UserFamilyMemberDomain::getId;
 
 
     /**
     * RELATE user_family_member lambda
     */
-    public static SFunction<UserDomain, Serializable> userFamilyMemberSourceLambda = UserDomain::getId;
+    public static SFunction<UserDomain, Serializable> userFamilyMemberDomainEntitySourceLambda = UserDomain::getId;
 
-
-    /**
-    * RELATE user_address lambda
-    */
-    public static BiConsumer<UserDomain.UserFamilyMemberDomain,java.lang.Long> userFamilyMemberTargetSetLambda =UserDomain.UserFamilyMemberDomain::setUserId;
 
     /**
     * RELATE user_family_member lambda
     */
-    public static SFunction<UserFamilyMemberDO,Serializable> userFamilyMemberTargetLambda =UserFamilyMemberDO::getUserId;
+    public static BiConsumer<UserDomain.UserFamilyMemberDomain,java.lang.Long> userFamilyMemberDomainTargetSetLambda =UserDomain.UserFamilyMemberDomain::setUserId;
+
+  /**
+    * RELATE user_family_member lambda
+    */
+    public static SFunction<UserDomain.UserFamilyMemberDomain,Serializable> userFamilyMemberDomainTargetLambda =UserDomain.UserFamilyMemberDomain::getUserId;
+
+
+    /**
+    * RELATE user_family_member lambda
+    */
+    public static SFunction<UserFamilyMemberDO,Serializable> userFamilyMemberDOTargetLambda =UserFamilyMemberDO::getUserId;
 
 }
