@@ -3,7 +3,6 @@ package ${domainPackage!''}.${NameUtils.packageName(source.folder)}.repository;
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain.*;
 import ${tablePackage!''}.*;
 import ${corePackage}.repository.*;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 
 <#assign dtoClassName=NameUtils.dataTOName(source.name)/>
 <#assign relateRepositoryClassName=NameUtils.repositoryName(table.name)/>

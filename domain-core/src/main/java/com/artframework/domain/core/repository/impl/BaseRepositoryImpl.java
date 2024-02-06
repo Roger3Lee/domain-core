@@ -3,15 +3,20 @@ package com.artframework.domain.core.repository.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.artframework.domain.core.domain.BaseDomain;
 import com.artframework.domain.core.mapper.BatchBaseMapper;
-import com.artframework.domain.core.constants.Op;
-import com.artframework.domain.core.domain.BaseLoadFlag;
-import com.artframework.domain.core.repository.BaseRepository;
-import com.artframework.domain.core.uitls.FiltersUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import lombok.extern.slf4j.Slf4j;
+import com.artframework.domain.core.constants.Op;
+import com.artframework.domain.core.constants.SaveState;
+import com.artframework.domain.core.domain.BaseLoadFlag;
+import com.artframework.domain.core.lambda.LambdaCache;
+import com.artframework.domain.core.lambda.LambdaOrder;
+import com.artframework.domain.core.repository.BaseRepository;
+import com.artframework.domain.core.uitls.FiltersUtils;
+import com.artframework.domain.core.uitls.OrdersUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -22,7 +27,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class BaseRepositoryImpl<D, DO> implements BaseRepository<D, DO> {
+public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements BaseRepository<D, DO> {
     @Autowired
     protected BaseMapper<DO> baseMapper;
 
@@ -33,9 +38,8 @@ public abstract class BaseRepositoryImpl<D, DO> implements BaseRepository<D, DO>
 
     @Override
     public D queryByKey(Serializable key, SFunction<D, Serializable> keyWarp) {
-        return query(key, FiltersUtils.DOLambda(this.getDOClass(), keyWarp));
+        return query(key, LambdaCache.DOLambda(this.getDOClass(), keyWarp), null);
     }
-
     @Override
     public D query(Serializable id, SFunction<DO, Serializable> idWrap) {
         return query(id, idWrap, null);
@@ -70,6 +74,11 @@ public abstract class BaseRepositoryImpl<D, DO> implements BaseRepository<D, DO>
 
     @Override
     public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters){
+        return queryList(id, wrap, filters, null);
+    }
+
+    @Override
+    public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders){
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
                 .eq(wrap, id);
 
@@ -82,6 +91,12 @@ public abstract class BaseRepositoryImpl<D, DO> implements BaseRepository<D, DO>
 
             for (BaseLoadFlag.DOFilter filter : filters) {
                 FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
+            }
+        }
+
+        if (ObjectUtil.isNotNull(orders)) {
+            for (LambdaOrder.LambdaOrderItem order : orders) {
+                OrdersUtils.buildOrderWrapper(wrapper, order, this.getDOClass());
             }
         }
 
@@ -125,6 +140,8 @@ public abstract class BaseRepositoryImpl<D, DO> implements BaseRepository<D, DO>
         //覆蓋列表， 目的是將自賦值的字段的值返回
         for (int i = 0; i < list.size(); i++) {
             convert2DTO(tList.get(i), list.get(i));
+            //觸發保存後的回調
+            list.get(i).afterSave(SaveState.INSERT);
         }
         return list;
     }
@@ -196,9 +213,10 @@ public abstract class BaseRepositoryImpl<D, DO> implements BaseRepository<D, DO>
         if (CollUtil.isEmpty(list)) {
             return 0;
         }
+        Integer effect = 0;
         List<DO> tList = convert2DO(list);
         if (list.size() == 1) {
-            return this.baseMapper.updateById(tList.get(0));
+            effect = this.baseMapper.updateById(tList.get(0));
         } else {
             if(BatchBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())){
                 return ((BatchBaseMapper) this.baseMapper).batchUpdate(tList);
@@ -206,9 +224,15 @@ public abstract class BaseRepositoryImpl<D, DO> implements BaseRepository<D, DO>
                 for (DO d : tList) {
                     this.baseMapper.updateById(d);
                 }
-                return tList.size();
+                effect = tList.size();
             }
         }
+
+        //觸發保存後的回調
+        for (D item:list) {
+            item.afterSave(SaveState.UPDATE);
+        }
+        return effect;
     }
 
     public abstract List<DO> convert2DO(List<D> list);

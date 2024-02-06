@@ -90,6 +90,29 @@ public class NameUtils {
         return getFieldWithSuffix(name, "DomainTargetSetLambda");
     }
 
+    public static String fieldRefSourceLambda(String name, String ref, String field) {
+        return getFieldWithSuffix(name, "Ref" + StringUtils.capitalize(ref) + "_" + getFieldName(field) + "SourceLambda");
+    }
+
+    public static String fieldRefTargetDomainLambda(String name, String ref, String field) {
+        return getFieldWithSuffix(name, "Ref" + StringUtils.capitalize(ref) + "_" + getFieldName(field) + "TargetLambda");
+    }
+    public static String fieldRefTargetDomainSetLambda(String name, String ref, String field) {
+        return getFieldWithSuffix(name, "Ref" + StringUtils.capitalize(ref) + "_" + getFieldName(field) + "TargetSetLambda");
+    }
+
+    public static String getRefGetterName(String refName, boolean isList){
+        return StrUtil.genGetter("Ref" + StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", refName))) + (isList ? "List" : ""));
+    }
+
+    public static String getRefSetterName(String refName, boolean isList){
+        return StrUtil.genSetter("Ref" + StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", refName))) + (isList ? "List" : ""));
+    }
+
+    public static String getRefFieldName(String refName, boolean isList){
+        return getFieldName("ref" + StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", refName))) + (isList ? "List" : ""));
+    }
+
     public static String covertName(String name) {
         return getNameWithSuffix(name, "Convertor");
     }

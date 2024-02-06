@@ -70,6 +70,31 @@ public class ${className}{
     * RELATE ${relateTable.name} lambda
     */
     public static SFunction<${relateClassName},Serializable> ${NameUtils.fieldTargetLambda(fieldName)} =${relateClassName}::${NameUtils.genGetter(relateTable.fkTargetColumn)};
+<#if relateTable.refTableList??>
+    <#list relateTable.refTableList as refTable>
+        <#assign refRelateClassName=NameUtils.dataObjectName(refTable.tableName)/>
+        <#assign refRelateDtoClassName=dtoClassName+"."+NameUtils.dataTOName(refTable.tableName)/>
+        <#assign refTableName=NameUtils.getFieldName(refTable.name)/>
+        <#list refTable.fkList as fk>
+<#if fk.fkSourceColumn??>
+    /**
+    * REF ${refTable.name} source lambda
+    */
+    public static SFunction<${relateDtoClassName}, Serializable> ${NameUtils.fieldRefSourceLambda(fieldName,refTableName,fk.fkSourceColumn)} = ${relateDtoClassName}::${NameUtils.genGetter(fk.fkSourceColumn)};
+
+</#if>
+    /**
+    * REF ${refTable.name} target lambda
+    */
+    public static SFunction<${refRelateDtoClassName},Serializable> ${NameUtils.fieldRefTargetDomainLambda(fieldName,refTableName,fk.fkTargetColumn)} =${refRelateDtoClassName}::${NameUtils.genGetter(fk.fkTargetColumn)};
+
+    /**
+    * REF ${refTable.name} target lambda
+    */
+    public static BiConsumer<${refRelateDtoClassName},${fk.fkTargetColumnType}> ${NameUtils.fieldRefTargetDomainSetLambda(fieldName,refTableName,fk.fkTargetColumn)} =${refRelateDtoClassName}::${NameUtils.genSetter(fk.fkTargetColumn)};
+         </#list>
+    </#list>
+</#if>
 </#list>
 
 <#--    聚合-->

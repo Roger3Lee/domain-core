@@ -1,6 +1,7 @@
 package com.artframework.domain.core.constants;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * @author li.pengcheng
@@ -34,7 +35,7 @@ public enum Op {
         this.code = code;
     }
 
-
+    @JsonValue
     public String getCode() {
         return code;
     }

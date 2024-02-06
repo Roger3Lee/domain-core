@@ -1,12 +1,14 @@
 package com.artframework.domain.core.repository;
 
-import com.artframework.domain.core.domain.BaseLoadFlag;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.artframework.domain.core.domain.BaseDomain;
+import com.artframework.domain.core.domain.BaseLoadFlag;
+import com.artframework.domain.core.lambda.LambdaOrder;
 
 import java.io.Serializable;
 import java.util.List;
 
-public interface BaseRepository<D, DO> {
+public interface BaseRepository<D extends BaseDomain, DO> {
     /**
      * 通過非主鍵字段查詢唯一一條數據
      * @param key
@@ -20,6 +22,8 @@ public interface BaseRepository<D, DO> {
     List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap);
 
     List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters);
+
+    List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders);
     /**
      * 插入一条数据
      *

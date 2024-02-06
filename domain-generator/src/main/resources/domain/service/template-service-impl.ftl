@@ -9,8 +9,6 @@ import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.repository.*;
 import ${corePackage}.service.impl.*;
 import ${corePackage}.uitls.*;
 
-import ${corePackage}.domain.*;
-import ${corePackage}.repository.BaseRepository;
 import cn.hutool.core.collection.*;
 import cn.hutool.core.util.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -20,9 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.lambdaexp.*;
@@ -40,10 +36,6 @@ import javax.annotation.PostConstruct;
 
 @Service
 public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${serviceClassName} {
-<#if (source.relatedTable?size>0)>
-    //用於保存實體和repository之間的關係
-    private final Map<String, BaseRepository> _DomainRepositoryMap = new HashMap<>();
-</#if>
 <#--    注入Repository-->
     @Autowired
     private ${repositoryClassName} ${repositoryName};
@@ -65,12 +57,12 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     <#list source.relatedTable as relateTable>
         <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
         <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
-        _DomainRepositoryMap.put(FiltersUtils.getEntityName(${dtoClassName}.${relateDtoClassName}.class), this.${NameUtils.getFieldName(relateRepositoryClassName)});
+        this._DomainRepositoryMap.put(${dtoClassName}.${relateDtoClassName}.class.getCanonicalName(), this.${NameUtils.getFieldName(relateRepositoryClassName)});
     </#list>
     <#if source.aggregate??>
       <#assign relateRepositoryClassName=NameUtils.repositoryName(source.aggregate.name)/>
       <#assign relateDtoClassName=NameUtils.dataTOName(source.aggregate.name)/>
-        _DomainRepositoryMap.put(FiltersUtils.getEntityName(${dtoClassName}.${relateDtoClassName}.class), this.${NameUtils.getFieldName(relateRepositoryClassName)});
+        this._DomainRepositoryMap.put(${dtoClassName}.${relateDtoClassName}.class.getCanonicalName(), this.${NameUtils.getFieldName(relateRepositoryClassName)});
     </#if>
     }
 </#if>
@@ -112,8 +104,13 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
                 return response;
             }
         }
+        return find(response, request.getLoadFlag());
+    }
 
-        if (ObjectUtil.isNotNull(request.getLoadFlag())) {
+
+    public ${dtoClassName} find(${dtoClassName} response,${dtoClassName}.LoadFlag loadFlag){
+        final ${dtoClassName} resp = response;
+        if (ObjectUtil.isNotNull(loadFlag)) {
             <#list source.relatedTable as relateTable>
                 <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
                 <#assign loadProperty=NameUtils.getFieldWithPrefix(relateTable.name,"getLoad")/>
@@ -123,22 +120,34 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
                 <#assign relatetargetLambda=NameUtils.fieldTargetLambda(relateFieldName)/>
                 <#assign setRelatedProperty=NameUtils.genSetter(relateTable.name)/>
                 <#assign setRelatedPropertyList=NameUtils.genListSetter(relateTable.name)/>
+                <#assign getRelatedPropertyList=NameUtils.genListGetter(relateTable.name)/>
                 <#assign relatedDtoClassName=NameUtils.dataTOName(relateTable.name)/>
-            if(BooleanUtil.isTrue(request.getLoadFlag().getLoadAll()) || BooleanUtil.isTrue(request.getLoadFlag().${loadProperty}())){
-                Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(response);
+            if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.${loadProperty}())){
+                Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(resp);
                 if(ObjectUtil.isNotNull(key)){
                     <#if relateTable.many>
-                    response.${setRelatedPropertyList}(${NameUtils.getFieldName(relateRepositoryClassName)}.queryList(key, ${lambdaClassName}.${relatetargetLambda},
-                                    FiltersUtils.getEntityFilters(request.getLoadFlag().getFilters(), ${dtoClassName}.${relatedDtoClassName}.class)));
+                    List<${dtoClassName}.${relatedDtoClassName}> queryList = ${NameUtils.getFieldName(relateRepositoryClassName)}.queryList(key, ${lambdaClassName}.${relatetargetLambda},
+                                     FiltersUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class),
+                                     OrdersUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class))
+                                                .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
+                    if (CollectionUtil.isEmpty(resp.${getRelatedPropertyList}())){
+                        resp.${setRelatedPropertyList}(queryList);
+                    } else {
+                        resp.${getRelatedPropertyList}().addAll(queryList);
+                    }
                     <#else>
-                    response.${setRelatedProperty}(${NameUtils.getFieldName(relateRepositoryClassName)}.query(key, ${lambdaClassName}.${relatetargetLambda}));
+                    ${dtoClassName}.${relatedDtoClassName} item= ${NameUtils.getFieldName(relateRepositoryClassName)}.query(key, ${lambdaClassName}.${relatetargetLambda});
+                    if(ObjectUtil.isNotNull(item)){
+                        item.set_thisDomain(resp);
+                    }
+                    resp.${setRelatedProperty}(item);
                     </#if>
                 }
             }
             </#list>
         }
-        response.setLoadFlag(request.getLoadFlag());
-        return response;
+        resp.setLoadFlag(${dtoClassName}.LoadFlag.merge(loadFlag, resp.getLoadFlag()));
+        return resp;
     <#else>
         return ${repositoryName}.query(request.getKey(), ${lambdaClassName}.doKeyLambda);
     </#if>
@@ -182,7 +191,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
             }
             </#list>
         }
-        response.setLoadFlag(request.getLoadFlag());
+        response.setLoadFlag(${dtoClassName}.LoadFlag.merge(request.getLoadFlag(), response.getLoadFlag()));
 </#if>
 <#if source.aggregate??>
         <#assign relateRepositoryClassName=NameUtils.repositoryName(source.aggregate.name)/>
@@ -275,7 +284,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     }
 <#if (source.relatedTable?size>0)>
     /**
-    * 修改
+    * 修改 此方法不用再加載domain主entity數據
     * @param request 请求体
     * @param domain 原始數據，避免重新查詢主表
     * @return 成功OR失败
@@ -283,8 +292,26 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean update(${dtoClassName} request, ${dtoClassName} domain){
-        Serializable keyId = ${lambdaClassName}.dtoKeyLambda.apply(request);
-        ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindDomain(keyId, request.getLoadFlag()), domain<#if source.aggregate??>,true</#if>);
+        return update(request, domain, true);
+    }
+
+   /**
+    * 修改,此方法不用再加載domain主entity數據
+    * reload參數True將重新加載數據， False將直接對request和domain進行比較， 適用於模型比較複雜，需要以來加載後的數據再進行下一層數據加載的情況層數據加載的情況
+
+    * @param request 请求体
+    * @param domain 原始domain
+    * @param reload 是否使用request的loadFlag重新加載數據
+    * @return 成功OR失败
+    */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean update(${dtoClassName} request, ${dtoClassName} domain, Boolean reload){
+        ${dtoClassName} old = domain;
+        if (reload) {
+            Serializable keyId = ${lambdaClassName}.dtoKeyLambda.apply(request);
+            old = find(new ${NameUtils.getName(source.name)}FindDomain(keyId, request.getLoadFlag()), domain<#if source.aggregate??>,true</#if>);
+        }
 <#list source.relatedTable as relateTable>
     <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
     <#assign getter=NameUtils.genGetter(relateTable.name)/>
@@ -384,27 +411,4 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         return ${repositoryName}.deleteById(id) > 0;
 </#if>
     }
-<#if (source.relatedTable?size>0)>
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean deleteRelated(List<BaseLoadFlag.Filter> filters) {
-        if (CollUtil.isEmpty(filters)) {
-            return false;
-        }
-
-        int totalEffect = 0;
-        Map<String, List<BaseLoadFlag.Filter>> filterMap = filters.stream().collect(Collectors.groupingBy(BaseLoadFlag.Filter::getEntity));
-        for (Map.Entry<String, List<BaseLoadFlag.Filter>> item : filterMap.entrySet()) {
-            BaseRepository repository = _DomainRepositoryMap.get(item.getKey());
-            if (null == repository) {
-                throw new UnsupportedOperationException("刪除不支持的實體:" + item.getKey());
-            }
-
-            totalEffect += repository.deleteByFilter(item.getValue());
-        }
-
-        return totalEffect > 0;
-    }
-</#if>
 }

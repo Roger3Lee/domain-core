@@ -1,9 +1,12 @@
 package com.artframework.domain.dto;
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.artframework.domain.config.GlobalSetting;
 import com.artframework.domain.meta.domain.DomainMetaInfo;
+import com.artframework.domain.meta.domain.RefTableMetaInfo;
 import com.artframework.domain.meta.domain.RelatedTableMetaInfo;
 import com.artframework.domain.meta.table.ColumnMetaInfo;
 import com.artframework.domain.utils.NameUtils;
@@ -12,7 +15,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Data
@@ -30,7 +36,7 @@ public class DomainInfo {
     private List<RelateTableInfo> relatedTable;
     private RelateTableInfo aggregate;
 
-    public String getFolder(){
+    public String getFolder() {
         return StringUtils.isNotEmpty(this.folder) ? this.folder : NameUtils.packageName(this.getName());
     }
 
@@ -47,8 +53,8 @@ public class DomainInfo {
                 .name(domainMetaInfo.getName())
                 .description(domainMetaInfo.getDescription())
                 .mainTable(tableInfo)
-                .relatedTable(domainMetaInfo.getRelatedList().stream().map(RelateTableInfo::convert).collect(Collectors.toList()))
-                .aggregate(RelateTableInfo.convert(domainMetaInfo.getAggregate()))
+                .relatedTable(domainMetaInfo.getRelatedList().stream().map(x -> RelateTableInfo.convert(x, tableInfo)).collect(Collectors.toList()))
+                .aggregate(RelateTableInfo.convert(domainMetaInfo.getAggregate(), tableInfo))
                 .build();
     }
 
@@ -60,9 +66,13 @@ public class DomainInfo {
         private String fkSourceColumn;
         private String fkTargetColumnType;
         private String fkTargetColumn;
+        /**
+         * 關聯表列表
+         */
+        private List<RefTable> refTableList;
 
-        public static RelateTableInfo convert(RelatedTableMetaInfo relatedTableMetaInfo) {
-            if(ObjectUtil.isNull(relatedTableMetaInfo)){
+        public static RelateTableInfo convert(RelatedTableMetaInfo relatedTableMetaInfo, TableInfo mainTable) {
+            if (ObjectUtil.isNull(relatedTableMetaInfo)) {
                 return null;
             }
             RelateTableInfo tableInfo = new RelateTableInfo();
@@ -79,18 +89,110 @@ public class DomainInfo {
             tableInfo.setMany(relatedTableMetaInfo.getMany());
             String[] strings = relatedTableMetaInfo.getFk().split(":");
             tableInfo.setFkSourceColumn(strings[0]);
-            tableInfo.setFkSourceColumnType(tableInfo.getColumn().stream().filter(x->StringUtils.equalsAnyIgnoreCase(x.getName(),strings[0]))
+            tableInfo.setFkSourceColumnType(mainTable.getColumn().stream().filter(x -> StringUtils.equalsAnyIgnoreCase(x.getName(), strings[0]))
                     .map(ColumnMetaInfo::getType).findFirst().orElse(""));
             tableInfo.setFkTargetColumn(strings[1]);
-            tableInfo.setFkTargetColumnType(tableInfo.getColumn().stream().filter(x->StringUtils.equalsAnyIgnoreCase(x.getName(),strings[1]))
+            tableInfo.setFkTargetColumnType(tableInfo.getColumn().stream().filter(x -> StringUtils.equalsAnyIgnoreCase(x.getName(), strings[1]))
                     .map(ColumnMetaInfo::getType).findFirst().orElse(""));
+            if (CollectionUtil.isNotEmpty(relatedTableMetaInfo.getRefList())) {
+                tableInfo.setRefTableList(relatedTableMetaInfo.getRefList().stream().map(x -> RelateTableInfo.convertRef(x, tableInfo))
+                        .collect(Collectors.toList()));
+            }
             return tableInfo;
+        }
+
+        public static RefTable convertRef(RefTableMetaInfo relatedTableMetaInfo, TableInfo mainTable) {
+            RefTable tableInfo = RefTable.builder()
+                    .name(StrUtil.isEmpty(relatedTableMetaInfo.getName()) ? relatedTableMetaInfo.getTable() : relatedTableMetaInfo.getName())
+                    .tableName(relatedTableMetaInfo.getTable())
+                    .many(relatedTableMetaInfo.getMany())
+                    .build();
+            tableInfo.setColumn(GlobalSetting.INSTANCE.getTableColumns(relatedTableMetaInfo.getTable()));
+            String[] strings = relatedTableMetaInfo.getFk().split("\\|");
+            List<RefTable.RefTableFK> fkList = new ArrayList<>();
+            for (String fk : strings) {
+                String[] fkMap = fk.split(":");
+                if(fkMap.length!=2){
+                    continue;
+                }
+                Tuple target = getColumnInfo(fkMap[1]);
+                Tuple source = getColumnInfo(fkMap[0]);
+                //目標字段類型
+                String targetType = tableInfo.getColumn().stream().filter(x -> StringUtils.equalsAnyIgnoreCase(x.getName(), target.get(0).toString()))
+                        .map(ColumnMetaInfo::getType).findFirst().orElse("");
+
+                RefTable.RefTableFK refTableFK = new RefTable.RefTableFK();
+                ColumnMetaInfo sourceColumn = mainTable.getColumn().stream().filter(x -> StringUtils.equalsAnyIgnoreCase(x.getName(), source.get(0).toString())).findFirst().orElse(null);
+                if (null != sourceColumn) {
+                    refTableFK.setFkSourceColumn(source.get(0));
+                    refTableFK.setFkSourceColumnType(sourceColumn.getType());
+                } else {
+                    //沒有找到此列常量處理, 如果包含.則認為是使用的代碼中定義的常量
+                    if(source.get(0).toString().contains(".") ||targetType.equals("String")){
+                        refTableFK.setSourceValue(source.get(0));
+                    }else{
+                        continue;
+                    }
+                }
+
+                refTableFK.setFkTargetColumn(target.get(0));
+                refTableFK.setFkTargetColumnType(targetType);
+                refTableFK.setFkSourceConvertMethod(source.get(1));
+                refTableFK.setFkTargetConvertMethod(target.get(1));
+                fkList.add(refTableFK);
+            }
+            tableInfo.setFkList(fkList);
+            return tableInfo;
+        }
+
+        /**
+         * 轉換方法
+         * @param value
+         * @return
+         */
+        public static Tuple getColumnInfo(String value) {
+            // 使用Pattern和Matcher进行匹配
+            Pattern p = Pattern.compile("\\(([^)]+)\\)");
+            Matcher m = p.matcher(value);
+
+            // 查找整个字符串中是否存在一个完整且匹配的括号对序列
+            if (m.find()) {
+                String insideBrackets = m.group(1);
+                return new Tuple(value.substring(0, value.indexOf("(")), insideBrackets);
+            }
+            return new Tuple(value, "");
         }
 
         public String nameSuffix(String suffix) {
             return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", this.getName()))) + suffix;
         }
+
+        public static void main(String[] args) {
+            getColumnInfo("id:1(String.valueOf)");
+        }
     }
+
+    @Data
+    @Builder
+    public static class RefTable{
+        private String name;
+        private String tableName;
+        private Boolean many;
+        private List<RefTableFK> fkList;
+        private List<ColumnMetaInfo> column;
+
+        @Data
+        public static class RefTableFK{
+            private String fkSourceColumnType;
+            private String fkSourceColumn;
+            private String fkSourceConvertMethod;
+            private String fkTargetColumnType;
+            private String fkTargetColumn;
+            private String fkTargetConvertMethod;
+            private String sourceValue; //為常量是，存儲常量的值， 常量定義為常量
+        }
+    }
+
 
 
     @Data
