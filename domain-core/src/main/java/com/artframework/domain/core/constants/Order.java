@@ -21,4 +21,13 @@ public enum Order {
     public String getCode() {
         return code;
     }
+
+    public static Order getOrder(String order) {
+        for (Order item : Order.values()) {
+            if (item.getCode().equals(order)) {
+                return item;
+            }
+        }
+        return Order.ASC;
+    }
 }

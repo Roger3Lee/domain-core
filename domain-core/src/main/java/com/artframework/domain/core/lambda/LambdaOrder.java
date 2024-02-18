@@ -1,11 +1,11 @@
 package com.artframework.domain.core.lambda;
 
 import cn.hutool.core.collection.ListUtil;
-import com.artframework.domain.core.constants.Order;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import com.artframework.domain.core.constants.Order;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -63,6 +63,11 @@ public class LambdaOrder<T> {
         LambdaOrderItem orderItem = new LambdaOrderItem(field, order);
         return new LambdaOrder<T>(orderItem);
     }
+
+    public static <T> LambdaOrder<T> buildByFieldName(Class<T> clazz, String field, Order order) {
+        LambdaOrderItem orderItem = new LambdaOrderItem(clazz, field, order);
+        return new LambdaOrder<T>(orderItem);
+    }
     /**
      * 構造排序的Item
      * @param field
@@ -106,6 +111,12 @@ public class LambdaOrder<T> {
             LambdaCache.LambdaInfo<T> lambdaInfo = LambdaCache.info(field);
             this.entity = lambdaInfo.getClazzName();
             this.field = lambdaInfo.getFieldName();
+            this.order = order;
+        }
+
+        public <T> LambdaOrderItem(Class<T> clazz, String field, Order order) {
+            this.entity = clazz.getCanonicalName();
+            this.field = field;
             this.order = order;
         }
 

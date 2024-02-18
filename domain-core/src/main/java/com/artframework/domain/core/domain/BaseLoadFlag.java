@@ -38,7 +38,7 @@ public class BaseLoadFlag {
     }
 
     public <T extends BaseLoadFlag> T setFilters(List<Filter> filters) {
-        if(CollectionUtil.isNotEmpty(filters)){
+        if(CollectionUtil.isEmpty(filters)){
             return (T) this;
         }
 

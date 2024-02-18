@@ -3,6 +3,8 @@ package com.artframework.domain.core.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import lombok.extern.slf4j.Slf4j;
 import com.artframework.domain.core.domain.BaseDomain;
 import com.artframework.domain.core.domain.PageDomain;
 import com.artframework.domain.core.lambda.LambdaFilter;
@@ -11,8 +13,6 @@ import com.artframework.domain.core.repository.BaseRepository;
 import com.artframework.domain.core.service.BaseDomainService;
 import com.artframework.domain.core.uitls.CompareUtil;
 import com.artframework.domain.core.uitls.FiltersUtils;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -43,13 +43,14 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
     public <D extends BaseDomain> void merge(List<D> oldList, List<D> newList, Function<D, Serializable> keyWrap, BaseRepository repository) {
         CompareUtil.CompareResult<D> compareList = CompareUtil.compareList(oldList, newList, keyWrap);
 
-        //新增
-        if (CollUtil.isNotEmpty(compareList.getAddList())) {
-            repository.insert(compareList.getAddList());
-        }
         //删除
         if (CollUtil.isNotEmpty(compareList.getDeleteList())) {
             repository.delete(compareList.getDeleteList());
+        }
+
+        //新增
+        if (CollUtil.isNotEmpty(compareList.getAddList())) {
+            repository.insert(compareList.getAddList());
         }
         //修改
         if (CollUtil.isNotEmpty(compareList.getUpdateList())) {
