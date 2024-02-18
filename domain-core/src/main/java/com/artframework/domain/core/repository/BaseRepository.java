@@ -1,9 +1,11 @@
 package com.artframework.domain.core.repository;
 
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.artframework.domain.core.domain.BaseDomain;
 import com.artframework.domain.core.domain.BaseLoadFlag;
+import com.artframework.domain.core.domain.PageDomain;
 import com.artframework.domain.core.lambda.LambdaOrder;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
 import java.io.Serializable;
 import java.util.List;
@@ -11,19 +13,33 @@ import java.util.List;
 public interface BaseRepository<D extends BaseDomain, DO> {
     /**
      * 通過非主鍵字段查詢唯一一條數據
+     *
      * @param key
      * @param keyWarp
      * @return
      */
     D queryByKey(Serializable key, SFunction<D, Serializable> keyWarp);
+
     D query(Serializable id, SFunction<DO, Serializable> idWrap);
+
     D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters);
+
+    List<D> queryList(List<BaseLoadFlag.DOFilter> filters);
+
+    List<D> queryList(List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders);
 
     List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap);
 
     List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters);
 
     List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders);
+
+
+    IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> buildLambdaFilter);
+
+
+    IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> buildLambdaFilter, List<LambdaOrder.LambdaOrderItem> orders);
+
     /**
      * 插入一条数据
      *
@@ -50,6 +66,7 @@ public interface BaseRepository<D extends BaseDomain, DO> {
 
     /**
      * 通過Filter刪除數據
+     *
      * @param filters
      * @return
      */

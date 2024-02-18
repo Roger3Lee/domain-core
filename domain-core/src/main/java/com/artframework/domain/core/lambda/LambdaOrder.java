@@ -1,13 +1,14 @@
 package com.artframework.domain.core.lambda;
 
 import cn.hutool.core.collection.ListUtil;
+import com.artframework.domain.core.constants.Order;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import com.artframework.domain.core.constants.Order;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,12 @@ public class LambdaOrder<T> {
             x.addAll(y);
             return x;
         });
+    }
+
+    public List<LambdaOrderItem> toOrderItems() {
+        List<LambdaOrderItem> list = new ArrayList<>();
+        orderItems.forEach((x, y) -> list.addAll(y));
+        return list;
     }
 
     public static <T> LambdaOrder<T> build() {

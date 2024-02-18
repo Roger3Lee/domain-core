@@ -3,20 +3,23 @@ package com.artframework.domain.core.repository.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.artframework.domain.core.domain.BaseDomain;
-import com.artframework.domain.core.mapper.BatchBaseMapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import lombok.extern.slf4j.Slf4j;
 import com.artframework.domain.core.constants.Op;
 import com.artframework.domain.core.constants.SaveState;
+import com.artframework.domain.core.domain.BaseDomain;
 import com.artframework.domain.core.domain.BaseLoadFlag;
+import com.artframework.domain.core.domain.PageDomain;
 import com.artframework.domain.core.lambda.LambdaCache;
 import com.artframework.domain.core.lambda.LambdaOrder;
+import com.artframework.domain.core.mapper.BatchBaseMapper;
 import com.artframework.domain.core.repository.BaseRepository;
 import com.artframework.domain.core.uitls.FiltersUtils;
 import com.artframework.domain.core.uitls.OrdersUtils;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -32,21 +35,22 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
     protected BaseMapper<DO> baseMapper;
 
     @PostConstruct
-    public void init(){
-        log.info(this.getDOClass().getSimpleName() +" repository init successfully.");
+    public void init() {
+        log.info(this.getDOClass().getSimpleName() + " repository init successfully.");
     }
 
     @Override
     public D queryByKey(Serializable key, SFunction<D, Serializable> keyWarp) {
         return query(key, LambdaCache.DOLambda(this.getDOClass(), keyWarp), null);
     }
+
     @Override
     public D query(Serializable id, SFunction<DO, Serializable> idWrap) {
         return query(id, idWrap, null);
     }
 
     @Override
-    public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters){
+    public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters) {
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
                 .eq(idWrap, id);
         //額外的filter
@@ -57,7 +61,7 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
             }
 
             for (BaseLoadFlag.DOFilter filter : filters) {
-                wrapper = FiltersUtils.buildWrapper(wrapper,filter, this.getDOClass());
+                wrapper = FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
             }
         }
         wrapper = wrapper.last("limit 1");
@@ -67,20 +71,33 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         }
         return list.get(0);
     }
+
+    @Override
+    public List<D> queryList(List<BaseLoadFlag.DOFilter> filters) {
+        return queryList(null, null, filters, null);
+    }
+
+    @Override
+    public List<D> queryList(List<BaseLoadFlag.DOFilter> filters,List<LambdaOrder.LambdaOrderItem> orders){
+        return queryList(null, null, filters, orders);
+    }
+
     @Override
     public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap) {
         return queryList(id, wrap, null);
     }
 
     @Override
-    public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters){
+    public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters) {
         return queryList(id, wrap, filters, null);
     }
 
     @Override
-    public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders){
-        LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>()
-                .eq(wrap, id);
+    public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders) {
+        LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
+        if (ObjectUtil.isNotNull(id) && ObjectUtil.isNotNull(wrap)) {
+            wrapper.eq(wrap, id);
+        }
 
         //額外的filter
         if (ObjectUtil.isNotNull(filters)) {
@@ -103,8 +120,36 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         return convert2DTO(this.baseMapper.selectList(wrapper));
     }
 
+    @Override
+    public IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> buildLambdaFilter) {
+        return queryPage(pageDomain, buildLambdaFilter, null);
+    }
+
+    @Override
+    public IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders) {
+        LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
+        if (ObjectUtil.isNotNull(filters)) {
+            //儅不需要查詢出數據時，返回空列表
+            if (filters.stream().anyMatch(x -> Op.NIL.getCode().equals(x.getOp()))) {
+                return null;
+            }
+
+            for (BaseLoadFlag.DOFilter filter : filters) {
+                FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
+            }
+        }
+
+        if (ObjectUtil.isNotNull(orders)) {
+            for (LambdaOrder.LambdaOrderItem order : orders) {
+                OrdersUtils.buildOrderWrapper(wrapper, order, this.getDOClass());
+            }
+        }
+        return this.baseMapper.selectPage(new Page<>(pageDomain.getPageNum(), pageDomain.getPageSize()), wrapper).convert(x -> convert2DTO(ListUtil.toList(x)).get(0));
+    }
+
     /**
      * 插入一条数据
+     *
      * @param item
      * @return 新增后数据
      */
@@ -126,12 +171,12 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
             return Collections.emptyList();
         }
         List<DO> tList = convert2DO(list);
-        if (list.size()== 1) {
+        if (list.size() == 1) {
             this.baseMapper.insert(tList.get(0));
         } else {
-            if(BatchBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())){
-                ((BatchBaseMapper)this.baseMapper).insertBatch(tList);
-            }else{
+            if (BatchBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())) {
+                ((BatchBaseMapper) this.baseMapper).insertBatch(tList);
+            } else {
                 for (DO d : tList) {
                     this.baseMapper.insert(d);
                 }
@@ -148,7 +193,8 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
 
 
     /**
-     *  批量删除
+     * 批量删除
+     *
      * @param list
      * @return 受影响行数
      */
@@ -163,11 +209,12 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
 
     /**
      * 通過實體的過濾條件刪除數據
+     *
      * @param filters
      * @return
      */
     @Override
-    public int deleteByFilter(List<BaseLoadFlag.DOFilter> filters){
+    public int deleteByFilter(List<BaseLoadFlag.DOFilter> filters) {
         //額外的filter
         if (ObjectUtil.isNotNull(filters)) {
             LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
@@ -184,16 +231,18 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
 
     /**
      * 删除一行数据BYid
+     *
      * @param id
      * @return 受影响行数
      */
     @Override
-    public int deleteById(Serializable id){
+    public int deleteById(Serializable id) {
         return this.baseMapper.deleteById(id);
     }
 
     /**
      * 更新一条数据
+     *
      * @param item
      * @return 更新后数据
      */
@@ -218,9 +267,9 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         if (list.size() == 1) {
             effect = this.baseMapper.updateById(tList.get(0));
         } else {
-            if(BatchBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())){
+            if (BatchBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())) {
                 return ((BatchBaseMapper) this.baseMapper).batchUpdate(tList);
-            }else{
+            } else {
                 for (DO d : tList) {
                     this.baseMapper.updateById(d);
                 }
@@ -229,7 +278,7 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         }
 
         //觸發保存後的回調
-        for (D item:list) {
+        for (D item : list) {
             item.afterSave(SaveState.UPDATE);
         }
         return effect;
@@ -239,7 +288,7 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
 
     public abstract List<D> convert2DTO(List<DO> list);
 
-    public abstract void convert2DTO(DO item ,D targetItem);
+    public abstract void convert2DTO(DO item, D targetItem);
 
     public abstract Function<D, Serializable> keyLambda();
 

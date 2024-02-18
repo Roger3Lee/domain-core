@@ -1,8 +1,11 @@
 package com.artframework.domain.core.service;
 
 import com.artframework.domain.core.domain.BaseDomain;
+import com.artframework.domain.core.domain.PageDomain;
 import com.artframework.domain.core.lambda.LambdaFilter;
+import com.artframework.domain.core.lambda.LambdaOrder;
 import com.artframework.domain.core.repository.BaseRepository;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.io.Serializable;
 import java.util.List;
@@ -28,4 +31,13 @@ public interface BaseDomainService {
 
 
     <D> Boolean deleteRelated(Class<D> clazz, List<LambdaFilter<D>> lambdaFilters);
+
+    <T> List<T> queryList(Class<T> clazz, List<LambdaFilter<T>> lambdaFilters);
+
+    <T> List<T> queryList(Class<T> clazz, List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders);
+
+    <T> IPage<T> queryPage(Class<T> clazz, PageDomain pageDomain);
+    <T> IPage<T> queryPage(Class<T> clazz, PageDomain pageDomain, LambdaOrder<T> orders);
+
+    <T> IPage<T> queryPage(Class<T> clazz, PageDomain pageDomain, List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders);
 }
