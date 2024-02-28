@@ -19,6 +19,10 @@ import java.util.stream.Collectors;
  **/
 
 public class BaseLoadFlag {
+
+    @Getter
+    @Setter
+    private Boolean ignoreDomainFilter = false;
     /**
      * filter信息
      */

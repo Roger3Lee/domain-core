@@ -48,7 +48,7 @@ public abstract class BaseAggregateDomain<D extends BaseDomain, S extends BaseDo
     }
 
     public <T> D loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters) {
-        return loadRelated(tClass, filters, null);
+        return loadRelated(tClass, filters, LambdaOrder.build());
     }
 
 
@@ -64,7 +64,45 @@ public abstract class BaseAggregateDomain<D extends BaseDomain, S extends BaseDo
      * @return
      * @param <T>
      */
-    public abstract <T> D loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders);
+    public <T> D loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders) {
+        return loadRelated(tClass, filters, orders, false);
+    }
 
 
+    /**
+     * 加載關聯數據， 不適用domain的外鍵字段過濾， 用於特殊場景
+     *
+     * @param tClass
+     * @param filter
+     * @param ignoreDomainFkFilter 是否忽略模型的外鍵過濾， 用於特殊場景
+     * @param <T>
+     * @return
+     */
+    public <T> D loadRelated(Class<T> tClass, LambdaFilter<T> filter, Boolean ignoreDomainFkFilter) {
+        return loadRelated(tClass, ListUtil.toList(filter), ignoreDomainFkFilter);
+    }
+
+    /**
+     * 加載關聯數據， 不適用domain的外鍵字段過濾， 用於特殊場景
+     * @param tClass
+     * @param filters
+     * @param ignoreDomainFkFilter 是否忽略模型的外鍵過濾， 用於特殊場景
+     * @return
+     * @param <T>
+     */
+    public <T> D loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, Boolean ignoreDomainFkFilter) {
+        return loadRelated(tClass, filters, null, ignoreDomainFkFilter);
+    }
+
+    /**
+     * 加載關聯數據， 不適用domain的外鍵字段過濾， 用於特殊場景
+     * @param tClass
+     * @param filters
+     * @param ignoreDomainFkFilter 是否忽略模型的外鍵過濾， 用於特殊場景
+     * @return
+     * @param <T>
+     */
+    public <T> D loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders, Boolean ignoreDomainFkFilter){
+        throw new UnsupportedOperationException();
+    };
 }

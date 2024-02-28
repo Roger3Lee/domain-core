@@ -126,6 +126,6 @@ public class LambdaOrder<T> {
         @Getter
         private String field;
         @Getter
-        private com.artframework.domain.core.constants.Order order;
+        private Order order;
     }
 }

@@ -65,6 +65,7 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
     @Transactional(rollbackFor = Exception.class)
     public <T> Boolean deleteRelated(Class<T> clazz, List<LambdaFilter<T>> lambdaFilters) {
         if (CollUtil.isEmpty(lambdaFilters)) {
+            log.warn("不允許不加過濾條件刪除數據");
             return false;
         }
 

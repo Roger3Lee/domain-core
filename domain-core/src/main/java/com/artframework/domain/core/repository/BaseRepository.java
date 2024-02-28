@@ -20,6 +20,7 @@ public interface BaseRepository<D extends BaseDomain, DO> {
     D queryByKey(Serializable key, SFunction<D, Serializable> keyWarp);
     D query(Serializable id, SFunction<DO, Serializable> idWrap);
     D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters);
+    D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters, Boolean ignoreDomainFkFilter);
 
     List<D> queryList(List<BaseLoadFlag.DOFilter> filters);
     List<D> queryList(List<BaseLoadFlag.DOFilter> filters,List<LambdaOrder.LambdaOrderItem> orders);
@@ -29,6 +30,7 @@ public interface BaseRepository<D extends BaseDomain, DO> {
 
     List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders);
 
+    List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders, Boolean ignoreDomainFkFilter);
 
     IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> buildLambdaFilter);
 

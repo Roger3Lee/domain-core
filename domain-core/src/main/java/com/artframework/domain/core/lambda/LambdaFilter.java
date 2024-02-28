@@ -16,7 +16,7 @@ public class LambdaFilter<T> {
     @Getter
     private SFunction<T, Serializable> field;
     @Getter
-    private com.artframework.domain.core.constants.Op op;
+    private Op op;
     @Getter
     private Object value;
     @Getter
