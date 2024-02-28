@@ -40,41 +40,33 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
     @Autowired
     private ${repositoryClassName} ${repositoryName};
 
-<#list source.relatedTable as relateTable>
-    <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
+<#list source.relatedTableDistinct as relateTable>
+    <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.tableName)/>
     @Autowired
     private ${relateRepositoryClassName} ${NameUtils.getFieldName(relateRepositoryClassName)};
 
 </#list>
 <#if source.aggregate??>
-  <#assign relateRepositoryClassName=NameUtils.repositoryName(source.aggregate.name)/>
+  <#assign relateRepositoryClassName=NameUtils.repositoryName(source.aggregate.tableName)/>
     @Autowired
     private ${relateRepositoryClassName} ${NameUtils.getFieldName(relateRepositoryClassName)};
 </#if>
 <#if (source.relatedTable?size>0)>
     @PostConstruct
     public void init(){
+        this._DomainRepositoryMap.put(${dtoClassName}.class.getCanonicalName(), this.${repositoryName});
     <#list source.relatedTable as relateTable>
-        <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
+        <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.tableName)/>
         <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
         this._DomainRepositoryMap.put(${dtoClassName}.${relateDtoClassName}.class.getCanonicalName(), this.${NameUtils.getFieldName(relateRepositoryClassName)});
     </#list>
     <#if source.aggregate??>
-      <#assign relateRepositoryClassName=NameUtils.repositoryName(source.aggregate.name)/>
+      <#assign relateRepositoryClassName=NameUtils.repositoryName(source.aggregate.tableName)/>
       <#assign relateDtoClassName=NameUtils.dataTOName(source.aggregate.name)/>
         this._DomainRepositoryMap.put(${dtoClassName}.${relateDtoClassName}.class.getCanonicalName(), this.${NameUtils.getFieldName(relateRepositoryClassName)});
     </#if>
     }
 </#if>
-    /**
-    * 分页查询
-    * @param request 请求体
-    * @return
-    */
-    @Override
-    public IPage<${dtoClassName}> page(${domainName}PageDomain request){
-        return ${repositoryName}.page(request);
-    }
 
    /**
     * 查找
@@ -128,7 +120,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
                     <#if relateTable.many>
                     List<${dtoClassName}.${relatedDtoClassName}> queryList = ${NameUtils.getFieldName(relateRepositoryClassName)}.queryList(key, ${lambdaClassName}.${relatetargetLambda},
                                      FiltersUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class),
-                                     OrdersUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class))
+                                     OrdersUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class), loadFlag.getIgnoreDomainFilter())
                                                 .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
                     if (CollectionUtil.isEmpty(resp.${getRelatedPropertyList}())){
                         resp.${setRelatedPropertyList}(queryList);
@@ -136,7 +128,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
                         resp.${getRelatedPropertyList}().addAll(queryList);
                     }
                     <#else>
-                    ${dtoClassName}.${relatedDtoClassName} item= ${NameUtils.getFieldName(relateRepositoryClassName)}.query(key, ${lambdaClassName}.${relatetargetLambda});
+                    ${dtoClassName}.${relatedDtoClassName} item= ${NameUtils.getFieldName(relateRepositoryClassName)}.query(key, ${lambdaClassName}.${relatetargetLambda}, null, loadFlag.getIgnoreDomainFilter());
                     if(ObjectUtil.isNotNull(item)){
                         item.set_thisDomain(resp);
                     }

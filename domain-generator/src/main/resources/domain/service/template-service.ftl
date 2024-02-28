@@ -3,7 +3,6 @@ package ${domainPackage!''}.${NameUtils.packageName(source.folder)}.service;
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain.*;
 
 import ${corePackage}.service.*;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
 import java.io.Serializable;
@@ -12,13 +11,6 @@ import java.io.Serializable;
 <#assign domainName=NameUtils.getName(source.name)/>
 <#assign dtoClassName=NameUtils.dataTOName(source.name)/>
 public interface ${serviceClassName} extends BaseDomainService {
-
-    /**
-    * 分页查询
-    * @param request 请求体
-    * @return
-    */
-    IPage<${dtoClassName}> page(${domainName}PageDomain request);
 
     /**
     * 查找

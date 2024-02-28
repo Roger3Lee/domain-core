@@ -29,8 +29,8 @@ public class GenerateUtils {
             domainDtoGenerator.setTemplateFilePath(FTLConstants.FIND_REQUEST_PATH);
             FileUtils.saveFile(path + "\\" + getDomainFolderName(domainInfo) + "\\" + "domain\\", domainInfo.nameSuffix("FindDomain") + ".java", domainDtoGenerator.generate(domainInfo));
 
-            domainDtoGenerator.setTemplateFilePath(FTLConstants.PAGE_REQUEST_PATH);
-            FileUtils.saveFile(path + "\\" + getDomainFolderName(domainInfo) + "\\" + "domain\\", domainInfo.nameSuffix("PageDomain") + ".java", domainDtoGenerator.generate(domainInfo));
+//            domainDtoGenerator.setTemplateFilePath(FTLConstants.PAGE_REQUEST_PATH);
+//            FileUtils.saveFile(path + "\\" + getDomainFolderName(domainInfo) + "\\" + "domain\\", domainInfo.nameSuffix("PageDomain") + ".java", domainDtoGenerator.generate(domainInfo));
 
 
 //            domainDtoGenerator.setTemplateFilePath(FTLConstants.UPDATE_REQUEST_PATH);
@@ -46,7 +46,7 @@ public class GenerateUtils {
             domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_IMPL_PATH);
             FileUtils.saveFile(path + "\\" + getDomainFolderName(domainInfo) + "\\" + "repository\\impl\\", domainInfo.nameSuffix("RepositoryImpl") + ".java", domainDtoGenerator.generate(domainInfo), null != overWrite ? overWrite : false);
 
-            for (DomainInfo.RelateTableInfo relateTableInfo : domainInfo.getRelatedTable()) {
+            for (DomainInfo.RelateTableInfo relateTableInfo : domainInfo.getRelatedTableDistinct()) {
                 domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_RELATED_PATH);
                 domainDtoGenerator.putParam("table", relateTableInfo);
                 FileUtils.saveFile(path + "\\" + getDomainFolderName(domainInfo) + "\\" + "repository\\", relateTableInfo.nameSuffix("Repository") + ".java", domainDtoGenerator.generate(domainInfo), null != overWrite ? overWrite : false);

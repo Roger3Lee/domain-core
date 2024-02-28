@@ -11,6 +11,7 @@ import java.util.List;
  */
 @Getter
 public class RelatedTableMetaInfo {
+    private String name;
     private String table;
     private Boolean many=false  ;
     private String fk;
@@ -22,7 +23,10 @@ public class RelatedTableMetaInfo {
     public void setImplement(String implement) {
         this.implement = implement;
     }
-
+    @XmlAttribute(name = "name")
+    public void setName(String name) {
+        this.name = name;
+    }
     @XmlAttribute(name = "table")
     public void setTable(String table) {
         this.table = table;

@@ -39,7 +39,7 @@ public class ${className}{
 
 <#--    关联实体属性-->
 <#list source.relatedTable as relateTable>
-    <#assign relateClassName=NameUtils.dataObjectName(relateTable.name)/>
+    <#assign relateClassName=NameUtils.dataObjectName(relateTable.tableName)/>
     <#assign relateDtoClassName=dtoClassName+"."+NameUtils.dataTOName(relateTable.name)/>
     <#assign fieldName=NameUtils.getFieldName(relateTable.name)/>
 

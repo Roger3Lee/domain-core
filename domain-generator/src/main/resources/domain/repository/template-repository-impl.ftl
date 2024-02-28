@@ -7,9 +7,6 @@ import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.repository.*;
 import ${tablePackage!''}.*;
 import ${corePackage}.repository.impl.*;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.stereotype.Repository;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
@@ -51,12 +48,5 @@ public class ${repositoryImplClassName} extends BaseRepositoryImpl<${dtoClassNam
     @Override
     public Class<${doClassName}> getDOClass() {
         return ${doClassName}.class;
-    }
-
-    @Override
-    public IPage<${dtoClassName}> page(${domainName}PageDomain request){
-        IPage<${doClassName}> page=new Page<>(request.getPageNum(), request.getPageSize());
-        LambdaQueryWrapper<${doClassName}> wrapper =new LambdaQueryWrapper<>();
-        return this.baseMapper.selectPage(page,wrapper).convert(${covertName}.INSTANCE::convert2DTO);
     }
 }

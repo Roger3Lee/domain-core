@@ -33,7 +33,7 @@ public interface  ${covertName}{
 
     <#list source.relatedTable as relateTable>
     <#assign relateDTOClassName= NameUtils.dataTOName(relateTable.name)/>
-    <#assign relateDOClassName= NameUtils.dataObjectName(relateTable.name)/>
+    <#assign relateDOClassName= NameUtils.dataObjectName(relateTable.tableName)/>
     <#assign relateName= NameUtils.getName(relateTable.name)/>
     ${dtoClassName}.${relateDTOClassName} convert2${relateName}DTO(${relateDOClassName} request);
     void convert2${relateName}DTO(${relateDOClassName} request, @MappingTarget ${dtoClassName}.${relateDTOClassName} target);

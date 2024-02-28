@@ -54,7 +54,7 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
 <#--    关联实体属性-->
     <#list source.relatedTable as relateTable>
         <#assign relateClassName=NameUtils.dataObjectName(relateTable.name)/>
-        <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
+        <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.tableName)/>
         <#assign fieldName=NameUtils.getFieldName(relateTable.name)/>
         <#assign fieldNameList=NameUtils.getListFieldName(relateTable.name)/>
         <#assign relatedDomainGetterList=NameUtils.genListGetter(relateTable.name)/>
@@ -132,6 +132,10 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
         <#--   列表 -->
         public synchronized <#if refTable.many>java.util.List<${refClassName}><#else>${refClassName}</#if> ${refGetterMethodName}() {
             ${className} domain = (${className})this.get_thisDomain();
+            if(null == domain){
+                return null;
+            }
+
             if(null == this.${refFieldName}){
                 Predicate<${refClassName}> condition = x -> true;
                 <#list refTable.fkList as fk>
@@ -187,8 +191,8 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
                      <#else>
                      ${lambdaClassName}.${refTargetLambdaSetter}.accept(refDomain, ${fk.sourceValue});
                      </#if>
-                     list.add(refDomain);
                 </#list>
+                     list.add(refDomain);
                 }
                 if(saveState.equals(SaveState.INSERT)){
                     //新增關聯數據, 更新loadFlag=true
@@ -305,11 +309,12 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
      * 加載關聯數據
      * @param tClass
      * @param  filters
+     * @param ignoreDomainFilter 是否忽略模型的外鍵過濾， 用於特殊場景
      * @return
      * @param <T>
      */
     @Override
-    public <T> ${className} loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders) {
+    public <T> ${className} loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders, Boolean ignoreDomainFilter) {
         LoadFlag.LoadFlagBuilder builder = LoadFlag.builder();
     <#list source.relatedTable as relateTable>
         <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
@@ -320,6 +325,7 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
     </#list>
         LoadFlag loadFlag = builder.build().addFilters(FiltersUtils.buildLambdaFilter(filters));
         loadFlag.setOrder(orders);
+        loadFlag.setIgnoreDomainFilter(ignoreDomainFilter);
         return this._service.find(this, loadFlag);
     }
 </#if>

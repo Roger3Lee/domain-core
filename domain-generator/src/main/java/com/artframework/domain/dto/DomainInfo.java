@@ -17,6 +17,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -33,6 +37,7 @@ public class DomainInfo {
     private String implement;
 
     private TableInfo mainTable;
+
     private List<RelateTableInfo> relatedTable;
     private RelateTableInfo aggregate;
 
@@ -58,6 +63,19 @@ public class DomainInfo {
                 .build();
     }
 
+    public List<RelateTableInfo> getRelatedTableDistinct() {
+        if(CollectionUtil.isEmpty(relatedTable)){
+            return relatedTable;
+        }
+
+        return relatedTable.stream().filter(distinctByKey(TableInfo::getTableName)).collect(Collectors.toList());
+    }
+
+    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Map<Object,Boolean> seen = new ConcurrentHashMap<>();
+        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
+
     @EqualsAndHashCode(callSuper = true)
     @Data
     public static class RelateTableInfo extends TableInfo {
@@ -78,7 +96,8 @@ public class DomainInfo {
             RelateTableInfo tableInfo = new RelateTableInfo();
             tableInfo.setImplement(relatedTableMetaInfo.getImplement());
             tableInfo.setDeletable(relatedTableMetaInfo.getDeletable());
-            tableInfo.setName(relatedTableMetaInfo.getTable());
+            tableInfo.setName(StrUtil.isEmpty(relatedTableMetaInfo.getName()) ? relatedTableMetaInfo.getTable() : relatedTableMetaInfo.getName());
+            tableInfo.setTableName(relatedTableMetaInfo.getTable());
             tableInfo.setColumn(GlobalSetting.INSTANCE.getTableColumns(relatedTableMetaInfo.getTable()));
             ColumnMetaInfo keyColumn = tableInfo.getColumn().stream().filter(ColumnMetaInfo::getKey).findFirst().orElse(null);
             if (keyColumn != null) {
@@ -164,7 +183,7 @@ public class DomainInfo {
         }
 
         public String nameSuffix(String suffix) {
-            return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", this.getName()))) + suffix;
+            return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", this.getTableName()))) + suffix;
         }
 
         public static void main(String[] args) {
@@ -198,6 +217,7 @@ public class DomainInfo {
     @Data
     public static class TableInfo {
         private String name;
+        private String tableName;
         private String implement;
         private Boolean deletable;
         private List<ColumnMetaInfo> column;

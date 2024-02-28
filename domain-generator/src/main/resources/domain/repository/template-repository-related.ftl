@@ -5,8 +5,8 @@ import ${tablePackage!''}.*;
 import ${corePackage}.repository.*;
 
 <#assign dtoClassName=NameUtils.dataTOName(source.name)/>
-<#assign relateRepositoryClassName=NameUtils.repositoryName(table.name)/>
-<#assign relateDtoClassName=NameUtils.dataTOName(table.name)/>
-<#assign relateDoClassName=NameUtils.dataObjectName(table.name)/>
+<#assign relateRepositoryClassName=NameUtils.repositoryName(table.tableName)/>
+<#assign relateDtoClassName=NameUtils.dataTOName(table.tableName)/>
+<#assign relateDoClassName=NameUtils.dataObjectName(table.tableName)/>
 public interface ${relateRepositoryClassName} extends BaseRepository<${dtoClassName}.${relateDtoClassName}, ${relateDoClassName}> {
 }

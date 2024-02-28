@@ -17,15 +17,15 @@ import java.util.List;
 <#assign covertName=NameUtils.covertName(source.name)/>
 <#assign lambdaClassName=NameUtils.lambdaExpName(source.name)/>
 
-<#assign relateDOClassName= NameUtils.dataObjectName(table.name)/>
-<#assign relateDTOClassName= dtoClassName+"."+ NameUtils.dataTOName(table.name)/>
-<#assign relateMapperClassName=NameUtils.mapperName(table.name)/>
+<#assign relateDOClassName= NameUtils.dataObjectName(table.tableName)/>
+<#assign relateDTOClassName= dtoClassName+"."+ NameUtils.dataTOName(table.tableName)/>
+<#assign relateMapperClassName=NameUtils.mapperName(table.tableName)/>
 <#assign relateMapperName=NameUtils.getFieldName(relateMapperClassName)/>
-<#assign relateFieldName=NameUtils.getFieldName(table.name)/>
-<#assign relateRepositoryClassName=NameUtils.repositoryName(table.name)/>
-<#assign relateRepositoryImplClassName=NameUtils.repositoryImplName(table.name)/>
-<#assign fieldName=NameUtils.getFieldName(table.name)/>
-<#assign relateName=NameUtils.getName(table.name)/>
+<#assign relateFieldName=NameUtils.getFieldName(table.tableName)/>
+<#assign relateRepositoryClassName=NameUtils.repositoryName(table.tableName)/>
+<#assign relateRepositoryImplClassName=NameUtils.repositoryImplName(table.tableName)/>
+<#assign fieldName=NameUtils.getFieldName(table.tableName)/>
+<#assign relateName=NameUtils.getName(table.tableName)/>
 @Repository(value="${source.name}-${relateRepositoryImplClassName}")
 public class ${relateRepositoryImplClassName} extends BaseRepositoryImpl<${relateDTOClassName},${relateDOClassName}>  implements ${relateRepositoryClassName} {
 
