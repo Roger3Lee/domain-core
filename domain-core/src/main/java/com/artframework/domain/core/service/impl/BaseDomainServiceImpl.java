@@ -3,8 +3,6 @@ package com.artframework.domain.core.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import lombok.extern.slf4j.Slf4j;
 import com.artframework.domain.core.domain.BaseDomain;
 import com.artframework.domain.core.domain.PageDomain;
 import com.artframework.domain.core.lambda.LambdaFilter;
@@ -13,6 +11,8 @@ import com.artframework.domain.core.repository.BaseRepository;
 import com.artframework.domain.core.service.BaseDomainService;
 import com.artframework.domain.core.uitls.CompareUtil;
 import com.artframework.domain.core.uitls.FiltersUtils;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -81,6 +81,27 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
     }
 
     @Override
+    public <T> T queryOne(Class<T> clazz, List<LambdaFilter<T>> lambdaFilters) {
+        return queryOne(clazz, lambdaFilters, null);
+    }
+
+    @Override
+    public <T> T queryOne(Class<T> clazz, List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders) {
+        if (CollUtil.isEmpty(lambdaFilters)) {
+            log.warn("不允許不加過濾條件加載數據");
+            return null;
+        }
+
+        BaseRepository repository = _DomainRepositoryMap.get(clazz.getCanonicalName());
+        if (null == repository) {
+            throw new UnsupportedOperationException("查詢不支持的實體:" + clazz.getCanonicalName());
+        }
+
+        return (T) repository.query(null, null, FiltersUtils.buildLambdaFilter(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty(), false);
+    }
+
+
+    @Override
     public <T> List<T> queryList(Class<T> clazz, List<LambdaFilter<T>> lambdaFilters) {
         return queryList(clazz, lambdaFilters, null);
     }
@@ -94,7 +115,7 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
 
         BaseRepository repository = _DomainRepositoryMap.get(clazz.getCanonicalName());
         if (null == repository) {
-            throw new UnsupportedOperationException("刪除不支持的實體:" + clazz.getCanonicalName());
+            throw new UnsupportedOperationException("查詢不支持的實體:" + clazz.getCanonicalName());
         }
 
         return repository.queryList(FiltersUtils.buildLambdaFilter(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
@@ -114,10 +135,10 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
     public <T> IPage<T> queryPage(Class<T> clazz, PageDomain pageDomain, List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders) {
         BaseRepository repository = _DomainRepositoryMap.get(clazz.getCanonicalName());
         if (null == repository) {
-            throw new UnsupportedOperationException("刪除不支持的實體:" + clazz.getCanonicalName());
+            throw new UnsupportedOperationException("查詢不支持的實體:" + clazz.getCanonicalName());
         }
 
-        return repository.queryPage(pageDomain, FiltersUtils.buildLambdaFilter(lambdaFilters));
+        return repository.queryPage(pageDomain, FiltersUtils.buildLambdaFilter(lambdaFilters),ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
     }
 }
     

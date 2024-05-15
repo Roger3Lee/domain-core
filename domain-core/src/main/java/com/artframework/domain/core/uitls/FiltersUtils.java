@@ -3,12 +3,12 @@ package com.artframework.domain.core.uitls;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.artframework.domain.core.constants.Op;
 import com.artframework.domain.core.domain.BaseLoadFlag;
 import com.artframework.domain.core.lambda.LambdaCache;
 import com.artframework.domain.core.lambda.LambdaFilter;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -37,13 +37,13 @@ public class FiltersUtils {
         return build(entity, field, op, value, null);
     }
 
-    public static BaseLoadFlag.Filter build(String entity, String field, Op op, Object value, BaseLoadFlag.DOFilter orFilter) {
+    public static BaseLoadFlag.Filter build(String entity, String field, Op op, Object value, List<BaseLoadFlag.DOFilter> orFilterList) {
         BaseLoadFlag.Filter filter = new BaseLoadFlag.Filter();
         filter.setEntity(entity);
         filter.setField(field);
         filter.setOp(op.getCode());
         filter.setValue(value);
-        filter.setOrFilter(orFilter);
+        filter.setOrFilter(orFilterList);
         return filter;
     }
 
@@ -51,9 +51,9 @@ public class FiltersUtils {
         return build(column, value, op, null);
     }
 
-    public static <D> BaseLoadFlag.Filter build(SFunction<D, Serializable> column, Object value, Op op, BaseLoadFlag.DOFilter orFilter) {
+    public static <D> BaseLoadFlag.Filter build(SFunction<D, Serializable> column, Object value, Op op, List<BaseLoadFlag.DOFilter> orFilterList) {
         LambdaCache.LambdaInfo<D> lambdaInfo = LambdaCache.info(column);
-        return build(getEntityName(lambdaInfo.getClazz()), lambdaInfo.getFieldName(), op, value, orFilter);
+        return build(getEntityName(lambdaInfo.getClazz()), lambdaInfo.getFieldName(), op, value, orFilterList);
     }
 
     public static <D> BaseLoadFlag.Filter build(SFunction<D, Serializable> column, Object value) {
@@ -68,9 +68,10 @@ public class FiltersUtils {
         //轉換
         List<BaseLoadFlag.Filter> filters = new ArrayList<>(lambdaFilters.size());
         for (LambdaFilter<D> filter : lambdaFilters) {
-            if (ObjectUtil.isNotNull(filter.getOr())) {
-                LambdaFilter<D> orFilter = filter.getOr();
-                filters.add(build(filter.getField(), filter.getValue(), filter.getOp(), build(orFilter.getField(), orFilter.getValue(), orFilter.getOp())));
+            if (CollectionUtil.isNotEmpty(filter.getOr())) {
+                List<LambdaFilter<D>> orFilterList = filter.getOr();
+                filters.add(build(filter.getField(), filter.getValue(), filter.getOp(),
+                        orFilterList.stream().map(orFilter -> build(orFilter.getField(), orFilter.getValue(), orFilter.getOp())).collect(Collectors.toList())));
             } else {
                 filters.add(build(filter.getField(), filter.getValue(), filter.getOp()));
             }
@@ -106,7 +107,7 @@ public class FiltersUtils {
     }
 
     public static <DO, T> LambdaQueryWrapper<DO> buildWrapper(LambdaQueryWrapper<DO> wrapper, BaseLoadFlag.DOFilter filter, Class<DO> doClass) {
-        if (ObjectUtil.isNull(filter.getOrFilter())) {
+        if (CollectionUtil.isEmpty(filter.getOrFilter())) {
             //沒有OR過濾條件時
             Op op = Op.getOp(filter.getOp());
             switch (op) {
@@ -126,6 +127,12 @@ public class FiltersUtils {
                     break;
                 case LIKE:
                     wrapper.like(LambdaCache.DOLambda(doClass, filter.getField()), filter.getValue());
+                    break;
+                case LIKE_LEFT:
+                    wrapper.likeLeft(LambdaCache.DOLambda(doClass, filter.getField()), filter.getValue());
+                    break;
+                case LIKE_RIGHT:
+                    wrapper.likeRight(LambdaCache.DOLambda(doClass, filter.getField()), filter.getValue());
                     break;
                 case NOT_LIKE:
                     wrapper.notLike(LambdaCache.DOLambda(doClass, filter.getField()), filter.getValue());
@@ -153,12 +160,20 @@ public class FiltersUtils {
                     break;
                 default:
                     //EQ
-                    wrapper.eq(LambdaCache.DOLambda(doClass, filter.getField()), filter.getValue());
+                    if (null == filter.getValue()) {
+                        //為null的情況下使用is null 過濾
+                        wrapper.isNull(LambdaCache.DOLambda(doClass, filter.getField()));
+                    } else {
+                        wrapper.eq(LambdaCache.DOLambda(doClass, filter.getField()), filter.getValue());
+                    }
             }
         } else {
-            Consumer<LambdaQueryWrapper<DO>> consumer = x -> x.and(y -> buildWrapper(y, BaseLoadFlag.DOFilter.copy(filter), doClass))
-                    .or(y -> buildWrapper(y, filter.getOrFilter(), doClass));
-            wrapper.and(x -> x.and(consumer));
+            Consumer<LambdaQueryWrapper<DO>> consumer = x -> x.and(y -> buildWrapper(y, BaseLoadFlag.DOFilter.copy(filter), doClass));
+            for (BaseLoadFlag.DOFilter filterItem : filter.getOrFilter()) {
+                consumer = consumer.andThen(x -> x.or(y -> buildWrapper(y, filterItem, doClass)));
+            }
+            Consumer<LambdaQueryWrapper<DO>> finalConsumer = consumer;
+            wrapper.and(x -> x.and(finalConsumer));
         }
         return wrapper;
     }

@@ -1,11 +1,11 @@
 package com.artframework.domain.core.repository;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.artframework.domain.core.domain.BaseDomain;
 import com.artframework.domain.core.domain.BaseLoadFlag;
 import com.artframework.domain.core.domain.PageDomain;
 import com.artframework.domain.core.lambda.LambdaOrder;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
 import java.io.Serializable;
 import java.util.List;
@@ -20,10 +20,12 @@ public interface BaseRepository<D extends BaseDomain, DO> {
     D queryByKey(Serializable key, SFunction<D, Serializable> keyWarp);
     D query(Serializable id, SFunction<DO, Serializable> idWrap);
     D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters);
+    D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders);
     D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters, Boolean ignoreDomainFkFilter);
+    D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders, Boolean ignoreDomainFkFilter);
 
     List<D> queryList(List<BaseLoadFlag.DOFilter> filters);
-    List<D> queryList(List<BaseLoadFlag.DOFilter> filters,List<LambdaOrder.LambdaOrderItem> orders);
+    List<D> queryList(List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders);
     List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap);
 
     List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters);
@@ -35,7 +37,7 @@ public interface BaseRepository<D extends BaseDomain, DO> {
     IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> buildLambdaFilter);
 
 
-    IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> buildLambdaFilter,List<LambdaOrder.LambdaOrderItem> orders);
+    IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> buildLambdaFilter, List<LambdaOrder.LambdaOrderItem> orders);
     /**
      * 插入一条数据
      *

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import lombok.Data;
 import lombok.SneakyThrows;
 
+import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 
@@ -48,7 +49,7 @@ public class MPFieldLambda<T> {
         };
     }
 
-    public static <T, R> SSFunction<T, R> fieldLambda(Class<T> doClass, String key) {
+    public static <T> SSFunction<T, Serializable> fieldLambda(Class<T> doClass, String key) {
         MPFieldLambda fieldLambda = new MPFieldLambda(doClass, key);
         return fieldLambda.fieldLambda();
     }

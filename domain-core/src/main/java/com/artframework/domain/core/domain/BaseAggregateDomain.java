@@ -1,11 +1,10 @@
 package com.artframework.domain.core.domain;
 
 import cn.hutool.core.collection.ListUtil;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Setter;
 import com.artframework.domain.core.lambda.LambdaFilter;
 import com.artframework.domain.core.lambda.LambdaOrder;
 import com.artframework.domain.core.service.BaseDomainService;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -20,9 +19,8 @@ public abstract class BaseAggregateDomain<D extends BaseDomain, S extends BaseDo
     /**
      * 領域服務
      */
-    @JsonIgnore
     @Setter
-    public S _service;
+    protected transient S _service;
 
     /**
      * 加載關聯數據
@@ -52,17 +50,18 @@ public abstract class BaseAggregateDomain<D extends BaseDomain, S extends BaseDo
     }
 
 
-    public <T> D loadRelated(Class<T> tClass, LambdaFilter<T> filter, LambdaOrder<T> orders){
+    public <T> D loadRelated(Class<T> tClass, LambdaFilter<T> filter, LambdaOrder<T> orders) {
         return loadRelated(tClass, ListUtil.toList(filter), orders);
     }
 
     /**
      * 帶排序的加載關聯數據
+     *
      * @param tClass
      * @param filters
      * @param orders
-     * @return
      * @param <T>
+     * @return
      */
     public <T> D loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders) {
         return loadRelated(tClass, filters, orders, false);
@@ -84,11 +83,12 @@ public abstract class BaseAggregateDomain<D extends BaseDomain, S extends BaseDo
 
     /**
      * 加載關聯數據， 不適用domain的外鍵字段過濾， 用於特殊場景
+     *
      * @param tClass
      * @param filters
      * @param ignoreDomainFkFilter 是否忽略模型的外鍵過濾， 用於特殊場景
-     * @return
      * @param <T>
+     * @return
      */
     public <T> D loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, Boolean ignoreDomainFkFilter) {
         return loadRelated(tClass, filters, null, ignoreDomainFkFilter);
@@ -96,13 +96,16 @@ public abstract class BaseAggregateDomain<D extends BaseDomain, S extends BaseDo
 
     /**
      * 加載關聯數據， 不適用domain的外鍵字段過濾， 用於特殊場景
+     *
      * @param tClass
      * @param filters
      * @param ignoreDomainFkFilter 是否忽略模型的外鍵過濾， 用於特殊場景
-     * @return
      * @param <T>
+     * @return
      */
-    public <T> D loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders, Boolean ignoreDomainFkFilter){
+    public <T> D loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders, Boolean ignoreDomainFkFilter) {
         throw new UnsupportedOperationException();
-    };
+    }
+
+    ;
 }

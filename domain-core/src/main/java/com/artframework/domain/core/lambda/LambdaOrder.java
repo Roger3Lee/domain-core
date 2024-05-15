@@ -1,11 +1,12 @@
 package com.artframework.domain.core.lambda;
 
 import cn.hutool.core.collection.ListUtil;
+import com.artframework.domain.core.constants.Order;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import com.artframework.domain.core.constants.Order;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class LambdaOrder<T> {
      * @param <T>
      */
     public static <T> LambdaOrder<T> build(SFunction<T, Serializable> field) {
-        return build(field,Order.ASC);
+        return build(field, Order.ASC);
     }
 
     /**
@@ -65,6 +66,9 @@ public class LambdaOrder<T> {
     }
 
     public static <T> LambdaOrder<T> buildByFieldName(Class<T> clazz, String field, Order order) {
+        if(StringUtils.isBlank(field)){
+            return new LambdaOrder<T>();
+        }
         LambdaOrderItem orderItem = new LambdaOrderItem(clazz, field, order);
         return new LambdaOrder<T>(orderItem);
     }

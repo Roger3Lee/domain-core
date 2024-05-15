@@ -13,6 +13,9 @@ public enum Op {
     NOT_IN("NOTIN"),
     LIKE("LIKE"),
     NOT_LIKE("NOTLIKE"),
+    LIKE_LEFT("LIKE_LEFT"),
+
+    LIKE_RIGHT("LIKE_RIGHT"),
     EQ(StringPool.EQUALS),
     NE("<>"),
     GT(StringPool.RIGHT_CHEV),
@@ -26,8 +29,7 @@ public enum Op {
     /**
      * 不過濾任何數據
      */
-    NIL("NIL"),
-    ;
+    NIL("NIL"),;
 
     private String code;
 

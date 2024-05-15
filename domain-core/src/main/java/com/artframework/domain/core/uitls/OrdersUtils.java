@@ -1,9 +1,9 @@
 package com.artframework.domain.core.uitls;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.artframework.domain.core.lambda.LambdaCache;
 import com.artframework.domain.core.lambda.LambdaOrder;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -26,6 +26,7 @@ public class OrdersUtils {
 
     /**
      * 生成排序的
+     *
      * @param wrapper
      * @param order
      * @param doClass

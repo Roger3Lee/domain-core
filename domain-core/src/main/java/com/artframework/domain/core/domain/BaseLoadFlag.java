@@ -2,11 +2,12 @@ package com.artframework.domain.core.domain;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
+import com.artframework.domain.core.constants.Op;
+import com.artframework.domain.core.constants.Order;
+import com.artframework.domain.core.lambda.LambdaOrder;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import com.artframework.domain.core.constants.Order;
-import com.artframework.domain.core.lambda.LambdaOrder;
 
 import java.io.Serializable;
 import java.util.*;
@@ -99,10 +100,10 @@ public class BaseLoadFlag {
     @NoArgsConstructor
     public static class DOFilter{
         private String field;
-        private String op = com.artframework.domain.core.constants.Op.EQ.getCode();
+        private String op = Op.EQ.getCode();
         private Object value;
 
-        private DOFilter orFilter;
+        private List<DOFilter> orFilter;
 
         /**
          * 拷貝基礎信息， 補拷貝orFilter

@@ -4,12 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import lombok.extern.slf4j.Slf4j;
 import com.artframework.domain.core.constants.Op;
 import com.artframework.domain.core.constants.SaveState;
 import com.artframework.domain.core.domain.BaseDomain;
@@ -21,9 +15,14 @@ import com.artframework.domain.core.mapper.BatchBaseMapper;
 import com.artframework.domain.core.repository.BaseRepository;
 import com.artframework.domain.core.uitls.FiltersUtils;
 import com.artframework.domain.core.uitls.OrdersUtils;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -34,11 +33,6 @@ import java.util.stream.Collectors;
 public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements BaseRepository<D, DO> {
     @Autowired
     protected BaseMapper<DO> baseMapper;
-
-    @PostConstruct
-    public void init() {
-        log.info(this.getDOClass().getSimpleName() + " repository init successfully.");
-    }
 
     @Override
     public D queryByKey(Serializable key, SFunction<D, Serializable> keyWarp) {
@@ -52,14 +46,23 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
 
     @Override
     public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters) {
-        return query(id, idWrap, filters, false);
+        return query(id, idWrap, filters, null,false);
     }
 
     @Override
-    public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters, Boolean ignoreDomainFkFilter) {
+    public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders){
+        return query(id, idWrap, filters, orders,false);
+    }
+    @Override
+    public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters , Boolean ignoreDomainFkFilter) {
+        return query(id, idWrap, filters, null,false);
+    }
+
+    @Override
+    public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters , List<LambdaOrder.LambdaOrderItem> orders, Boolean ignoreDomainFkFilter) {
         boolean hasFilter = false;
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
-        if (!BooleanUtil.isTrue(ignoreDomainFkFilter)) {
+        if (!BooleanUtil.isTrue(ignoreDomainFkFilter) && ObjectUtil.isNotNull(id) && ObjectUtil.isNotNull(idWrap)) {
             hasFilter = true;
             wrapper.eq(idWrap, id);
         }
@@ -80,6 +83,13 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         if (!hasFilter) {
             log.warn("不允許不加過濾條件查詢數據");
             return null;
+        }
+
+        //排序
+        if (ObjectUtil.isNotNull(orders)) {
+            for (LambdaOrder.LambdaOrderItem order : orders) {
+                OrdersUtils.buildOrderWrapper(wrapper, order, this.getDOClass());
+            }
         }
 
         wrapper = wrapper.last("limit 1");
