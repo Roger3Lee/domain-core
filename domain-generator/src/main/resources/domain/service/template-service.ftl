@@ -10,7 +10,7 @@ import java.io.Serializable;
 <#assign serviceClassName=NameUtils.serviceName(source.name)/>
 <#assign domainName=NameUtils.getName(source.name)/>
 <#assign dtoClassName=NameUtils.dataTOName(source.name)/>
-public interface ${serviceClassName} extends BaseDomainService {
+public interface ${serviceClassName} extends <#if (source.relatedTable?size>0)>BaseDomainService<#else>BaseSimpleDomainService<${dtoClassName}></#if> {
 
     /**
     * 查找
@@ -27,7 +27,7 @@ public interface ${serviceClassName} extends BaseDomainService {
     */
     ${dtoClassName} find(${domainName}FindDomain request, ${dtoClassName} domain);
 
-
+<#if (source.relatedTable?size>0)>
    /**
      * 通過已有實體查找
      * @param response 已有實體
@@ -35,7 +35,7 @@ public interface ${serviceClassName} extends BaseDomainService {
      * @return
      */
     ${dtoClassName} find(${dtoClassName} response, ${dtoClassName}.LoadFlag loadFlag);
-
+</#if>
     <#if source.aggregate??>
     /**
      * 查找

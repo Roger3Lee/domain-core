@@ -22,6 +22,12 @@ import java.util.List;
 public interface  ${covertName}{
     ${domainName}Convertor INSTANCE= Mappers.getMapper(${domainName}Convertor.class);
 
+<#list source.relatedTable as relateTable>
+    <#assign fieldName=NameUtils.getFieldName(relateTable.name)/>
+    <#assign fieldNameList=NameUtils.getListFieldName(relateTable.name)/>
+    @Mapping(target = "<#if relateTable.many>${fieldNameList}<#else>${fieldName}</#if>", ignore = true)
+</#list>
+    ${dtoClassName} copy(${dtoClassName} request);
     ${dtoClassName} convert2DTO(${doClassName} request);
     void convert2DTO(${doClassName} request, @MappingTarget ${dtoClassName} target);
     List<${dtoClassName}> convert2DTO(List<${doClassName}> request);

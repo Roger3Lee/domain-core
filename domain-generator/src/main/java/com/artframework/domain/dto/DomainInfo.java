@@ -42,7 +42,11 @@ public class DomainInfo {
     private RelateTableInfo aggregate;
 
     public String getFolder() {
-        return StringUtils.isNotEmpty(this.folder) ? this.folder : NameUtils.packageName(this.getName());
+        return StringUtils.isNotEmpty(this.folder) ? StrUtil.replace(this.folder, "/", ".") : NameUtils.packageName(this.getName());
+    }
+
+    public String getFolderPath() {
+        return StringUtils.isNotEmpty(this.folder) ? this.folder: NameUtils.packageName(this.getName());
     }
 
     public String nameSuffix(String suffix) {
@@ -84,6 +88,7 @@ public class DomainInfo {
         private String fkSourceColumn;
         private String fkTargetColumnType;
         private String fkTargetColumn;
+        private List<TableFK> otherFkList = new ArrayList<>();
         /**
          * 關聯表列表
          */
@@ -113,6 +118,11 @@ public class DomainInfo {
             tableInfo.setFkTargetColumn(strings[1]);
             tableInfo.setFkTargetColumnType(tableInfo.getColumn().stream().filter(x -> StringUtils.equalsAnyIgnoreCase(x.getName(), strings[1]))
                     .map(ColumnMetaInfo::getType).findFirst().orElse(""));
+
+            if (StringUtils.isNotEmpty(relatedTableMetaInfo.getOtherFk())) {
+                tableInfo.setOtherFkList(getFK(relatedTableMetaInfo.getOtherFk(), tableInfo.getColumn(), mainTable.getColumn()));
+            }
+
             if (CollectionUtil.isNotEmpty(relatedTableMetaInfo.getRefList())) {
                 tableInfo.setRefTableList(relatedTableMetaInfo.getRefList().stream().map(x -> RelateTableInfo.convertRef(x, tableInfo))
                         .collect(Collectors.toList()));
@@ -127,8 +137,13 @@ public class DomainInfo {
                     .many(relatedTableMetaInfo.getMany())
                     .build();
             tableInfo.setColumn(GlobalSetting.INSTANCE.getTableColumns(relatedTableMetaInfo.getTable()));
-            String[] strings = relatedTableMetaInfo.getFk().split("\\|");
-            List<RefTable.RefTableFK> fkList = new ArrayList<>();
+            tableInfo.setFkList(getFK(relatedTableMetaInfo.getFk(), tableInfo.getColumn(), mainTable.getColumn()));
+            return tableInfo;
+        }
+
+        private static List<TableFK> getFK(String fkString, List<ColumnMetaInfo> targetColumns, List<ColumnMetaInfo> mainColumns) {
+            String[] strings = fkString.split("\\|");
+            List<TableFK> fkList = new ArrayList<>();
             for (String fk : strings) {
                 String[] fkMap = fk.split(":");
                 if(fkMap.length!=2){
@@ -137,11 +152,11 @@ public class DomainInfo {
                 Tuple target = getColumnInfo(fkMap[1]);
                 Tuple source = getColumnInfo(fkMap[0]);
                 //目標字段類型
-                String targetType = tableInfo.getColumn().stream().filter(x -> StringUtils.equalsAnyIgnoreCase(x.getName(), target.get(0).toString()))
+                String targetType = targetColumns.stream().filter(x -> StringUtils.equalsAnyIgnoreCase(x.getName(), target.get(0).toString()))
                         .map(ColumnMetaInfo::getType).findFirst().orElse("");
 
-                RefTable.RefTableFK refTableFK = new RefTable.RefTableFK();
-                ColumnMetaInfo sourceColumn = mainTable.getColumn().stream().filter(x -> StringUtils.equalsAnyIgnoreCase(x.getName(), source.get(0).toString())).findFirst().orElse(null);
+                TableFK refTableFK = new TableFK();
+                ColumnMetaInfo sourceColumn = mainColumns.stream().filter(x -> StringUtils.equalsAnyIgnoreCase(x.getName(), source.get(0).toString())).findFirst().orElse(null);
                 if (null != sourceColumn) {
                     refTableFK.setFkSourceColumn(source.get(0));
                     refTableFK.setFkSourceColumnType(sourceColumn.getType());
@@ -160,8 +175,7 @@ public class DomainInfo {
                 refTableFK.setFkTargetConvertMethod(target.get(1));
                 fkList.add(refTableFK);
             }
-            tableInfo.setFkList(fkList);
-            return tableInfo;
+            return fkList;
         }
 
         /**
@@ -197,19 +211,8 @@ public class DomainInfo {
         private String name;
         private String tableName;
         private Boolean many;
-        private List<RefTableFK> fkList;
+        private List<TableFK> fkList;
         private List<ColumnMetaInfo> column;
-
-        @Data
-        public static class RefTableFK{
-            private String fkSourceColumnType;
-            private String fkSourceColumn;
-            private String fkSourceConvertMethod;
-            private String fkTargetColumnType;
-            private String fkTargetColumn;
-            private String fkTargetConvertMethod;
-            private String sourceValue; //為常量是，存儲常量的值， 常量定義為常量
-        }
     }
 
 
@@ -236,5 +239,17 @@ public class DomainInfo {
 
             return tableInfo;
         }
+    }
+
+
+    @Data
+    public static class TableFK{
+        private String fkSourceColumnType;
+        private String fkSourceColumn;
+        private String fkSourceConvertMethod;
+        private String fkTargetColumnType;
+        private String fkTargetColumn;
+        private String fkTargetConvertMethod;
+        private String sourceValue; //為常量是，存儲常量的值， 常量定義為常量
     }
 }

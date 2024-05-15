@@ -1,27 +1,36 @@
 package ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain;
 
 import ${corePackage}.domain.*;
+<#if (source.relatedTable?size>0)>
 import ${corePackage}.lambda.*;
 import ${corePackage}.uitls.FiltersUtils;
 import ${corePackage}.constants.*;
+</#if>
 <#if source.aggregate??>
 import com.fasterxml.jackson.annotation.JsonIgnore;
 </#if>
 import lombok.*;
+import java.io.Serializable;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.lambdaexp.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.convertor.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.service.*;
+<#if (source.relatedTable?size>0)>
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.lambdaexp.*;
 import cn.hutool.core.util.*;
 import cn.hutool.core.collection.*;
-import java.io.Serializable;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+</#if>
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
+<#assign covertName=NameUtils.covertName(source.name)/>
+<#assign className=NameUtils.dataTOName(source.name)/>
+<#assign lambdaClassName=NameUtils.lambdaExpName(source.name)/>
+<#assign serviceClassName=NameUtils.serviceName(source.name)/>
 /**
 * ${source.name}
 *
@@ -31,15 +40,14 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 @ApiModel(value = "${source.description}")
 @NoArgsConstructor
 @AllArgsConstructor
-<#assign className=NameUtils.dataTOName(source.name)/>
-<#assign lambdaClassName=NameUtils.lambdaExpName(source.name)/>
-<#assign serviceClassName=NameUtils.serviceName(source.name)/>
-public class ${className} extends BaseAggregateDomain<${className},${serviceClassName}> <#if (source.implement??) && (source.implement!='')> implements ${source.implement}</#if> {
+public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregateDomain<${className},${serviceClassName}><#else>BaseDomain</#if><#if (source.implement??) && (source.implement!='')> implements ${source.implement}</#if> {
 
+<#if (source.relatedTable?size>0)>
     public ${className}(${source.mainTable.keyType} key, ${serviceClassName} service){
         this.${source.mainTable.keyColName} = key;
         this._service = service;
     }
+</#if>
 <#if source.mainTable??>
     <#list source.mainTable.column as column>
     /**
@@ -89,6 +97,7 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
     private ${relateDtoClassName} ${fieldName};
     </#if>
 
+<#if (source.relatedTable?size>0)>
     /**
     * 加载数据標識類
     */
@@ -96,6 +105,7 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
     @Setter
     @ApiModelProperty(value =  "加载数据標識類")
     private LoadFlag loadFlag;
+</#if>
 
 <#--    关联实体类-->
     <#list source.relatedTable as relateTable>
@@ -131,12 +141,12 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
         */
         <#--   列表 -->
         public synchronized <#if refTable.many>java.util.List<${refClassName}><#else>${refClassName}</#if> ${refGetterMethodName}() {
-            ${className} domain = (${className})this.get_thisDomain();
-            if(null == domain){
-                return null;
-            }
-
             if(null == this.${refFieldName}){
+                ${className} domain = (${className})this.get_thisDomain();
+                if(null == domain){
+                    return null;
+                }
+
                 Predicate<${refClassName}> condition = x -> true;
                 <#list refTable.fkList as fk>
                  <#assign refSourceLambda=NameUtils.fieldRefSourceLambda(fieldName,refName,fk.fkSourceColumn)/>
@@ -179,7 +189,7 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
                         <#assign sourceDomainGetterList=NameUtils.genListGetter(refTable.tableName)/>
                         <#assign sourceDomainSetterList=NameUtils.genListSetter(refTable.tableName)/>
             // 處理${refFieldName}
-            if(ObjectUtil.isNotEmpty(this.${refFieldName})){
+            if(ObjectUtil.isNotEmpty(this.${refFieldName}) && ObjectUtil.isNotEmpty(this.${refFieldName}.getValue())){
                 java.util.List<${refClassName}> list = new java.util.ArrayList<>();
                 //設置關聯字段值
                 for (${refClassName} refDomain : ListUtil.toList(this.${refFieldName}.getValue())) {
@@ -194,14 +204,15 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
                 </#list>
                      list.add(refDomain);
                 }
-                if(saveState.equals(SaveState.INSERT)){
-                    //新增關聯數據, 更新loadFlag=true
-                    domain.getLoadFlag().${NameUtils.getFieldWithPrefix(refTable.tableName,"load")} = true;
-                }
 
                 //將關聯信息插入到主domain中
                 if (CollectionUtil.isNotEmpty(domain.${sourceDomainGetterList}())) {
-                    domain.${sourceDomainGetterList}().addAll(list);
+                    list.forEach(x -> {
+                        //引用類型，如果已經存在則不重複加入
+                        if (!domain.${sourceDomainGetterList}().contains(x)) {
+                            domain.${sourceDomainGetterList}().add(x);
+                        }
+                    });
                 } else {
                     domain.${sourceDomainSetterList}(list);
                 }
@@ -230,6 +241,7 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
     }
 </#if>
 
+<#if (source.relatedTable?size>0)>
     @Getter
     @Setter
     @ToString
@@ -279,6 +291,7 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
             return loadFlag;
         }
     }
+</#if>
 
     /**
      * 加載實體數據
@@ -287,9 +300,15 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
      * @return
      */
     public static ${className} load(Serializable key, ${serviceClassName} service) {
+    <#if (source.relatedTable?size>0)>
         ${className} domain = service.find(${NameUtils.getName(source.name)}FindDomain.builder().key(key).build());
-        domain._service = service;
+        if(ObjectUtil.isNotNull(domain)){
+            domain._service = service;
+        }
         return domain;
+    <#else>
+        return service.find(${NameUtils.getName(source.name)}FindDomain.builder().key(key).build());
+    </#if>
     }
 
     /**
@@ -300,11 +319,17 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
      * @return
      */
     public static ${className} loadByKey(Serializable key, SFunction<${className}, Serializable> keyLambda, ${serviceClassName} service) {
+     <#if (source.relatedTable?size>0)>
         ${className} domain = service.findByKey(${NameUtils.getName(source.name)}FindDomain.builder().key(key).build(), keyLambda);
-        domain._service = service;
+        if(ObjectUtil.isNotNull(domain)){
+            domain._service = service;
+        }
         return domain;
+     <#else>
+        return service.findByKey(${NameUtils.getName(source.name)}FindDomain.builder().key(key).build(), keyLambda);
+     </#if>
     }
-
+<#if (source.relatedTable?size>0)>
     /**
      * 加載關聯數據
      * @param tClass
@@ -329,4 +354,14 @@ public class ${className} extends BaseAggregateDomain<${className},${serviceClas
         return this._service.find(this, loadFlag);
     }
 </#if>
+</#if>
+
+     /**
+     * 淺拷貝領域模型
+     * @param sourceDomain 源模型
+     * @return 返回的模型
+     */
+    public static ${className} copy(${className} sourceDomain){
+        return ${covertName}.INSTANCE.copy(sourceDomain);
+    }
 }

@@ -6,24 +6,28 @@ import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.convertor.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.service.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.repository.*;
+import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.lambdaexp.*;
 import ${corePackage}.service.impl.*;
-import ${corePackage}.uitls.*;
 
-import cn.hutool.core.collection.*;
-import cn.hutool.core.util.*;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+<#if (source.relatedTable?size>0)>
+import ${corePackage}.uitls.*;
+import cn.hutool.core.collection.*;
+import cn.hutool.core.util.*;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
-import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.lambdaexp.*;
-
 import javax.annotation.PostConstruct;
+<#else>
+import ${corePackage}.repository.*;
+</#if>
+
 
 <#assign serviceClassName=NameUtils.serviceName(source.name)/>
 <#assign serviceImplClassName=NameUtils.serviceImplName(source.name)/>
@@ -35,7 +39,7 @@ import javax.annotation.PostConstruct;
 <#assign sourceLambda=NameUtils.fieldSourceLambda(source.name)/>
 
 @Service
-public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${serviceClassName} {
+public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>BaseDomainServiceImpl<#else>BaseSimpleDomainServiceImpl<${dtoClassName}></#if> implements ${serviceClassName} {
 <#--    注入Repository-->
     @Autowired
     private ${repositoryClassName} ${repositoryName};
@@ -65,6 +69,10 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
       <#assign relateDtoClassName=NameUtils.dataTOName(source.aggregate.name)/>
         this._DomainRepositoryMap.put(${dtoClassName}.${relateDtoClassName}.class.getCanonicalName(), this.${NameUtils.getFieldName(relateRepositoryClassName)});
     </#if>
+    }
+<#else>
+    public BaseRepository getRepository() {
+        return ${repositoryName};
     }
 </#if>
 
@@ -117,6 +125,19 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
             if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.${loadProperty}())){
                 Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(resp);
                 if(ObjectUtil.isNotNull(key)){
+                     <#if (relateTable.otherFkList?size>0)>
+                    List<${corePackage}.lambda.LambdaFilter<${dtoClassName}.${relatedDtoClassName}>> lambdaFilters = new ArrayList<>();
+                        <#list relateTable.otherFkList as fk>
+                         <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,fk.fkSourceColumn)/>
+                         <#assign relatedTargetLambda=NameUtils.fieldRelatedTargetLambda(relateTable.name,fk.fkTargetColumn)/>
+                         <#if fk.fkSourceColumn??>
+                    lambdaFilters.add(${corePackage}.lambda.LambdaFilter.build(${lambdaClassName}.${relatedTargetLambda},<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(this))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(resp)</#if>));
+                         <#else>
+                    lambdaFilters.add(${corePackage}.lambda.LambdaFilter.build(${lambdaClassName}.${relatedTargetLambda},${fk.sourceValue}));
+                         </#if>
+                        </#list>
+                    loadFlag.addFilters(FiltersUtils.buildLambdaFilter(lambdaFilters));
+                     </#if>
                     <#if relateTable.many>
                     List<${dtoClassName}.${relatedDtoClassName}> queryList = ${NameUtils.getFieldName(relateRepositoryClassName)}.queryList(key, ${lambdaClassName}.${relatetargetLambda},
                                      FiltersUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class),
@@ -128,7 +149,9 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
                         resp.${getRelatedPropertyList}().addAll(queryList);
                     }
                     <#else>
-                    ${dtoClassName}.${relatedDtoClassName} item= ${NameUtils.getFieldName(relateRepositoryClassName)}.query(key, ${lambdaClassName}.${relatetargetLambda}, null, loadFlag.getIgnoreDomainFilter());
+                    ${dtoClassName}.${relatedDtoClassName} item= ${NameUtils.getFieldName(relateRepositoryClassName)}.query(key, ${lambdaClassName}.${relatetargetLambda},
+                                     FiltersUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class),
+                                     OrdersUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class), loadFlag.getIgnoreDomainFilter());
                     if(ObjectUtil.isNotNull(item)){
                         item.set_thisDomain(resp);
                     }
@@ -236,13 +259,39 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         <#if relateTable.many>
         if(CollUtil.isNotEmpty(request.${getterList}())){
             Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(domain);
+            <#if (relateTable.otherFkList?size>0)>
+            request.${getterList}().forEach(x->{
+                ${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key);
+                <#list relateTable.otherFkList as fk>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
+                    <#if fk.fkSourceColumn??>
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                         <#else>
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, ${fk.sourceValue});
+                         </#if>
+                </#list>
+            });
+            <#else>
             request.${getterList}().forEach(x->${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key));
+             </#if>
             ${NameUtils.getFieldName(relateRepositoryClassName)}.insert(request.${getterList}());
         }
         <#else>
         if(ObjectUtil.isNotNull(request.${getter}())){
             Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(domain);
             ${lambdaClassName}.${targetSetLambda}.accept(request.${getter}(),(${relateTable.fkTargetColumnType})key);
+            <#if (relateTable.otherFkList?size>0)>
+                <#list relateTable.otherFkList as fk>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
+                    <#if fk.fkSourceColumn??>
+            ${lambdaClassName}.${relatedTargetSetLambda}.accept(domain, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                     <#else>
+            ${lambdaClassName}.${relatedTargetSetLambda}.accept(domain, ${fk.sourceValue});
+                     </#if>
+                </#list>
+             </#if>
             ${NameUtils.getFieldName(relateRepositoryClassName)}.insert(request.${getter}());
         }
         </#if>
@@ -269,7 +318,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
         return update(request,old);
 <#else>
         if(request.getChanged()){
-            ${repositoryName}.update(request);
+            return ${repositoryName}.update(request) > 0;
         }
         return true;
 </#if>
@@ -321,7 +370,22 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
             && (BooleanUtil.isTrue(request.getLoadFlag().getLoadAll()) || BooleanUtil.isTrue(request.getLoadFlag().${loadProperty}()))){
             if(CollUtil.isNotEmpty(request.${getterList}())){
                 Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
+                <#if (relateTable.otherFkList?size>0)>
+                request.${getterList}().forEach(x->{
+                    ${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key);
+                    <#list relateTable.otherFkList as fk>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
+                        <#if fk.fkSourceColumn??>
+                    ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                             <#else>
+                    ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, ${fk.sourceValue});
+                             </#if>
+                    </#list>
+                });
+                <#else>
                 request.${getterList}().forEach(x->${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key));
+                </#if>
             }
             this.merge(old.${getterList}(), request.${getterList}(), ${lambdaClassName}.${targetKeyLambda}, ${NameUtils.getFieldName(relateRepositoryClassName)});
         }
@@ -331,6 +395,17 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
             if(ObjectUtil.isNotNull(request.${getter}())){
                 Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
                 ${lambdaClassName}.${targetSetLambda}.accept(request.${getter}(),(${relateTable.fkTargetColumnType})key);
+                <#if (relateTable.otherFkList?size>0)>
+                    <#list relateTable.otherFkList as fk>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
+                        <#if fk.fkSourceColumn??>
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(domain, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                         <#else>
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(domain, ${fk.sourceValue});
+                         </#if>
+                    </#list>
+                 </#if>
             }
             this.merge(ObjectUtil.isNotNull(old.${getter}())? CollUtil.toList(old.${getter}()):ListUtil.empty(),
                     ObjectUtil.isNotNull(request.${getter}())? CollUtil.toList(request.${getter}()):ListUtil.empty(),
@@ -353,7 +428,7 @@ public class ${serviceImplClassName} extends BaseDomainServiceImpl implements ${
 
         //更新数据
         if(request.getChanged()){
-            ${repositoryName}.update(request);
+            return ${repositoryName}.update(request) > 0;
         }
         return true;
     }

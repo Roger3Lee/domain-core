@@ -15,16 +15,16 @@ public class Program {
         GlobalSetting.load(new File(configPath + "\\table-list.xml"),
                 new File(configPath + "\\domain-config.xml"));
 
-        Map<String, String> packageParam = new HashMap<>();
-        packageParam.put("tablePackage", "com.artframework.sample.entities");
-        packageParam.put("mapperPackage", "com.artframework.sample.mappers");
-        packageParam.put("domainPackage", "com.artframework.sample.domains");
-        packageParam.put("controllerPackage", "com.artframework.sample.controller");
+        Map<String, String> packageParam=new HashMap<>();
+        packageParam.put("tablePackage","com.artframework.sample.entities");
+        packageParam.put("mapperPackage","com.artframework.sample.mappers");
+        packageParam.put("domainPackage","com.artframework.sample.domains");
+        packageParam.put("controllerPackage","com.artframework.sample.controller");
 
-        GenerateUtils.generateTables("C:\\work\\demo\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\mappers",
-                "C:\\work\\demo\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\entities",
-                GlobalSetting.INSTANCE.getTableList(), packageParam, false, false);
-        GenerateUtils.generateDomains("C:\\work\\demo\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\domains\\",
+        GenerateUtils.generateTables("C:\\work\\demo\\artframework.domain\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\mappers",
+                "C:\\work\\demo\\artframework.domain\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\entities",
+                GlobalSetting.INSTANCE.getTableList(), packageParam,false,false);
+        GenerateUtils.generateDomains("C:\\work\\demo\\artframework.domain\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\domains\\",
                 GlobalSetting.INSTANCE.getDomainList(), packageParam, false);
     }
 }

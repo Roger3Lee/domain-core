@@ -90,6 +90,18 @@ public class NameUtils {
         return getFieldWithSuffix(name, "DomainTargetSetLambda");
     }
 
+    public static String fieldRelatedSourceLambda(String name, String field) {
+        return getFieldWithSuffix(name,  getFieldName(field) + "SourceLambda");
+    }
+
+    public static String fieldRelatedTargetLambda(String name, String field) {
+        return getFieldWithSuffix(name, "_" + getFieldName(field) + "TargetLambda");
+    }
+
+    public static String fieldRelatedTargetSetLambda(String name, String field) {
+        return getFieldWithSuffix(name, getFieldName(field) + "TargetSetLambda");
+    }
+
     public static String fieldRefSourceLambda(String name, String ref, String field) {
         return getFieldWithSuffix(name, "Ref" + StringUtils.capitalize(ref) + "_" + getFieldName(field) + "SourceLambda");
     }
