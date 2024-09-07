@@ -202,6 +202,15 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
                      ${lambdaClassName}.${refTargetLambdaSetter}.accept(refDomain, ${fk.sourceValue});
                      </#if>
                 </#list>
+                 <#list refTable.redundancyList as fk>
+                     <#assign refSourceLambda=NameUtils.fieldRefSourceLambda(fieldName,refName,fk.fkSourceColumn)/>
+                     <#assign refTargetLambdaSetter=NameUtils.fieldRefTargetDomainSetLambda(fieldName,refName,fk.fkTargetColumn)/>
+                     <#if fk.fkSourceColumn??>
+                     ${lambdaClassName}.${refTargetLambdaSetter}.accept(refDomain, <#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${refSourceLambda}.apply(this))<#else>(${fk.fkTargetColumnType})${lambdaClassName}.${refSourceLambda}.apply(this)</#if>);
+                     <#else>
+                     ${lambdaClassName}.${refTargetLambdaSetter}.accept(refDomain, ${fk.sourceValue});
+                     </#if>
+                </#list>
                      list.add(refDomain);
                 }
 

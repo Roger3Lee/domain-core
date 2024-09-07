@@ -15,6 +15,7 @@ public class RefTableMetaInfo {
     private String table;
     private Boolean many=false  ;
     private String fk;
+    private String redundancy;
 
     @XmlAttribute(name = "name")
     public void setName(String name) {
@@ -34,5 +35,13 @@ public class RefTableMetaInfo {
     @XmlAttribute(name = "fk")
     public void setFk(String fk) {
         this.fk = fk;
+    }
+    /**
+     * 冗餘字段
+     * @param redundancy
+     */
+    @XmlAttribute(name = "redundancy")
+    public void setRedundancy(String redundancy) {
+        this.redundancy = redundancy;
     }
 }

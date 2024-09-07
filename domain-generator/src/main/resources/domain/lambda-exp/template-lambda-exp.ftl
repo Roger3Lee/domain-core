@@ -70,7 +70,7 @@ public class ${className}{
     /**
     * REF ${refTable.name} source lambda
     */
-    public static SFunction<${dtoClassName}, Serializable> ${NameUtils.fieldRelatedSourceLambda(source.mainTable.name,fk.fkSourceColumn)} = ${dtoClassName}::${NameUtils.genGetter(fk.fkSourceColumn)};
+    public static SFunction<${dtoClassName}, Serializable> ${NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)} = ${dtoClassName}::${NameUtils.genGetter(fk.fkSourceColumn)};
 
 </#if>
     /**
@@ -84,6 +84,24 @@ public class ${className}{
     public static BiConsumer<${relateDtoClassName},${fk.fkTargetColumnType}> ${NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)} =${relateDtoClassName}::${NameUtils.genSetter(fk.fkTargetColumn)};
  </#list>
 
+ <#list relateTable.redundancyList as fk>
+ <#if fk.fkSourceColumn??>
+     /**
+     * REF ${refTable.name} source lambda
+     */
+     public static SFunction<${dtoClassName}, Serializable> ${NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)} = ${dtoClassName}::${NameUtils.genGetter(fk.fkSourceColumn)};
+
+ </#if>
+     /**
+     * REF ${refTable.name} target lambda
+     */
+     public static SFunction<${relateDtoClassName},Serializable> ${NameUtils.fieldRelatedTargetLambda(relateTable.name,fk.fkTargetColumn)} =${relateDtoClassName}::${NameUtils.genGetter(fk.fkTargetColumn)};
+
+     /**
+     * REF ${refTable.name} target lambda
+     */
+     public static BiConsumer<${relateDtoClassName},${fk.fkTargetColumnType}> ${NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)} =${relateDtoClassName}::${NameUtils.genSetter(fk.fkTargetColumn)};
+  </#list>
     /**
     * RELATE ${relateTable.name} lambda
     */
@@ -110,7 +128,25 @@ public class ${className}{
     * REF ${refTable.name} target lambda
     */
     public static BiConsumer<${refRelateDtoClassName},${fk.fkTargetColumnType}> ${NameUtils.fieldRefTargetDomainSetLambda(fieldName,refTableName,fk.fkTargetColumn)} =${refRelateDtoClassName}::${NameUtils.genSetter(fk.fkTargetColumn)};
-         </#list>
+ </#list>
+ <#list refTable.redundancyList as fk>
+ <#if fk.fkSourceColumn??>
+     /**
+     * REF ${refTable.name} source lambda
+     */
+     public static SFunction<${relateDtoClassName}, Serializable> ${NameUtils.fieldRefSourceLambda(fieldName,refTableName,fk.fkSourceColumn)} = ${relateDtoClassName}::${NameUtils.genGetter(fk.fkSourceColumn)};
+
+ </#if>
+     /**
+     * REF ${refTable.name} target lambda
+     */
+     public static SFunction<${refRelateDtoClassName},Serializable> ${NameUtils.fieldRefTargetDomainLambda(fieldName,refTableName,fk.fkTargetColumn)} =${refRelateDtoClassName}::${NameUtils.genGetter(fk.fkTargetColumn)};
+
+     /**
+     * REF ${refTable.name} target lambda
+     */
+     public static BiConsumer<${refRelateDtoClassName},${fk.fkTargetColumnType}> ${NameUtils.fieldRefTargetDomainSetLambda(fieldName,refTableName,fk.fkTargetColumn)} =${refRelateDtoClassName}::${NameUtils.genSetter(fk.fkTargetColumn)};
+ </#list>
     </#list>
 </#if>
 </#list>

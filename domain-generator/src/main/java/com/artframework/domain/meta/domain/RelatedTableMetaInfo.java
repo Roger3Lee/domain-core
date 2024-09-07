@@ -16,6 +16,7 @@ public class RelatedTableMetaInfo {
     private Boolean many=false  ;
     private String fk;
     private String otherFk;
+    private String redundancy;
     private String implement;
     private Boolean deletable=true;
     private List<RefTableMetaInfo> refList;
@@ -56,7 +57,14 @@ public class RelatedTableMetaInfo {
     public void setOtherFk(String otherFk) {
         this.otherFk = otherFk;
     }
-
+    /**
+     * 冗餘字段
+     * @param redundancy
+     */
+    @XmlAttribute(name = "redundancy")
+    public void setRedundancy(String redundancy) {
+        this.redundancy = redundancy;
+    }
     @XmlElement(name = "ref")
     public void setRefList(List<RefTableMetaInfo> refList) {
         this.refList = refList;

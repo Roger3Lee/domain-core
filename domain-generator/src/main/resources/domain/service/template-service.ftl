@@ -19,6 +19,7 @@ public interface ${serviceClassName} extends <#if (source.relatedTable?size>0)>B
     */
     ${dtoClassName} find(${domainName}FindDomain request);
 
+<#if (source.relatedTable?size>0)>
     /**
     * 查找
     * @param request 请求体
@@ -27,7 +28,6 @@ public interface ${serviceClassName} extends <#if (source.relatedTable?size>0)>B
     */
     ${dtoClassName} find(${domainName}FindDomain request, ${dtoClassName} domain);
 
-<#if (source.relatedTable?size>0)>
    /**
      * 通過已有實體查找
      * @param response 已有實體
@@ -90,4 +90,13 @@ public interface ${serviceClassName} extends <#if (source.relatedTable?size>0)>B
     * @return 成功OR失败
     */
     Boolean delete(${source.mainTable.keyType} key);
+    <#if (source.relatedTable?size>0)>
+    /**
+    * 删除
+    * @param key 数据ID
+    * @param loadFlag 數據加載參數
+    * @return 成功OR失败
+    */
+    Boolean delete(${source.mainTable.keyType} key, ${dtoClassName}.LoadFlag loadFlag);
+    </#if>
 }

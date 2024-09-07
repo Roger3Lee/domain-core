@@ -266,6 +266,7 @@ public class DomainGeneratorDialog extends JDialog {
                         .schema(t_schema.getText())
                         .typeConvert(new MyPostgreSqlTypeConvert())
                         .keyWordsHandler(new PostgreSqlKeyWordsHandler())
+                        .addConnectionProperty("currentSchema",t_schema.getText())
                         .databaseQueryClass(SQLQuery.class);
             }
 
@@ -293,6 +294,7 @@ public class DomainGeneratorDialog extends JDialog {
                         .schema(t_schema.getText())
                         .typeConvert(new MyPostgreSqlTypeConvert())
                         .keyWordsHandler(new PostgreSqlKeyWordsHandler())
+                        .addConnectionProperty("currentSchema",t_schema.getText())
                         .databaseQueryClass(SQLQuery.class);
             }
 

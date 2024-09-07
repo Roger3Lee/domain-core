@@ -90,8 +90,8 @@ public class NameUtils {
         return getFieldWithSuffix(name, "DomainTargetSetLambda");
     }
 
-    public static String fieldRelatedSourceLambda(String name, String field) {
-        return getFieldWithSuffix(name,  getFieldName(field) + "SourceLambda");
+    public static String fieldRelatedSourceLambda(String name, String target, String field) {
+        return getFieldWithSuffix(name,  getFieldName(field) +"_Related" + StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", target))) + "_" + "SourceLambda");
     }
 
     public static String fieldRelatedTargetLambda(String name, String field) {

@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.generator.config.rules.IColumnType;
 import java.util.regex.Pattern;
 
 import static com.baomidou.mybatisplus.generator.config.rules.DbColumnType.*;
-import static com.baomidou.mybatisplus.generator.config.rules.DbColumnType.STRING;
 
 public class MyPostgreSqlTypeConvert implements ITypeConvert {
 

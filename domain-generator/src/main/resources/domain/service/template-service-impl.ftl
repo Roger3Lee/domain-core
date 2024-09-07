@@ -83,9 +83,14 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
     */
     @Override
     public ${dtoClassName} find(${domainName}FindDomain request){
+    <#if (source.relatedTable?size>0)>
         return find(request, null);
+    <#else>
+        return ${repositoryName}.query(request.getKey(), ${lambdaClassName}.doKeyLambda);
+    </#if>
     }
 
+<#if (source.relatedTable?size>0)>
     /**
     * 查找
     * @param request 请求体
@@ -97,7 +102,6 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
 <#if source.aggregate??>
     return this.find(request, response, true);
 <#else>
-<#if (source.relatedTable?size>0)>
         if(ObjectUtil.isNull(response)){
             response = ${repositoryName}.query(request.getKey(), ${lambdaClassName}.doKeyLambda);
             if(ObjectUtil.isNull(response)){
@@ -126,17 +130,19 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
                 Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(resp);
                 if(ObjectUtil.isNotNull(key)){
                      <#if (relateTable.otherFkList?size>0)>
-                    List<${corePackage}.lambda.LambdaFilter<${dtoClassName}.${relatedDtoClassName}>> lambdaFilters = new ArrayList<>();
-                        <#list relateTable.otherFkList as fk>
-                         <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,fk.fkSourceColumn)/>
-                         <#assign relatedTargetLambda=NameUtils.fieldRelatedTargetLambda(relateTable.name,fk.fkTargetColumn)/>
-                         <#if fk.fkSourceColumn??>
-                    lambdaFilters.add(${corePackage}.lambda.LambdaFilter.build(${lambdaClassName}.${relatedTargetLambda},<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(this))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(resp)</#if>));
-                         <#else>
-                    lambdaFilters.add(${corePackage}.lambda.LambdaFilter.build(${lambdaClassName}.${relatedTargetLambda},${fk.sourceValue}));
-                         </#if>
-                        </#list>
-                    loadFlag.addFilters(FiltersUtils.buildLambdaFilter(lambdaFilters));
+                    if(!BooleanUtil.isTrue(loadFlag.getIgnoreDomainFilter())){
+                        List<${corePackage}.lambda.LambdaFilter<${dtoClassName}.${relatedDtoClassName}>> lambdaFilters = new ArrayList<>();
+                            <#list relateTable.otherFkList as fk>
+                             <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
+                             <#assign relatedTargetLambda=NameUtils.fieldRelatedTargetLambda(relateTable.name,fk.fkTargetColumn)/>
+                             <#if fk.fkSourceColumn??>
+                        lambdaFilters.add(${corePackage}.lambda.LambdaFilter.build(${lambdaClassName}.${relatedTargetLambda},<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(this))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(resp)</#if>));
+                             <#else>
+                        lambdaFilters.add(${corePackage}.lambda.LambdaFilter.build(${lambdaClassName}.${relatedTargetLambda},${fk.sourceValue}));
+                             </#if>
+                            </#list>
+                        loadFlag.addFilters(FiltersUtils.buildLambdaFilter(lambdaFilters));
+                    }
                      </#if>
                     <#if relateTable.many>
                     List<${dtoClassName}.${relatedDtoClassName}> queryList = ${NameUtils.getFieldName(relateRepositoryClassName)}.queryList(key, ${lambdaClassName}.${relatetargetLambda},
@@ -163,11 +169,9 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
         }
         resp.setLoadFlag(${dtoClassName}.LoadFlag.merge(loadFlag, resp.getLoadFlag()));
         return resp;
-    <#else>
-        return ${repositoryName}.query(request.getKey(), ${lambdaClassName}.doKeyLambda);
-    </#if>
 </#if>
     }
+</#if>
 
     <#if source.aggregate??>
     /**
@@ -222,7 +226,7 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
 </#if>
         return response;
     }
-    </#if>
+</#if>
 
     /**
      * 查找
@@ -232,7 +236,11 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
      */
     @Override
     public ${dtoClassName} findByKey(${domainName}FindDomain request, SFunction<${dtoClassName}, Serializable> keyLambda){
+    <#if (source.relatedTable?size>0)>
         return find(request, ${repositoryName}.queryByKey(request.getKey(), keyLambda));
+    <#else>
+        return ${repositoryName}.queryByKey(request.getKey(), keyLambda);
+    </#if>
     }
 
     /**
@@ -259,11 +267,20 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
         <#if relateTable.many>
         if(CollUtil.isNotEmpty(request.${getterList}())){
             Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(domain);
-            <#if (relateTable.otherFkList?size>0)>
+            <#if (relateTable.otherFkList?size>0 || relateTable.redundancyList?size>0)>
             request.${getterList}().forEach(x->{
                 ${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key);
                 <#list relateTable.otherFkList as fk>
-                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
+                    <#if fk.fkSourceColumn??>
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                         <#else>
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, ${fk.sourceValue});
+                         </#if>
+                </#list>
+                <#list relateTable.redundancyList as fk>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
                  <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
                     <#if fk.fkSourceColumn??>
                 ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
@@ -281,14 +298,23 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
         if(ObjectUtil.isNotNull(request.${getter}())){
             Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(domain);
             ${lambdaClassName}.${targetSetLambda}.accept(request.${getter}(),(${relateTable.fkTargetColumnType})key);
-            <#if (relateTable.otherFkList?size>0)>
+            <#if (relateTable.otherFkList?size>0 || relateTable.redundancyList?size>0)>
                 <#list relateTable.otherFkList as fk>
-                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
                  <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
                     <#if fk.fkSourceColumn??>
-            ${lambdaClassName}.${relatedTargetSetLambda}.accept(domain, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+            ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
                      <#else>
-            ${lambdaClassName}.${relatedTargetSetLambda}.accept(domain, ${fk.sourceValue});
+            ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), ${fk.sourceValue});
+                     </#if>
+                </#list>
+                <#list relateTable.redundancyList as fk>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
+                    <#if fk.fkSourceColumn??>
+            ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                     <#else>
+            ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), ${fk.sourceValue});
                      </#if>
                 </#list>
              </#if>
@@ -370,11 +396,20 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
             && (BooleanUtil.isTrue(request.getLoadFlag().getLoadAll()) || BooleanUtil.isTrue(request.getLoadFlag().${loadProperty}()))){
             if(CollUtil.isNotEmpty(request.${getterList}())){
                 Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
-                <#if (relateTable.otherFkList?size>0)>
+                <#if (relateTable.otherFkList?size>0 || relateTable.redundancyList?size>0)>
                 request.${getterList}().forEach(x->{
                     ${lambdaClassName}.${targetSetLambda}.accept(x,(${relateTable.fkTargetColumnType})key);
                     <#list relateTable.otherFkList as fk>
-                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
+                        <#if fk.fkSourceColumn??>
+                    ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                             <#else>
+                    ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, ${fk.sourceValue});
+                             </#if>
+                    </#list>
+                    <#list relateTable.redundancyList as fk>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
                  <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
                         <#if fk.fkSourceColumn??>
                     ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
@@ -395,14 +430,23 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
             if(ObjectUtil.isNotNull(request.${getter}())){
                 Serializable key = ${lambdaClassName}.${relatesourceLambda}.apply(request);
                 ${lambdaClassName}.${targetSetLambda}.accept(request.${getter}(),(${relateTable.fkTargetColumnType})key);
-                <#if (relateTable.otherFkList?size>0)>
+                <#if (relateTable.otherFkList?size>0 || relateTable.redundancyList?size>0)>
                     <#list relateTable.otherFkList as fk>
-                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
                  <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
                         <#if fk.fkSourceColumn??>
-                ${lambdaClassName}.${relatedTargetSetLambda}.accept(domain, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
                          <#else>
-                ${lambdaClassName}.${relatedTargetSetLambda}.accept(domain, ${fk.sourceValue});
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), ${fk.sourceValue});
+                         </#if>
+                    </#list>
+                    <#list relateTable.redundancyList as fk>
+                 <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
+                 <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
+                        <#if fk.fkSourceColumn??>
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                         <#else>
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), ${fk.sourceValue});
                          </#if>
                     </#list>
                  </#if>
@@ -442,6 +486,19 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(${source.mainTable.keyType} id){
+        <#if (source.relatedTable?size>0)>
+        return delete(id, ${dtoClassName}.LoadFlag.builder().loadAll(true).build());
+    }
+    /**
+    * 删除
+    * @param id 数据ID
+    * @param loadFlag 數據加載參數
+    * @return 成功OR失败
+    */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean delete(${source.mainTable.keyType} id, ${dtoClassName}.LoadFlag loadFlag){
+        </#if>
 <#if (source.relatedTable?size>0)>
         ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindDomain(id ,${dtoClassName}.LoadFlag.builder().build())<#if source.aggregate??>,true</#if>);
         if (ObjectUtil.isNull(old)) {
@@ -454,11 +511,14 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
 <#assign relateFieldName=NameUtils.getFieldName(relateTable.name)/>
 <#assign relatesourceLambda=NameUtils.fieldSourceLambda(relateFieldName)/>
 <#assign relatefieldTargetDomainLambda=NameUtils.fieldTargetDomainLambda(relateFieldName)/>
+<#assign loadProperty=NameUtils.getFieldWithPrefix(relateTable.name,"getLoad")/>
 <#assign getterList=NameUtils.genListGetter(relateTable.name)/>
 <#if relateTable.deletable>
-        //删除关联数据${relateTable.name}
-        ${NameUtils.getFieldName(relateRepositoryClassName)}.deleteByFilter(ListUtil.toList(FiltersUtils.build(${lambdaClassName}.${relatefieldTargetDomainLambda},
-               ${lambdaClassName}.${relatesourceLambda}.apply(old))));
+        if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.${loadProperty}())){
+            //删除关联数据${relateTable.name}
+            ${NameUtils.getFieldName(relateRepositoryClassName)}.deleteByFilter(ListUtil.toList(FiltersUtils.build(${lambdaClassName}.${relatefieldTargetDomainLambda},
+                   ${lambdaClassName}.${relatesourceLambda}.apply(old))));
+        }
 </#if>
 </#list>
 <#if source.aggregate??>

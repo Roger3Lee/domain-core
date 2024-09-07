@@ -89,6 +89,8 @@ public class DomainInfo {
         private String fkTargetColumnType;
         private String fkTargetColumn;
         private List<TableFK> otherFkList = new ArrayList<>();
+
+        private List<TableFK> redundancyList = new ArrayList<>();
         /**
          * 關聯表列表
          */
@@ -123,6 +125,10 @@ public class DomainInfo {
                 tableInfo.setOtherFkList(getFK(relatedTableMetaInfo.getOtherFk(), tableInfo.getColumn(), mainTable.getColumn()));
             }
 
+            if (StringUtils.isNotEmpty(relatedTableMetaInfo.getRedundancy())) {
+                tableInfo.setRedundancyList(getFK(relatedTableMetaInfo.getRedundancy(), tableInfo.getColumn(), mainTable.getColumn()));
+            }
+
             if (CollectionUtil.isNotEmpty(relatedTableMetaInfo.getRefList())) {
                 tableInfo.setRefTableList(relatedTableMetaInfo.getRefList().stream().map(x -> RelateTableInfo.convertRef(x, tableInfo))
                         .collect(Collectors.toList()));
@@ -138,6 +144,9 @@ public class DomainInfo {
                     .build();
             tableInfo.setColumn(GlobalSetting.INSTANCE.getTableColumns(relatedTableMetaInfo.getTable()));
             tableInfo.setFkList(getFK(relatedTableMetaInfo.getFk(), tableInfo.getColumn(), mainTable.getColumn()));
+            if (StringUtils.isNotEmpty(relatedTableMetaInfo.getRedundancy())) {
+                tableInfo.setRedundancyList(getFK(relatedTableMetaInfo.getRedundancy(), tableInfo.getColumn(), mainTable.getColumn()));
+            }
             return tableInfo;
         }
 
@@ -212,6 +221,7 @@ public class DomainInfo {
         private String tableName;
         private Boolean many;
         private List<TableFK> fkList;
+        private List<TableFK> redundancyList = new ArrayList<>();
         private List<ColumnMetaInfo> column;
     }
 
