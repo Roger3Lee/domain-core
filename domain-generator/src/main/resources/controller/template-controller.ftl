@@ -33,7 +33,7 @@ public class ${controllerClassName} {
     * @return ${source.mainTable.keyType}
     */
     @PutMapping()
-    public ${source.mainTable.keyType} insert(@RequestBody ${NameUtils.getName(source.name)}CreateDomain request){
+    public ${source.mainTable.keyType} insert(@RequestBody ${dtoClassName} request){
         return ${serviceFieldName}.insert(request);
     }
 
@@ -43,7 +43,7 @@ public class ${controllerClassName} {
     * @return 成功OR失败
     */
     @PostMapping()
-    public Boolean update(@RequestBody ${NameUtils.getName(source.name)}UpdateDomain request){
+    public Boolean update(@RequestBody ${dtoClassName} request){
         return ${serviceFieldName}.update(request);
     }
 
