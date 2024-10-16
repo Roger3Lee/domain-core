@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.artframework"
-version = "1.1.15"
+version = "1.2.0"
 
 repositories {
     mavenCentral()

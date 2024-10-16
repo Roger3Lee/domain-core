@@ -2,6 +2,7 @@ package com.artframework.domain.core.domain;
 
 
 import com.artframework.domain.core.constants.SaveState;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -12,6 +13,7 @@ import lombok.ToString;
 public class BaseDomain {
     private Boolean changed = false;
 
+    @ApiModelProperty(hidden = true)
     private transient Object _thisDomain;
 
     /**

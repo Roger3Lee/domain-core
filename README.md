@@ -47,38 +47,6 @@ Mybatis plus, mapstruct、hutool
 
 #### XML样例
 
-``` XML
-<tables>
-    <table name="base" basic="true">
-        <column name="CREATED_TIME" type="java.util.Date" comment="創建時間"/>
-        <column name="CREATED_BY" type="java.lang.String" comment="創建用戶"/>
-        <column name="UPDATED_TIME" type="java.util.Date" comment="創建時間"/>
-        <column name="UPDATED_BY" type="java.lang.String" comment="創建用戶"/>
-    </table>
-    <table name="user_info" inherit="base">
-        <column name="id" type="java.lang.Long" comment="主鍵" key="true" keyGenerator="true"/>
-        <column name="name" type="java.lang.String" comment="名字"/>
-        <column name="phone" type="java.lang.String" comment="手机"/>
-        <column name="family_member_count" type="java.lang.Integer" comment="家庭成員總數"/>
-    </table>
-</tables>
-```
-#### XML介绍
-
-| 属性           | 类型   | 描述                                                         |
-| -------------- | ------ | ------------------------------------------------------------ |
-| name           | STRING | 表名称                                                       |
-| basic          | BOOL   | 是否为基础表，可以将公用字段使用基础表进行定义               |
-| inherit        | STRING | 继承的基础表                                                 |
-| column         | LIST   | 表的列集合                                                   |
-| - name         | STRING | 列字段名                                                     |
-| - type         | STRING | 列字段对应的java类型                                         |
-| - comment      | STRING | 列描述                                                       |
-| - key          | BOOL   | 是否为主键                                                   |
-| - keyGenerator | BOOL   | 是否为自增主键， 如果不是自增主键则会在实体类上增加@KeySequence注解，并使用seq_{table_name}_id生成主键seq. |
-
-
-
 ### 领域域配置文件
 
 ### XML样例
@@ -115,42 +83,4 @@ Mybatis plus, mapstruct、hutool
 
 - mappers: 通过表配置文件生成的mybatis plus mapper类
 
-### POSTMAN 调用接口样例
 
-- ​	新增用户，信息包括家庭住址和家庭成员，接口返回为数据新增后的主键
-
-  ![image-20231008160429968](https://github.com/Roger3Lee/artframework.domain/blob/master/images/add.png)
-  
-- ​	分页查询
-
-  ![image-20231008162534040](https://github.com/Roger3Lee/artframework.domain/blob/master/images/page-query.png)
-
-- ​	领域实体查询
-
-	可以通过loadFlag中关联的实体的加载属性来控制查询的数据，例如如下图：查询了包括家庭住址和家庭成员在内的数据
-
-  ![image-20231008162751086](https://github.com/Roger3Lee/artframework.domain/blob/master/images/id-query1.png)
-
-	如下图：则只查询了家庭成员的数据
-![image-20231008163434202](https://github.com/Roger3Lee/artframework.domain/blob/master/images/id-query2.png)
-
-
-- ​    修改
-
-  修改家庭成员儿子的名字为"李伟"并增加女儿"李芳"。
-
-  ![image-20231008164742955](https://github.com/Roger3Lee/artframework.domain/blob/master/images/update.png)再次查询家庭成员，发现实体聚合根属性familyMemberCount的值变成了2， 家庭成员儿子的姓名变成了李伟， 增加了女儿李芳。
-  
-  ![image-20231008165624529](https://github.com/Roger3Lee/artframework.domain/blob/master/images/id-query3.png)
-
-
-- ​	删除
-
-  删除成功后，实体和所关联的值/引用类型都将从数据库删除
-
-  ![image-20231008165820553](https://github.com/Roger3Lee/artframework.domain/blob/master/images/delete.png)
-
-
-# VNEXT
-- IDEA插件
-- 基于数据库表生成实体（Entity)

@@ -1,7 +1,6 @@
 <domains>
-    <domain name="user" description="用戶域" main-table="user_info">
-        <related table="user_address" many="false" fk="id:user_id"/>
-        <related table="user_family_member" many="true" fk="id:user_id"/>
-<!--        <aggregate table="user_aggregate" many="false" fk="id:user_id"/>-->
+    <domain name="family" description="家庭领域模型" main-table="family">
+        <related description="家庭住址" table="family_address" many="false" fk="id:family_id" redundancy="name:family_name"/>
+        <related description="家庭成员" table="family_member" many="true" fk="id:family_id" redundancy="name:family_name"/>
     </domain>
 </domains>

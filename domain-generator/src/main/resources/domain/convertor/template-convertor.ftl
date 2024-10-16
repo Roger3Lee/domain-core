@@ -44,6 +44,7 @@ public interface  ${covertName}{
     ${dtoClassName}.${relateDTOClassName} convert2${relateName}DTO(${relateDOClassName} request);
     void convert2${relateName}DTO(${relateDOClassName} request, @MappingTarget ${dtoClassName}.${relateDTOClassName} target);
     List<${dtoClassName}.${relateDTOClassName}> convert2${relateName}DTO(List<${relateDOClassName}>  request);
+    @BeanMapping(qualifiedByName = { "${decoratorName}"})
     ${relateDOClassName} convert2${relateName}DO(${dtoClassName}.${relateDTOClassName} request);
     List<${relateDOClassName}> convert2${relateName}DO(List<${dtoClassName}.${relateDTOClassName}>  request);
     </#list>
@@ -54,6 +55,7 @@ public interface  ${covertName}{
     <#assign relateName= NameUtils.getName(source.aggregate.name)/>
     ${dtoClassName}.${relateDTOClassName} convert2${relateName}DTO(${relateDOClassName} request);
     List<${dtoClassName}.${relateDTOClassName}> convert2${relateName}DTO(List<${relateDOClassName}>  request);
+    @BeanMapping(qualifiedByName = { "${decoratorName}"})
     ${relateDOClassName} convert2${relateName}DO(${dtoClassName}.${relateDTOClassName} request);
     List<${relateDOClassName}> convert2${relateName}DO(List<${dtoClassName}.${relateDTOClassName}>  request);
     </#if>

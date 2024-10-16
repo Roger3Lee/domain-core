@@ -403,7 +403,7 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
                  <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
                  <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
                         <#if fk.fkSourceColumn??>
-                    ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                    ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(request))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(request)</#if>);
                              <#else>
                     ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, ${fk.sourceValue});
                              </#if>
@@ -412,7 +412,7 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
                  <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
                  <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
                         <#if fk.fkSourceColumn??>
-                    ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                    ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(request))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(request)</#if>);
                              <#else>
                     ${lambdaClassName}.${relatedTargetSetLambda}.accept(x, ${fk.sourceValue});
                              </#if>
@@ -435,7 +435,7 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
                  <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
                  <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
                         <#if fk.fkSourceColumn??>
-                ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(request))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(request)</#if>);
                          <#else>
                 ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), ${fk.sourceValue});
                          </#if>
@@ -444,7 +444,7 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
                  <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
                  <#assign relatedTargetSetLambda=NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)/>
                         <#if fk.fkSourceColumn??>
-                ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(domain))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(domain)</#if>);
+                ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), (${fk.fkTargetColumnType})<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(request))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(request)</#if>);
                          <#else>
                 ${lambdaClassName}.${relatedTargetSetLambda}.accept(request.${getter}(), ${fk.sourceValue});
                          </#if>

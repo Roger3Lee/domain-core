@@ -7,6 +7,7 @@ import com.artframework.domain.core.constants.Order;
 import com.artframework.domain.core.lambda.LambdaOrder;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import java.io.Serializable;
@@ -23,6 +24,8 @@ public class BaseLoadFlag {
 
     @Getter
     @Setter
+    @ApiModelProperty(hidden = true)
+    @JsonIgnore
     private Boolean ignoreDomainFilter = false;
     /**
      * filter信息
@@ -36,11 +39,6 @@ public class BaseLoadFlag {
     @Getter
     private Map<String, List<LambdaOrder.LambdaOrderItem>> orders = new HashMap<>();
 
-    public <T extends BaseLoadFlag> T setFilters(Filter... filters) {
-        List<Filter> filterList = new ArrayList<>(filters.length);
-        Collections.addAll(filterList, filters);
-        return setFilters(filterList);
-    }
 
     public <T extends BaseLoadFlag> T setFilters(List<Filter> filters) {
         if(CollectionUtil.isEmpty(filters)){

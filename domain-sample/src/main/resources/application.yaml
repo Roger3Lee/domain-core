@@ -21,9 +21,17 @@ mybatis-plus:
     map-underscore-to-camel-case: true
   global-config:
     db-config:
-      id-type: AUTO
+      id-type: ASSIGN_ID
+
     banner: false
 
 logging:
   level:
     com.artframework.sample.mappers: DEBUG
+    root: INFO
+#
+#springfox:
+#  documentation:
+#    swagger-ui:
+#      enabled: true
+#      base-url: /v3/api-docs

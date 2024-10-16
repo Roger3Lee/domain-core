@@ -18,16 +18,6 @@ public class ${controllerClassName} {
     private ${serviceClassName} ${serviceFieldName};
 
     /**
-    * 分页查询
-    * @param request 请求体
-    * @return IPage<${dtoClassName}>
-    */
-    @PostMapping("page")
-    public IPage<${dtoClassName}> page(@RequestBody ${NameUtils.getName(source.name)}PageDomain request){
-        return ${serviceFieldName}.page(request);
-    }
-
-    /**
     * 查找
     * @param request 请求体
     * @return ${dtoClassName}
