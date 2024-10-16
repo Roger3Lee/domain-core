@@ -66,7 +66,7 @@ public class DomainGeneratorDialog extends JDialog {
 
     public DomainGeneratorDialog(AnActionEvent anActionEvent) {
         this.anActionEvent = anActionEvent;
-        this.setTitle("DDD代碼生成器");
+        this.setTitle("DDD领域模型代码生成插件");
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(btn_OK);
@@ -236,7 +236,7 @@ public class DomainGeneratorDialog extends JDialog {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(selectMode);
         fileChooser.setMultiSelectionEnabled(false);
-        int result = fileChooser.showDialog(this, "選擇");
+        int result = fileChooser.showDialog(this, "选择");
         if (result == JFileChooser.APPROVE_OPTION) {
             textField.setText(fileChooser.getSelectedFile().getPath());
         }
@@ -273,7 +273,7 @@ public class DomainGeneratorDialog extends JDialog {
             DataSourceConfig dataSourceConfig = builder.build();
             dataSourceConfig.getConn();
 
-            Messages.showInfoMessage(this.contentPane, "链接成功", "提示");
+            Messages.showInfoMessage(this.contentPane, "连接成功", "提示");
         } catch (Exception ex) {
 //            Notification
             Messages.showErrorDialog(this.contentPane, ex.getMessage(), "错误");
@@ -391,6 +391,7 @@ public class DomainGeneratorDialog extends JDialog {
         cacheMap.put("chk_entity", Boolean.toString(chk_do.isSelected()));
         cacheMap.put("chk_domain", Boolean.toString(chk_domain.isSelected()));
         cacheMap.put("chk_controller", Boolean.toString(chk_controller.isSelected()));
+
         super.dispose();
     }
 

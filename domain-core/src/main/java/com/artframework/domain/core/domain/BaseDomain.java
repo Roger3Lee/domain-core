@@ -2,6 +2,7 @@ package com.artframework.domain.core.domain;
 
 
 import com.artframework.domain.core.constants.SaveState;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,7 @@ public class BaseDomain {
     private Boolean changed = false;
 
     @ApiModelProperty(hidden = true)
+    @JsonIgnore
     private transient Object _thisDomain;
 
     /**
