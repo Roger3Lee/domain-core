@@ -3,13 +3,11 @@ package com.artframework.domain.core.repository.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.artframework.domain.core.constants.Op;
 import com.artframework.domain.core.constants.SaveState;
 import com.artframework.domain.core.domain.BaseDomain;
 import com.artframework.domain.core.domain.PageDomain;
-import com.artframework.domain.core.lambda.LambdaCache;
-import com.artframework.domain.core.lambda.LambdaFilter;
-import com.artframework.domain.core.lambda.LambdaOrder;
+import com.artframework.domain.core.lambda.order.LambdaOrderItem;
+import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.mapper.BatchBaseMapper;
 import com.artframework.domain.core.repository.BaseRepository;
 import com.artframework.domain.core.uitls.FiltersUtils;
@@ -33,21 +31,14 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
     @Autowired
     protected BaseMapper<DO> baseMapper;
 
-    private LambdaQueryWrapper<DO> buildQueryWrapper(List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders,
+    private LambdaQueryWrapper<DO> buildQueryWrapper(LambdaQuery<D> lambdaQuery,
                                                      boolean noConditionThrowException) {
         boolean hasFilter = false;
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
         //額外的filter
-        if (ObjectUtil.isNotNull(filters)) {
+        if (ObjectUtil.isNotNull(lambdaQuery) && ObjectUtil.isNotNull(lambdaQuery.hasFilter())) {
             hasFilter = true;
-            //儅不需要查詢出數據時，返回空
-            if (filters.stream().anyMatch(x -> Op.NIL.getCode().equals(x.getOp()))) {
-                return null;
-            }
-
-            for (LambdaFilter.Filter filter : filters) {
-                FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
-            }
+            FiltersUtils.buildWrapper(wrapper, lambdaQuery.getFilter(), this.getDOClass());
         }
 
         if (noConditionThrowException && !hasFilter) {
@@ -55,8 +46,8 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         }
 
         //排序
-        if (ObjectUtil.isNotNull(orders)) {
-            for (LambdaOrder.LambdaOrderItem order : orders) {
+        if (ObjectUtil.isNotNull(lambdaQuery) && ObjectUtil.isNotNull(lambdaQuery.getOrderItems())) {
+            for (LambdaOrderItem order : lambdaQuery.getOrderItems()) {
                 OrdersUtils.buildOrderWrapper(wrapper, order, this.getDOClass());
             }
         }
@@ -72,13 +63,12 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
      */
     @Override
     public D query(Serializable value, SFunction<D, Serializable> valueWarp) {
-        return query(FiltersUtils.toFilters(ListUtil.toList(LambdaFilter.build(LambdaCache.DOLambda(this.getDOClass(), valueWarp), value)))
-                , null);
+        return query(LambdaQuery.of(getDomainClass()).eq(valueWarp, value));
     }
 
     @Override
-    public D query(List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders) {
-        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(filters, orders,true);
+    public D query(LambdaQuery<D> lambdaQuery) {
+        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery, true);
         wrapper = wrapper.last("limit 1");
         List<D> list = convert2DTO(this.baseMapper.selectList(wrapper));
         if (CollUtil.isEmpty(list)) {
@@ -89,29 +79,19 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
 
     @Override
     public List<D> queryList(Serializable value, SFunction<D, Serializable> valueWarp) {
-        return queryList(FiltersUtils.toFilters(ListUtil.toList(LambdaFilter.build(LambdaCache.DOLambda(this.getDOClass(), valueWarp), value)))
-                , null);
+        return queryList(LambdaQuery.of(getDomainClass()).eq(valueWarp, value));
     }
 
     @Override
-    public List<D> queryList(List<LambdaFilter.Filter> filters) {
-        return queryList(filters, null);
-    }
-
-    @Override
-    public List<D> queryList(List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders) {
-        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(filters, orders, true);
+    public List<D> queryList(LambdaQuery<D> lambdaQuery) {
+        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery, true);
         return convert2DTO(this.baseMapper.selectList(wrapper));
     }
 
-    @Override
-    public IPage<D> queryPage(PageDomain pageDomain, List<LambdaFilter.Filter> filters) {
-        return queryPage(pageDomain, filters, null);
-    }
 
     @Override
-    public IPage<D> queryPage(PageDomain pageDomain, List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders) {
-        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(filters, orders, false);
+    public IPage<D> queryPage(PageDomain pageDomain, LambdaQuery<D> lambdaQuery) {
+        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery, false);
         return this.baseMapper.selectPage(new Page<>(pageDomain.getPageNum(), pageDomain.getPageSize()), wrapper).convert(x -> convert2DTO(ListUtil.toList(x)).get(0));
     }
 
@@ -182,13 +162,11 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
      * @return
      */
     @Override
-    public int deleteByFilter(List<LambdaFilter.Filter> filters) {
+    public int deleteByFilter(LambdaQuery<D> lambdaQuery) {
         //額外的filter
-        if (ObjectUtil.isNotNull(filters)) {
+        if (ObjectUtil.isNotNull(lambdaQuery)) {
             LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
-            for (LambdaFilter.Filter filter : filters) {
-                FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
-            }
+            FiltersUtils.buildWrapper(wrapper, lambdaQuery.getFilter(), this.getDOClass());
 
             return this.baseMapper.delete(wrapper);
         } else {
@@ -261,4 +239,6 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
     public abstract Function<D, Serializable> keyLambda();
 
     public abstract Class<DO> getDOClass();
+
+    public abstract Class<D> getDomainClass();
 }

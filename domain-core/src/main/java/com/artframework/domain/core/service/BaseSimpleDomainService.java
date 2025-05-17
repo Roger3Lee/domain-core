@@ -1,8 +1,7 @@
 package com.artframework.domain.core.service;
 
 import com.artframework.domain.core.domain.PageDomain;
-import com.artframework.domain.core.lambda.LambdaFilter;
-import com.artframework.domain.core.lambda.LambdaOrder;
+import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.repository.BaseRepository;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -34,19 +33,13 @@ public interface BaseSimpleDomainService<T> {
      */
     void merge(List<T> oldList, List<T> newList, Function<T, Serializable> keyWrap, BaseRepository repository);
 
-    T queryOne(List<LambdaFilter<T>> lambdaFilters);
+    T queryOne(LambdaQuery<T> lambdaQuery);
 
-    T queryOne(List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders);
-
-    List<T> queryList(List<LambdaFilter<T>> lambdaFilters);
-
-    List<T> queryList(List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders);
+    List<T> queryList(LambdaQuery<T> lambdaQuery);
 
     IPage<T> queryPage(PageDomain pageDomain);
 
-    IPage<T> queryPage(PageDomain pageDomain, LambdaOrder<T> orders);
-
-    IPage<T> queryPage(PageDomain pageDomain, List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders);
+    IPage<T> queryPage(PageDomain pageDomain, LambdaQuery<T> lambdaQuery);
 
     Boolean batchUpdate(List<T> list);
 

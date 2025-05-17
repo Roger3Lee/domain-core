@@ -42,10 +42,6 @@ public enum Op {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public static Op getOp(String op) {
         for (Op item : Op.values()) {
             if (item.getCode().equals(op)) {

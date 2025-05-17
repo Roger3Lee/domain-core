@@ -1,20 +1,10 @@
 package com.artframework.domain.core.domain;
 
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.collection.ListUtil;
-import com.artframework.domain.core.constants.Op;
-import com.artframework.domain.core.constants.Order;
-import com.artframework.domain.core.lambda.LambdaFilter;
-import com.artframework.domain.core.lambda.LambdaOrder;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import io.swagger.annotations.ApiModelProperty;
+import com.artframework.domain.core.lambda.order.LambdaOrderItem;
+import com.artframework.domain.core.lambda.query.LambdaQuery;
 import lombok.*;
 
-import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author li.pengcheng
@@ -27,12 +17,12 @@ public class BaseLoadFlag {
      * filter信息
      */
     @Getter
-    private Map<String, List<LambdaFilter.Filter>> filters = new HashMap<>();
+    private Map<String, List<LambdaQuery.Condition>> filters = new HashMap<>();
 
     /**
      * 排序
      */
     @Getter
-    private Map<String, List<LambdaOrder.LambdaOrderItem>> orders = new HashMap<>();
+    private Map<String, List<LambdaOrderItem>> orders = new HashMap<>();
 
 }

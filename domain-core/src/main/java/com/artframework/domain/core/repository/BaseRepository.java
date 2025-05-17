@@ -2,8 +2,7 @@ package com.artframework.domain.core.repository;
 
 import com.artframework.domain.core.domain.BaseDomain;
 import com.artframework.domain.core.domain.PageDomain;
-import com.artframework.domain.core.lambda.LambdaFilter;
-import com.artframework.domain.core.lambda.LambdaOrder;
+import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
@@ -18,16 +17,13 @@ public interface BaseRepository<D extends BaseDomain, DO> {
      * @return
      */
     D query(Serializable value, SFunction<D, Serializable> valueWarp);
-    D query(List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders);
+    D query(LambdaQuery<D> lambdaQuery);
 
     List<D> queryList(Serializable value, SFunction<D, Serializable> valueWarp);
-    List<D> queryList(List<LambdaFilter.Filter> filters);
-    List<D> queryList(List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders);
+    List<D> queryList(LambdaQuery<D> lambdaQuery);
 
-    IPage<D> queryPage(PageDomain pageDomain, List<LambdaFilter.Filter> filters);
+    IPage<D> queryPage(PageDomain pageDomain, LambdaQuery<D> lambdaQuery);
 
-
-    IPage<D> queryPage(PageDomain pageDomain, List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders);
     /**
      * 插入一条数据
      *
@@ -54,10 +50,10 @@ public interface BaseRepository<D extends BaseDomain, DO> {
 
     /**
      * 通過Filter刪除數據
-     * @param filters
+     * @param lambdaQuery
      * @return
      */
-    int deleteByFilter(List<LambdaFilter.Filter> filters);
+    int deleteByFilter(LambdaQuery<D> lambdaQuery);
 
     int deleteById(Serializable id);
 

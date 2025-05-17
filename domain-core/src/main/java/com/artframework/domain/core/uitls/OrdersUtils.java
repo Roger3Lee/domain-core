@@ -2,7 +2,8 @@ package com.artframework.domain.core.uitls;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.lambda.LambdaCache;
-import com.artframework.domain.core.lambda.LambdaOrder;
+import com.artframework.domain.core.lambda.order.LambdaOrder;
+import com.artframework.domain.core.lambda.order.LambdaOrderItem;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.Map;
  * @date 2024/2/4
  **/
 public class OrdersUtils {
-    public static <T> List<LambdaOrder.LambdaOrderItem> getEntityOrders(Map<String, List<LambdaOrder.LambdaOrderItem>> orders, Class<T> tClass) {
+    public static <T> List<LambdaOrderItem> getEntityOrders(Map<String, List<LambdaOrderItem>> orders, Class<T> tClass) {
         if (ObjectUtil.isNull(orders)) {
             return null;
         }
@@ -33,7 +34,7 @@ public class OrdersUtils {
      * @param <DO>
      */
 
-    public static <DO> void buildOrderWrapper(LambdaQueryWrapper<DO> wrapper, LambdaOrder.LambdaOrderItem order, Class<DO> doClass) {
+    public static <DO> void buildOrderWrapper(LambdaQueryWrapper<DO> wrapper, LambdaOrderItem order, Class<DO> doClass) {
         switch (order.getOrder()) {
             case DES:
                 wrapper.orderByDesc(LambdaCache.DOLambda(doClass, order.getField()));

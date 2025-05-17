@@ -5,12 +5,10 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.domain.BaseDomain;
 import com.artframework.domain.core.domain.PageDomain;
-import com.artframework.domain.core.lambda.LambdaFilter;
-import com.artframework.domain.core.lambda.LambdaOrder;
+import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.repository.BaseRepository;
 import com.artframework.domain.core.service.BaseSimpleDomainService;
 import com.artframework.domain.core.uitls.CompareUtil;
-import com.artframework.domain.core.uitls.FiltersUtils;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,39 +52,23 @@ public abstract class BaseSimpleDomainServiceImpl<T extends BaseDomain> implemen
     }
 
     @Override
-    public T queryOne(List<LambdaFilter<T>> lambdaFilters) {
-        return queryOne(lambdaFilters, null);
+    public T queryOne(LambdaQuery<T> lambdaQuery) {
+        return (T) getRepository().query(lambdaQuery);
     }
 
     @Override
-    public T queryOne(List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders) {
-        return (T) getRepository().query(FiltersUtils.toFilters(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
-    }
-
-
-    @Override
-    public List<T> queryList(List<LambdaFilter<T>> lambdaFilters) {
-        return queryList(lambdaFilters, null);
-    }
-
-    @Override
-    public List<T> queryList(List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders) {
-        return getRepository().queryList(FiltersUtils.toFilters(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
+    public List<T> queryList(LambdaQuery<T> lambdaQuery) {
+        return getRepository().queryList(lambdaQuery);
     }
 
     @Override
     public IPage<T> queryPage(PageDomain pageDomain) {
-        return queryPage(pageDomain, null, null);
+        return queryPage(pageDomain, null);
     }
 
     @Override
-    public IPage<T> queryPage(PageDomain pageDomain, LambdaOrder<T> orders) {
-        return queryPage(pageDomain, null, orders);
-    }
-
-    @Override
-    public IPage<T> queryPage(PageDomain pageDomain, List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders) {
-        return getRepository().queryPage(pageDomain, FiltersUtils.toFilters(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
+    public IPage<T> queryPage(PageDomain pageDomain, LambdaQuery<T> lambdaQuery) {
+        return getRepository().queryPage(pageDomain, lambdaQuery);
     }
 
     @Override

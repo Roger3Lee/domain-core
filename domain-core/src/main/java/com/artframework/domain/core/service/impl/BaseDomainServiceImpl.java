@@ -5,12 +5,10 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.domain.BaseDomain;
 import com.artframework.domain.core.domain.PageDomain;
-import com.artframework.domain.core.lambda.LambdaFilter;
-import com.artframework.domain.core.lambda.LambdaOrder;
+import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.repository.BaseRepository;
 import com.artframework.domain.core.service.BaseDomainService;
 import com.artframework.domain.core.uitls.CompareUtil;
-import com.artframework.domain.core.uitls.FiltersUtils;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,8 +61,8 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public <T> Boolean deleteRelated(Class<T> clazz, List<LambdaFilter<T>> lambdaFilters) {
-        if (CollUtil.isEmpty(lambdaFilters)) {
+    public <T> Boolean deleteRelated(Class<T> clazz, LambdaQuery<T> lambdaQuery) {
+        if (!lambdaQuery.hasFilter()) {
             log.warn("不允許不加過濾條件刪除數據");
             return false;
         }
@@ -75,20 +73,15 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
             throw new UnsupportedOperationException("刪除不支持的實體:" + clazz.getCanonicalName());
         }
 
-        totalEffect += repository.deleteByFilter(FiltersUtils.toFilters(lambdaFilters));
+        totalEffect += repository.deleteByFilter(lambdaQuery);
 
         return totalEffect > 0;
     }
 
     @Override
-    public <T> T queryOne(Class<T> clazz, List<LambdaFilter<T>> lambdaFilters) {
-        return queryOne(clazz, lambdaFilters, null);
-    }
-
-    @Override
-    public <T> T queryOne(Class<T> clazz, List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders) {
-        if (CollUtil.isEmpty(lambdaFilters)) {
-            log.warn("不允許不加過濾條件加載數據");
+    public <T> T queryOne(Class<T> clazz, LambdaQuery<T> lambdaQuery) {
+        if (!lambdaQuery.hasFilter()) {
+            log.warn("不允許不加過濾條件刪除數據");
             return null;
         }
 
@@ -97,18 +90,12 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
             throw new UnsupportedOperationException("查詢不支持的實體:" + clazz.getCanonicalName());
         }
 
-        return (T) repository.query(FiltersUtils.toFilters(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
-    }
-
-
-    @Override
-    public <T> List<T> queryList(Class<T> clazz, List<LambdaFilter<T>> lambdaFilters) {
-        return queryList(clazz, lambdaFilters, null);
+        return (T) repository.query(lambdaQuery);
     }
 
     @Override
-    public <T> List<T> queryList(Class<T> clazz, List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders) {
-        if (CollUtil.isEmpty(lambdaFilters)) {
+    public <T> List<T> queryList(Class<T> clazz, LambdaQuery<T> lambdaQuery) {
+        if (!lambdaQuery.hasFilter()) {
             log.warn("不允許不加過濾條件加載數據");
             return ListUtil.empty();
         }
@@ -118,27 +105,23 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
             throw new UnsupportedOperationException("查詢不支持的實體:" + clazz.getCanonicalName());
         }
 
-        return repository.queryList(FiltersUtils.toFilters(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
+        return repository.queryList(lambdaQuery);
     }
 
     @Override
     public <T> IPage<T> queryPage(Class<T> clazz, PageDomain pageDomain) {
-        return queryPage(clazz, pageDomain, null, null);
+        return queryPage(clazz, pageDomain, null);
     }
 
-    @Override
-    public <T> IPage<T> queryPage(Class<T> clazz, PageDomain pageDomain, LambdaOrder<T> orders) {
-        return queryPage(clazz, pageDomain, null, orders);
-    }
 
     @Override
-    public <T> IPage<T> queryPage(Class<T> clazz, PageDomain pageDomain, List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders) {
+    public <T> IPage<T> queryPage(Class<T> clazz, PageDomain pageDomain, LambdaQuery<T> lambdaQuery) {
         BaseRepository repository = _DomainRepositoryMap.get(clazz.getCanonicalName());
         if (null == repository) {
             throw new UnsupportedOperationException("查詢不支持的實體:" + clazz.getCanonicalName());
         }
 
-        return repository.queryPage(pageDomain, FiltersUtils.toFilters(lambdaFilters),ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
+        return repository.queryPage(pageDomain, lambdaQuery);
     }
 }
     
