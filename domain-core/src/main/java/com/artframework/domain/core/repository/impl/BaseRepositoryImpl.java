@@ -2,14 +2,13 @@ package com.artframework.domain.core.repository.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.constants.Op;
 import com.artframework.domain.core.constants.SaveState;
 import com.artframework.domain.core.domain.BaseDomain;
-import com.artframework.domain.core.domain.BaseLoadFlag;
 import com.artframework.domain.core.domain.PageDomain;
 import com.artframework.domain.core.lambda.LambdaCache;
+import com.artframework.domain.core.lambda.LambdaFilter;
 import com.artframework.domain.core.lambda.LambdaOrder;
 import com.artframework.domain.core.mapper.BatchBaseMapper;
 import com.artframework.domain.core.repository.BaseRepository;
@@ -34,39 +33,10 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
     @Autowired
     protected BaseMapper<DO> baseMapper;
 
-    @Override
-    public D queryByKey(Serializable key, SFunction<D, Serializable> keyWarp) {
-        return query(key, LambdaCache.DOLambda(this.getDOClass(), keyWarp), null);
-    }
-
-    @Override
-    public D query(Serializable id, SFunction<DO, Serializable> idWrap) {
-        return query(id, idWrap, null);
-    }
-
-    @Override
-    public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters) {
-        return query(id, idWrap, filters, null,false);
-    }
-
-    @Override
-    public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders){
-        return query(id, idWrap, filters, orders,false);
-    }
-    @Override
-    public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters , Boolean ignoreDomainFkFilter) {
-        return query(id, idWrap, filters, null,false);
-    }
-
-    @Override
-    public D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters , List<LambdaOrder.LambdaOrderItem> orders, Boolean ignoreDomainFkFilter) {
+    private LambdaQueryWrapper<DO> buildQueryWrapper(List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders,
+                                                     boolean noConditionThrowException) {
         boolean hasFilter = false;
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
-        if (!BooleanUtil.isTrue(ignoreDomainFkFilter) && ObjectUtil.isNotNull(id) && ObjectUtil.isNotNull(idWrap)) {
-            hasFilter = true;
-            wrapper.eq(idWrap, id);
-        }
-
         //額外的filter
         if (ObjectUtil.isNotNull(filters)) {
             hasFilter = true;
@@ -75,14 +45,13 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
                 return null;
             }
 
-            for (BaseLoadFlag.DOFilter filter : filters) {
+            for (LambdaFilter.Filter filter : filters) {
                 FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
             }
         }
 
-        if (!hasFilter) {
-            log.warn("不允許不加過濾條件查詢數據");
-            return null;
+        if (noConditionThrowException && !hasFilter) {
+            throw new IllegalArgumentException("不允許不加過濾條件查詢數據");
         }
 
         //排序
@@ -91,7 +60,25 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
                 OrdersUtils.buildOrderWrapper(wrapper, order, this.getDOClass());
             }
         }
+        return wrapper;
+    }
 
+    /**
+     * 通過字段查詢唯一一條數據
+     *
+     * @param value
+     * @param valueWarp
+     * @return
+     */
+    @Override
+    public D query(Serializable value, SFunction<D, Serializable> valueWarp) {
+        return query(FiltersUtils.toFilters(ListUtil.toList(LambdaFilter.build(LambdaCache.DOLambda(this.getDOClass(), valueWarp), value)))
+                , null);
+    }
+
+    @Override
+    public D query(List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders) {
+        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(filters, orders,true);
         wrapper = wrapper.last("limit 1");
         List<D> list = convert2DTO(this.baseMapper.selectList(wrapper));
         if (CollUtil.isEmpty(list)) {
@@ -101,90 +88,30 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
     }
 
     @Override
-    public List<D> queryList(List<BaseLoadFlag.DOFilter> filters) {
-        return queryList(null, null, filters, null);
+    public List<D> queryList(Serializable value, SFunction<D, Serializable> valueWarp) {
+        return queryList(FiltersUtils.toFilters(ListUtil.toList(LambdaFilter.build(LambdaCache.DOLambda(this.getDOClass(), valueWarp), value)))
+                , null);
     }
 
     @Override
-    public List<D> queryList(List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders) {
-        return queryList(null, null, filters, orders);
+    public List<D> queryList(List<LambdaFilter.Filter> filters) {
+        return queryList(filters, null);
     }
 
     @Override
-    public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap) {
-        return queryList(id, wrap, null);
-    }
-
-    @Override
-    public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters) {
-        return queryList(id, wrap, filters, null);
-    }
-
-    @Override
-    public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders) {
-        return queryList(id, wrap, filters, orders, false);
-    }
-
-    @Override
-    public List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders, Boolean ignoreDomainFkFilter) {
-        boolean hasFilter = false;
-        LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
-        if (!BooleanUtil.isTrue(ignoreDomainFkFilter) && ObjectUtil.isNotNull(id) && ObjectUtil.isNotNull(wrap)) {
-            hasFilter = true;
-            wrapper.eq(wrap, id);
-        }
-
-        //額外的filter
-        if (ObjectUtil.isNotNull(filters)) {
-            hasFilter = true;
-            //儅不需要查詢出數據時，返回空列表
-            if (filters.stream().anyMatch(x -> Op.NIL.getCode().equals(x.getOp()))) {
-                return ListUtil.empty();
-            }
-
-            for (BaseLoadFlag.DOFilter filter : filters) {
-                FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
-            }
-        }
-
-        if (ObjectUtil.isNotNull(orders)) {
-            for (LambdaOrder.LambdaOrderItem order : orders) {
-                OrdersUtils.buildOrderWrapper(wrapper, order, this.getDOClass());
-            }
-        }
-
-        if (!hasFilter) {
-            log.warn("不允許不加過濾條件查詢數據");
-            return ListUtil.empty();
-        }
-
+    public List<D> queryList(List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders) {
+        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(filters, orders, true);
         return convert2DTO(this.baseMapper.selectList(wrapper));
     }
 
     @Override
-    public IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> buildLambdaFilter) {
-        return queryPage(pageDomain, buildLambdaFilter, null);
+    public IPage<D> queryPage(PageDomain pageDomain, List<LambdaFilter.Filter> filters) {
+        return queryPage(pageDomain, filters, null);
     }
 
     @Override
-    public IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders) {
-        LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
-        if (ObjectUtil.isNotNull(filters)) {
-            //儅不需要查詢出數據時，返回空列表
-            if (filters.stream().anyMatch(x -> Op.NIL.getCode().equals(x.getOp()))) {
-                return null;
-            }
-
-            for (BaseLoadFlag.DOFilter filter : filters) {
-                FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
-            }
-        }
-
-        if (ObjectUtil.isNotNull(orders)) {
-            for (LambdaOrder.LambdaOrderItem order : orders) {
-                OrdersUtils.buildOrderWrapper(wrapper, order, this.getDOClass());
-            }
-        }
+    public IPage<D> queryPage(PageDomain pageDomain, List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders) {
+        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(filters, orders, false);
         return this.baseMapper.selectPage(new Page<>(pageDomain.getPageNum(), pageDomain.getPageSize()), wrapper).convert(x -> convert2DTO(ListUtil.toList(x)).get(0));
     }
 
@@ -255,11 +182,11 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
      * @return
      */
     @Override
-    public int deleteByFilter(List<BaseLoadFlag.DOFilter> filters) {
+    public int deleteByFilter(List<LambdaFilter.Filter> filters) {
         //額外的filter
         if (ObjectUtil.isNotNull(filters)) {
             LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
-            for (BaseLoadFlag.DOFilter filter : filters) {
+            for (LambdaFilter.Filter filter : filters) {
                 FiltersUtils.buildWrapper(wrapper, filter, this.getDOClass());
             }
 

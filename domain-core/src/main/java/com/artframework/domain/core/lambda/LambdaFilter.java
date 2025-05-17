@@ -3,7 +3,10 @@ package com.artframework.domain.core.lambda;
 import cn.hutool.core.collection.ListUtil;
 import com.artframework.domain.core.constants.Op;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.List;
@@ -44,5 +47,41 @@ public class LambdaFilter<T> {
 
     public static <T> LambdaFilter<T> build(SFunction<T, Serializable> field, Object value) {
         return new LambdaFilter<>(field, value, Op.EQ, ListUtil.empty());
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper=false)
+    @JsonPropertyOrder({"field","op","value","orFilter"})
+    public static class Filter extends DOFilter {
+        @ApiModelProperty(hidden=true)
+        @JsonIgnore
+        private String entity;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class DOFilter{
+        @ApiModelProperty("字段")
+        private String field;
+        @ApiModelProperty("过滤条件规则， 默认是=")
+        private String op = Op.EQ.getCode();
+        @ApiModelProperty("值")
+        private Object value;
+        @ApiModelProperty("OR 条件")
+        private List<DOFilter> orFilter;
+
+        /**
+         * 拷貝基礎信息， 補拷貝orFilter
+         * @param filter
+         * @return
+         */
+        public static DOFilter copy(DOFilter filter) {
+            DOFilter doFilter = new DOFilter();
+            doFilter.setField(filter.getField());
+            doFilter.setOp(filter.getOp());
+            doFilter.setValue(filter.getValue());
+            return doFilter;
+        }
     }
 }

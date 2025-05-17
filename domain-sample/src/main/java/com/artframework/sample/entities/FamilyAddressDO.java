@@ -1,0 +1,42 @@
+package com.artframework.sample.entities;
+
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+/**
+* family_address
+*
+* @author auto
+* @version v1.0
+*/
+@Getter
+@Setter
+@ToString
+@TableName(value="family_address", autoResultMap = true)
+@KeySequence("seq_family_address_id")
+public class FamilyAddressDO  {
+
+
+    /**
+    * 自增主键
+    */
+    @TableId(value = "id", type = IdType.INPUT)
+    private java.math.BigDecimal id;
+    /**
+    * 家庭ID
+    */
+    @TableField("family_id")
+    private java.math.BigDecimal familyId;
+    /**
+    * 家庭名称
+    */
+    @TableField("family_name")
+    private String familyName;
+    /**
+    * 地址
+    */
+    @TableField("address_name")
+    private String addressName;
+}

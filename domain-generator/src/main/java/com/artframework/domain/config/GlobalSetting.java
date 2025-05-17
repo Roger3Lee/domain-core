@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class GlobalSetting {
     public static GlobalSetting INSTANCE = new GlobalSetting();
 
-    private Map<String, TableMetaInfo> tableMetaInfoMap = new HashMap<>();
+    public Map<String, TableMetaInfo> tableMetaInfoMap = new HashMap<>();
     private List<DomainMetaInfo> domainMetaInfoList = new ArrayList<>();
 
 

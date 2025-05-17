@@ -3,11 +3,9 @@ package ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain;
 import ${corePackage}.domain.*;
 <#if (source.relatedTable?size>0)>
 import ${corePackage}.lambda.*;
-import ${corePackage}.uitls.FiltersUtils;
 import ${corePackage}.constants.*;
-</#if>
-<#if source.aggregate??>
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import ${corePackage}.uitls.FiltersUtils;
+import ${corePackage}.uitls.LoadFlagUtils;
 </#if>
 import lombok.*;
 import java.io.Serializable;
@@ -82,20 +80,6 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
         return this.<#if relateTable.many>${fieldNameList}<#else>${fieldName}</#if>;
     }
     </#list>
-
-<#--    聚合-->
-    <#if source.aggregate??>
-        <#assign relateDtoClassName=NameUtils.dataTOName(source.aggregate.name)/>
-        <#assign fieldName=NameUtils.getFieldName(source.aggregate.name)/>
-    /**
-    * aggregate ${source.aggregate.name} ,不需要序列化給接口輸出
-    */
-    @Getter
-    @Setter
-    @JsonIgnore
-    @ApiModelProperty(value =  "aggregate ${source.aggregate.name} ,不需要序列化給接口輸出")
-    private ${relateDtoClassName} ${fieldName};
-    </#if>
 
 <#if (source.relatedTable?size>0)>
     /**
@@ -231,77 +215,6 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
     </#if>
     }
     </#list>
-
-<#--    聚合-->
-<#if source.aggregate??>
-    <#assign relateClassName= NameUtils.dataTOName(source.aggregate.name)/>
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ${relateClassName} extends BaseDomain<#if (source.aggregate.implement??) && (source.aggregate.implement!='')> implements ${source.aggregate.implement}</#if>{
-    <#list source.aggregate.column as column>
-        /**
-        * ${column.comment}
-        */
-        @ApiModelProperty(value =  "${column.comment}")
-        private ${column.type} ${NameUtils.getFieldName(column.name)};
-    </#list>
-    }
-</#if>
-
-<#if (source.relatedTable?size>0)>
-    @Getter
-    @Setter
-    @ToString
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class LoadFlag extends BaseLoadFlag{
-        /**
-        * 加載所有數據， 謹慎使用
-        */
-        @ApiModelProperty(value =  "加載所有數據， 謹慎使用")
-        private Boolean loadAll;
-    <#list source.relatedTable as relateTable>
-
-        /**
-        * 加載${NameUtils.dataTOName(relateTable.name)}
-        */
-        @ApiModelProperty(value =  "加載${NameUtils.dataTOName(relateTable.name)}")
-        private Boolean ${NameUtils.getFieldWithPrefix(relateTable.name,"load")};
-    </#list>
-
-        /**
-         * 合併兩個loadFlag數據
-         * @param loadFlag target
-         * @param loadFlagSource source
-         * @return
-         */
-        public static LoadFlag merge(LoadFlag loadFlag, LoadFlag loadFlagSource) {
-            if (ObjectUtil.isNull(loadFlagSource)) {
-                return loadFlag;
-            }
-
-            if (ObjectUtil.isNull(loadFlag)) {
-                return loadFlagSource;
-            }
-
-    <#list source.relatedTable as relateTable>
-    <#assign relateClassName= NameUtils.dataTOName(relateTable.name)/>
-            // 合併${NameUtils.dataTOName(relateTable.name)}
-            if ((null == loadFlag.${NameUtils.getFieldWithPrefix(relateTable.name,"load")} || BooleanUtil.isFalse(loadFlag.${NameUtils.getFieldWithPrefix(relateTable.name,"load")})) &&
-                    BooleanUtil.isTrue(loadFlagSource.${NameUtils.getFieldWithPrefix(relateTable.name,"load")})) {
-                loadFlag.${NameUtils.getFieldWithPrefix(relateTable.name,"load")} = true;
-                loadFlag.addFilters(FiltersUtils.getEntityFiltersEx(loadFlagSource.getFilters(), ${className}.${relateClassName}.class));
-            }
-    </#list>
-            loadFlag.addOrders(loadFlagSource.getOrders());
-            return loadFlag;
-        }
-    }
-</#if>
-
     /**
      * 加載實體數據
      * @param key
@@ -343,23 +256,23 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
      * 加載關聯數據
      * @param tClass
      * @param  filters
-     * @param ignoreDomainFilter 是否忽略模型的外鍵過濾， 用於特殊場景
+     * @param orders
      * @return
      * @param <T>
      */
     @Override
-    public <T> ${className} loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders, Boolean ignoreDomainFilter) {
+    public <T> ${className} loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders) {
         LoadFlag.LoadFlagBuilder builder = LoadFlag.builder();
     <#list source.relatedTable as relateTable>
         <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
-        <#assign relatedLoadPropertyName=NameUtils.getFieldWithPrefix(relateTable.name,"load")/>
+        <#assign relatedLoadPropertyName=NameUtils.getFieldWithPrefix(relateClassName,"load")/>
         if (tClass.equals(${relateDtoClassName}.class)) {
             builder.${relatedLoadPropertyName} = true;
         }
     </#list>
-        LoadFlag loadFlag = builder.build().addFilters(FiltersUtils.buildLambdaFilter(filters));
-        loadFlag.setOrder(orders);
-        loadFlag.setIgnoreDomainFilter(ignoreDomainFilter);
+        LoadFlag loadFlag = builder.build();
+        LoadFlagUtils.addFilters(loadFlag, FiltersUtils.toFilters(filters));
+        LoadFlagUtils.addOrders(loadFlag, orders);
         return this._service.find(this, loadFlag);
     }
 </#if>
@@ -373,4 +286,60 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
     public static ${className} copy(${className} sourceDomain){
         return ${covertName}.INSTANCE.copy(sourceDomain);
     }
+
+
+<#if (source.relatedTable?size>0)>
+    @Getter
+    @Setter
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LoadFlag extends BaseLoadFlag{
+        /**
+        * 加載所有數據， 謹慎使用
+        */
+        @ApiModelProperty(value =  "加載所有數據， 謹慎使用")
+        private Boolean loadAll;
+    <#list source.relatedTable as relateTable>
+    <#assign relateClassName= NameUtils.dataTOName(relateTable.name)/>
+    <#assign relatedLoadPropertyName=NameUtils.getFieldWithPrefix(relateClassName,"load")/>
+
+        /**
+        * 加載${NameUtils.dataTOName(relateTable.name)}
+        */
+        @ApiModelProperty(value =  "加載${relateClassName}")
+        private Boolean ${relatedLoadPropertyName};
+    </#list>
+
+        /**
+         * 合併兩個loadFlag數據
+         * @param loadFlag target
+         * @param loadFlagSource source
+         * @return
+         */
+        public static LoadFlag merge(LoadFlag loadFlag, LoadFlag loadFlagSource) {
+            if (ObjectUtil.isNull(loadFlagSource)) {
+                return loadFlag;
+            }
+
+            if (ObjectUtil.isNull(loadFlag)) {
+                return loadFlagSource;
+            }
+
+    <#list source.relatedTable as relateTable>
+    <#assign relateClassName= NameUtils.dataTOName(relateTable.name)/>
+    <#assign relatedLoadPropertyName=NameUtils.getFieldWithPrefix(relateClassName,"load")/>
+            // 合併${NameUtils.dataTOName(relateTable.name)}
+            if ((null == loadFlag.${relatedLoadPropertyName} || BooleanUtil.isFalse(loadFlag.${relatedLoadPropertyName})) &&
+                    BooleanUtil.isTrue(loadFlagSource.${relatedLoadPropertyName})) {
+                loadFlag.${relatedLoadPropertyName} = true;
+                LoadFlagUtils.addFilters(loadFlag, FiltersUtils.getEntityFiltersEx(loadFlagSource.getFilters(), ${className}.${relateClassName}.class));
+            }
+    </#list>
+            LoadFlagUtils.addOrders(loadFlag, loadFlagSource.getOrders());
+            return loadFlag;
+        }
+    }
+</#if>
 }

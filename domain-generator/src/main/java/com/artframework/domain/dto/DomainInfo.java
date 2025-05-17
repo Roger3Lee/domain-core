@@ -9,6 +9,7 @@ import com.artframework.domain.meta.domain.DomainMetaInfo;
 import com.artframework.domain.meta.domain.RefTableMetaInfo;
 import com.artframework.domain.meta.domain.RelatedTableMetaInfo;
 import com.artframework.domain.meta.table.ColumnMetaInfo;
+import com.artframework.domain.meta.table.TableMetaInfo;
 import com.artframework.domain.utils.NameUtils;
 import lombok.Builder;
 import lombok.Data;
@@ -84,11 +85,7 @@ public class DomainInfo {
     @Data
     public static class RelateTableInfo extends TableInfo {
         private Boolean many;
-        private String fkSourceColumnType;
-        private String fkSourceColumn;
-        private String fkTargetColumnType;
-        private String fkTargetColumn;
-        private List<TableFK> otherFkList = new ArrayList<>();
+        private List<TableFK> fkList = new ArrayList<>();
 
         private List<TableFK> redundancyList = new ArrayList<>();
         /**
@@ -100,10 +97,12 @@ public class DomainInfo {
             if (ObjectUtil.isNull(relatedTableMetaInfo)) {
                 return null;
             }
+            TableMetaInfo table= GlobalSetting.INSTANCE.tableMetaInfoMap.get(relatedTableMetaInfo.getTable());
             RelateTableInfo tableInfo = new RelateTableInfo();
             tableInfo.setImplement(relatedTableMetaInfo.getImplement());
             tableInfo.setDeletable(relatedTableMetaInfo.getDeletable());
-            tableInfo.setName(StrUtil.isEmpty(relatedTableMetaInfo.getName()) ? relatedTableMetaInfo.getTable() : relatedTableMetaInfo.getName());
+            tableInfo.setName(StrUtil.isEmpty(relatedTableMetaInfo.getName()) ? table.getName() : relatedTableMetaInfo.getName());
+            tableInfo.setComment(table.getComment());
             tableInfo.setTableName(relatedTableMetaInfo.getTable());
             tableInfo.setColumn(GlobalSetting.INSTANCE.getTableColumns(relatedTableMetaInfo.getTable()));
             ColumnMetaInfo keyColumn = tableInfo.getColumn().stream().filter(ColumnMetaInfo::getKey).findFirst().orElse(null);
@@ -113,16 +112,8 @@ public class DomainInfo {
             }
 
             tableInfo.setMany(relatedTableMetaInfo.getMany());
-            String[] strings = relatedTableMetaInfo.getFk().split(":");
-            tableInfo.setFkSourceColumn(strings[0]);
-            tableInfo.setFkSourceColumnType(mainTable.getColumn().stream().filter(x -> StringUtils.equalsAnyIgnoreCase(x.getName(), strings[0]))
-                    .map(ColumnMetaInfo::getType).findFirst().orElse(""));
-            tableInfo.setFkTargetColumn(strings[1]);
-            tableInfo.setFkTargetColumnType(tableInfo.getColumn().stream().filter(x -> StringUtils.equalsAnyIgnoreCase(x.getName(), strings[1]))
-                    .map(ColumnMetaInfo::getType).findFirst().orElse(""));
-
-            if (StringUtils.isNotEmpty(relatedTableMetaInfo.getOtherFk())) {
-                tableInfo.setOtherFkList(getFK(relatedTableMetaInfo.getOtherFk(), tableInfo.getColumn(), mainTable.getColumn()));
+            if (StringUtils.isNotEmpty(relatedTableMetaInfo.getFk())) {
+                tableInfo.setFkList(getFK(relatedTableMetaInfo.getFk(), tableInfo.getColumn(), mainTable.getColumn()));
             }
 
             if (StringUtils.isNotEmpty(relatedTableMetaInfo.getRedundancy())) {
@@ -230,6 +221,7 @@ public class DomainInfo {
     @Data
     public static class TableInfo {
         private String name;
+        private String comment;
         private String tableName;
         private String implement;
         private Boolean deletable;

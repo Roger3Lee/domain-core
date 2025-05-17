@@ -75,7 +75,7 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
             throw new UnsupportedOperationException("刪除不支持的實體:" + clazz.getCanonicalName());
         }
 
-        totalEffect += repository.deleteByFilter(FiltersUtils.buildLambdaFilter(lambdaFilters));
+        totalEffect += repository.deleteByFilter(FiltersUtils.toFilters(lambdaFilters));
 
         return totalEffect > 0;
     }
@@ -97,7 +97,7 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
             throw new UnsupportedOperationException("查詢不支持的實體:" + clazz.getCanonicalName());
         }
 
-        return (T) repository.query(null, null, FiltersUtils.buildLambdaFilter(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty(), false);
+        return (T) repository.query(FiltersUtils.toFilters(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
     }
 
 
@@ -118,7 +118,7 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
             throw new UnsupportedOperationException("查詢不支持的實體:" + clazz.getCanonicalName());
         }
 
-        return repository.queryList(FiltersUtils.buildLambdaFilter(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
+        return repository.queryList(FiltersUtils.toFilters(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
     }
 
     @Override
@@ -138,7 +138,7 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
             throw new UnsupportedOperationException("查詢不支持的實體:" + clazz.getCanonicalName());
         }
 
-        return repository.queryPage(pageDomain, FiltersUtils.buildLambdaFilter(lambdaFilters),ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
+        return repository.queryPage(pageDomain, FiltersUtils.toFilters(lambdaFilters),ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
     }
 }
     

@@ -49,23 +49,7 @@ public class ${className}{
     public static SFunction<${relateDtoClassName}, Serializable> ${NameUtils.fieldTargetKeyLambda(fieldName)} = ${relateDtoClassName}::${NameUtils.genGetter(relateTable.keyColName)};
 
 
-    /**
-    * RELATE ${relateTable.name} lambda
-    */
-    public static SFunction<${dtoClassName}, Serializable> ${NameUtils.fieldSourceLambda(fieldName)} = ${dtoClassName}::${NameUtils.genGetter(relateTable.fkSourceColumn)};
-
-
-    /**
-    * RELATE ${relateTable.name} lambda
-    */
-    public static BiConsumer<${relateDtoClassName},${relateTable.fkTargetColumnType}> ${NameUtils.fieldTargetSetLambda(fieldName)} =${relateDtoClassName}::${NameUtils.genSetter(relateTable.fkTargetColumn)};
-
-  /**
-    * RELATE ${relateTable.name} lambda
-    */
-    public static SFunction<${relateDtoClassName},Serializable> ${NameUtils.fieldTargetDomainLambda(fieldName)} =${relateDtoClassName}::${NameUtils.genGetter(relateTable.fkTargetColumn)};
-
-<#list relateTable.otherFkList as fk>
+<#list relateTable.fkList as fk>
 <#if fk.fkSourceColumn??>
     /**
     * REF ${refTable.name} source lambda
@@ -102,10 +86,6 @@ public class ${className}{
      */
      public static BiConsumer<${relateDtoClassName},${fk.fkTargetColumnType}> ${NameUtils.fieldRelatedTargetSetLambda(relateTable.name,fk.fkTargetColumn)} =${relateDtoClassName}::${NameUtils.genSetter(fk.fkTargetColumn)};
   </#list>
-    /**
-    * RELATE ${relateTable.name} lambda
-    */
-    public static SFunction<${relateClassName},Serializable> ${NameUtils.fieldTargetLambda(fieldName)} =${relateClassName}::${NameUtils.genGetter(relateTable.fkTargetColumn)};
 <#if relateTable.refTableList??>
     <#list relateTable.refTableList as refTable>
         <#assign refRelateClassName=NameUtils.dataObjectName(refTable.tableName)/>
@@ -150,39 +130,5 @@ public class ${className}{
     </#list>
 </#if>
 </#list>
-
-<#--    聚合-->
-<#if source.aggregate??>
-    <#assign relateClassName=NameUtils.dataObjectName(source.aggregate.name)/>
-    <#assign relateDtoClassName=dtoClassName+"."+NameUtils.dataTOName(source.aggregate.name)/>
-    <#assign fieldName=NameUtils.getFieldName(source.aggregate.name)/>
-
-    /**
-    *  ${source.aggregate.name} lambda
-    */
-    public static SFunction<${relateDtoClassName}, Serializable> ${NameUtils.fieldTargetKeyLambda(fieldName)} = ${relateDtoClassName}::${NameUtils.genGetter(source.aggregate.keyColName)};
-
-
-    /**
-    * RELATE ${source.aggregate.name} lambda
-    */
-    public static SFunction<${dtoClassName}, Serializable> ${NameUtils.fieldSourceLambda(fieldName)} = ${dtoClassName}::${NameUtils.genGetter(source.aggregate.fkSourceColumn)};
-
-
-    /**
-    * RELATE ${source.aggregate.name} lambda
-    */
-    public static BiConsumer<${relateDtoClassName},${source.aggregate.fkTargetColumnType}> ${NameUtils.fieldTargetSetLambda(fieldName)} =${relateDtoClassName}::${NameUtils.genSetter(source.aggregate.fkTargetColumn)};
-
-    /**
-    * RELATE ${relateTable.name} lambda
-    */
-    public static SFunction<${relateDtoClassName},Serializable> ${NameUtils.fieldTargetDomainLambda(fieldName)} =${relateDtoClassName}::${NameUtils.genGetter(relateTable.fkTargetColumn)};
-
-    /**
-    * RELATE ${source.aggregate.name} lambda
-    */
-    public static SFunction<${relateClassName},Serializable> ${NameUtils.fieldTargetLambda(fieldName)} =${relateClassName}::${NameUtils.genGetter(source.aggregate.fkTargetColumn)};
-</#if>
 </#if>
 }

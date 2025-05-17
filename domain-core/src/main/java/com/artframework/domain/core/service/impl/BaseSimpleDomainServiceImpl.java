@@ -60,7 +60,7 @@ public abstract class BaseSimpleDomainServiceImpl<T extends BaseDomain> implemen
 
     @Override
     public T queryOne(List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders) {
-        return (T) getRepository().query(null, null, FiltersUtils.buildLambdaFilter(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty(), false);
+        return (T) getRepository().query(FiltersUtils.toFilters(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
     }
 
 
@@ -71,7 +71,7 @@ public abstract class BaseSimpleDomainServiceImpl<T extends BaseDomain> implemen
 
     @Override
     public List<T> queryList(List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders) {
-        return getRepository().queryList(FiltersUtils.buildLambdaFilter(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
+        return getRepository().queryList(FiltersUtils.toFilters(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
     }
 
     @Override
@@ -86,7 +86,7 @@ public abstract class BaseSimpleDomainServiceImpl<T extends BaseDomain> implemen
 
     @Override
     public IPage<T> queryPage(PageDomain pageDomain, List<LambdaFilter<T>> lambdaFilters, LambdaOrder<T> orders) {
-        return getRepository().queryPage(pageDomain, FiltersUtils.buildLambdaFilter(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
+        return getRepository().queryPage(pageDomain, FiltersUtils.toFilters(lambdaFilters), ObjectUtil.isNotNull(orders) ? orders.toOrderItems() : ListUtil.empty());
     }
 
     @Override

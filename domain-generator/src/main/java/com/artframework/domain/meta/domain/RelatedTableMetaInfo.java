@@ -15,7 +15,6 @@ public class RelatedTableMetaInfo {
     private String table;
     private Boolean many=false  ;
     private String fk;
-    private String otherFk;
     private String redundancy;
     private String implement;
     private Boolean deletable=true;
@@ -47,15 +46,6 @@ public class RelatedTableMetaInfo {
     @XmlAttribute(name = "fk")
     public void setFk(String fk) {
         this.fk = fk;
-    }
-
-    /**
-     * 多字段關聯用到
-     * @param otherFk
-     */
-    @XmlAttribute(name = "otherFk")
-    public void setOtherFk(String otherFk) {
-        this.otherFk = otherFk;
     }
     /**
      * 冗餘字段

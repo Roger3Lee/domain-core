@@ -1,6 +1,7 @@
 package com.artframework.domain.meta.table;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -15,6 +16,8 @@ import java.util.List;
 @Getter
 public class TableMetaInfo {
     private String name;
+    @Setter
+    private String comment;
     private Boolean basic = false;
     private String inherit;
     private List<ColumnMetaInfo> column;

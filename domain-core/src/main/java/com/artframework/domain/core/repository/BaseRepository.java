@@ -1,8 +1,8 @@
 package com.artframework.domain.core.repository;
 
 import com.artframework.domain.core.domain.BaseDomain;
-import com.artframework.domain.core.domain.BaseLoadFlag;
 import com.artframework.domain.core.domain.PageDomain;
+import com.artframework.domain.core.lambda.LambdaFilter;
 import com.artframework.domain.core.lambda.LambdaOrder;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
@@ -12,32 +12,22 @@ import java.util.List;
 
 public interface BaseRepository<D extends BaseDomain, DO> {
     /**
-     * 通過非主鍵字段查詢唯一一條數據
-     * @param key
-     * @param keyWarp
+     * 通過字段查詢唯一一條數據
+     * @param value
+     * @param valueWarp
      * @return
      */
-    D queryByKey(Serializable key, SFunction<D, Serializable> keyWarp);
-    D query(Serializable id, SFunction<DO, Serializable> idWrap);
-    D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters);
-    D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders);
-    D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters, Boolean ignoreDomainFkFilter);
-    D query(Serializable id, SFunction<DO, Serializable> idWrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders, Boolean ignoreDomainFkFilter);
+    D query(Serializable value, SFunction<D, Serializable> valueWarp);
+    D query(List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders);
 
-    List<D> queryList(List<BaseLoadFlag.DOFilter> filters);
-    List<D> queryList(List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders);
-    List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap);
+    List<D> queryList(Serializable value, SFunction<D, Serializable> valueWarp);
+    List<D> queryList(List<LambdaFilter.Filter> filters);
+    List<D> queryList(List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders);
 
-    List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters);
-
-    List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders);
-
-    List<D> queryList(Serializable id, SFunction<DO, Serializable> wrap, List<BaseLoadFlag.DOFilter> filters, List<LambdaOrder.LambdaOrderItem> orders, Boolean ignoreDomainFkFilter);
-
-    IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> buildLambdaFilter);
+    IPage<D> queryPage(PageDomain pageDomain, List<LambdaFilter.Filter> filters);
 
 
-    IPage<D> queryPage(PageDomain pageDomain, List<BaseLoadFlag.Filter> buildLambdaFilter, List<LambdaOrder.LambdaOrderItem> orders);
+    IPage<D> queryPage(PageDomain pageDomain, List<LambdaFilter.Filter> filters, List<LambdaOrder.LambdaOrderItem> orders);
     /**
      * 插入一条数据
      *
@@ -67,7 +57,7 @@ public interface BaseRepository<D extends BaseDomain, DO> {
      * @param filters
      * @return
      */
-    int deleteByFilter(List<BaseLoadFlag.DOFilter> filters);
+    int deleteByFilter(List<LambdaFilter.Filter> filters);
 
     int deleteById(Serializable id);
 

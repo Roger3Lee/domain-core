@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.constants.Op;
-import com.artframework.domain.core.domain.BaseLoadFlag;
 import com.artframework.domain.core.lambda.LambdaCache;
 import com.artframework.domain.core.lambda.LambdaFilter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -12,6 +11,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -32,13 +32,13 @@ public class FiltersUtils {
      * @param value
      * @return
      */
-    public static BaseLoadFlag.Filter build(String entity, String field, Op op, Object value) {
+    public static LambdaFilter.Filter build(String entity, String field, Op op, Object value) {
 
         return build(entity, field, op, value, null);
     }
 
-    public static BaseLoadFlag.Filter build(String entity, String field, Op op, Object value, List<BaseLoadFlag.DOFilter> orFilterList) {
-        BaseLoadFlag.Filter filter = new BaseLoadFlag.Filter();
+    public static LambdaFilter.Filter build(String entity, String field, Op op, Object value, List<LambdaFilter.DOFilter> orFilterList) {
+        LambdaFilter.Filter filter = new LambdaFilter.Filter();
         filter.setEntity(entity);
         filter.setField(field);
         filter.setOp(op.getCode());
@@ -47,40 +47,44 @@ public class FiltersUtils {
         return filter;
     }
 
-    public static <D> BaseLoadFlag.Filter build(SFunction<D, Serializable> column, Object value, Op op) {
+    public static <D> LambdaFilter.Filter build(SFunction<D, Serializable> column, Object value, Op op) {
         return build(column, value, op, null);
     }
 
-    public static <D> BaseLoadFlag.Filter build(SFunction<D, Serializable> column, Object value, Op op, List<BaseLoadFlag.DOFilter> orFilterList) {
+    public static <D> LambdaFilter.Filter build(SFunction<D, Serializable> column, Object value, Op op, List<LambdaFilter.DOFilter> orFilterList) {
         LambdaCache.LambdaInfo<D> lambdaInfo = LambdaCache.info(column);
         return build(getEntityName(lambdaInfo.getClazz()), lambdaInfo.getFieldName(), op, value, orFilterList);
     }
 
-    public static <D> BaseLoadFlag.Filter build(SFunction<D, Serializable> column, Object value) {
+    public static <D> LambdaFilter.Filter build(SFunction<D, Serializable> column, Object value) {
         return build(column, value, Op.EQ, null);
     }
 
-    public static <D> List<BaseLoadFlag.Filter> buildLambdaFilter(List<LambdaFilter<D>> lambdaFilters) {
-        if(CollectionUtil.isEmpty(lambdaFilters)){
+    public static <D> LambdaFilter.Filter toFilter(LambdaFilter<D> filter) {
+        if (CollectionUtil.isNotEmpty(filter.getOr())) {
+            List<LambdaFilter<D>> orFilterList = filter.getOr();
+            return build(filter.getField(), filter.getValue(), filter.getOp(),
+                    orFilterList.stream().map(orFilter -> build(orFilter.getField(), orFilter.getValue(), orFilter.getOp())).collect(Collectors.toList()));
+        } else {
+            return build(filter.getField(), filter.getValue(), filter.getOp());
+        }
+    }
+
+    public static <D> List<LambdaFilter.Filter> toFilters(List<LambdaFilter<D>> lambdaFilters) {
+        if (CollectionUtil.isEmpty(lambdaFilters)) {
             return ListUtil.empty();
         }
 
         //轉換
-        List<BaseLoadFlag.Filter> filters = new ArrayList<>(lambdaFilters.size());
+        List<LambdaFilter.Filter> filters = new ArrayList<>(lambdaFilters.size());
         for (LambdaFilter<D> filter : lambdaFilters) {
-            if (CollectionUtil.isNotEmpty(filter.getOr())) {
-                List<LambdaFilter<D>> orFilterList = filter.getOr();
-                filters.add(build(filter.getField(), filter.getValue(), filter.getOp(),
-                        orFilterList.stream().map(orFilter -> build(orFilter.getField(), orFilter.getValue(), orFilter.getOp())).collect(Collectors.toList())));
-            } else {
-                filters.add(build(filter.getField(), filter.getValue(), filter.getOp()));
-            }
+            filters.add(toFilter(filter));
         }
         return filters;
     }
 
     public static <D> String getEntityName(Class<D> dtoClass) {
-        return dtoClass.getCanonicalName();
+        return dtoClass.getSimpleName();
     }
 
     /**
@@ -90,23 +94,28 @@ public class FiltersUtils {
      * @param entityClass
      * @return
      */
-    public static <T> List<BaseLoadFlag.DOFilter> getEntityFilters(Map<String, List<BaseLoadFlag.Filter>> filters, Class<T> entityClass) {
-        return getEntityFilters(filters, getEntityName(entityClass)).stream().map(x -> (BaseLoadFlag.DOFilter) x).collect(Collectors.toList());
-    }
-
-    public static <T> List<BaseLoadFlag.Filter> getEntityFiltersEx(Map<String, List<BaseLoadFlag.Filter>> filters, Class<T> entityClass) {
+    public static <T> List<LambdaFilter.Filter> getEntityFilters(Map<String, List<LambdaFilter.Filter>> filters, Class<T> entityClass) {
         return getEntityFilters(filters, getEntityName(entityClass));
     }
 
-    public static <T> List<BaseLoadFlag.Filter> getEntityFilters(Map<String, List<BaseLoadFlag.Filter>> filters, String entity) {
-        List<BaseLoadFlag.Filter> list = filters.get(entity);
+    @SafeVarargs
+    public static List<LambdaFilter.Filter> combine(List<LambdaFilter.Filter>... filters) {
+        return Arrays.stream(filters).flatMap(List::stream).collect(Collectors.toList());
+    }
+
+    public static <T> List<LambdaFilter.Filter> getEntityFiltersEx(Map<String, List<LambdaFilter.Filter>> filters, Class<T> entityClass) {
+        return getEntityFilters(filters, getEntityName(entityClass));
+    }
+
+    public static <T> List<LambdaFilter.Filter> getEntityFilters(Map<String, List<LambdaFilter.Filter>> filters, String entity) {
+        List<LambdaFilter.Filter> list = filters.get(entity);
         if (ObjectUtil.isNull(list)) {
             list = ListUtil.empty();
         }
         return list;
     }
 
-    public static <DO, T> LambdaQueryWrapper<DO> buildWrapper(LambdaQueryWrapper<DO> wrapper, BaseLoadFlag.DOFilter filter, Class<DO> doClass) {
+    public static <DO, T> LambdaQueryWrapper<DO> buildWrapper(LambdaQueryWrapper<DO> wrapper, LambdaFilter.DOFilter filter, Class<DO> doClass) {
         if (CollectionUtil.isEmpty(filter.getOrFilter())) {
             //沒有OR過濾條件時
             Op op = Op.getOp(filter.getOp());
@@ -168,8 +177,8 @@ public class FiltersUtils {
                     }
             }
         } else {
-            Consumer<LambdaQueryWrapper<DO>> consumer = x -> x.and(y -> buildWrapper(y, BaseLoadFlag.DOFilter.copy(filter), doClass));
-            for (BaseLoadFlag.DOFilter filterItem : filter.getOrFilter()) {
+            Consumer<LambdaQueryWrapper<DO>> consumer = x -> x.and(y -> buildWrapper(y, LambdaFilter.DOFilter.copy(filter), doClass));
+            for (LambdaFilter.DOFilter filterItem : filter.getOrFilter()) {
                 consumer = consumer.andThen(x -> x.or(y -> buildWrapper(y, filterItem, doClass)));
             }
             Consumer<LambdaQueryWrapper<DO>> finalConsumer = consumer;
