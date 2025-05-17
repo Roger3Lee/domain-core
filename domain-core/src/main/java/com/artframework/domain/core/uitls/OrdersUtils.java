@@ -1,9 +1,11 @@
 package com.artframework.domain.core.uitls;
 
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.lambda.LambdaCache;
 import com.artframework.domain.core.lambda.order.LambdaOrder;
 import com.artframework.domain.core.lambda.order.LambdaOrderItem;
+import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import java.util.List;
@@ -43,5 +45,12 @@ public class OrdersUtils {
                 //EQ
                 wrapper.orderByAsc(LambdaCache.DOLambda(doClass, order.getField()));
         }
+    }
+
+    public static <T> List<LambdaOrderItem> toOrders(LambdaQuery<T> query) {
+        if(null==query){
+            return ListUtil.empty();
+        }
+        return query.getOrderItems();
     }
 }

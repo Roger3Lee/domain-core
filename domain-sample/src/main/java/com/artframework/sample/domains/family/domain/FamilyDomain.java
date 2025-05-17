@@ -1,8 +1,10 @@
 package com.artframework.sample.domains.family.domain;
 
 import com.artframework.domain.core.domain.*;
-import com.artframework.domain.core.lambda.*;
+import com.artframework.domain.core.lambda.query.*;
+import com.artframework.domain.core.constants.*;
 import com.artframework.domain.core.uitls.FiltersUtils;
+import com.artframework.domain.core.uitls.OrdersUtils;
 import com.artframework.domain.core.uitls.LoadFlagUtils;
 import lombok.*;
 import java.io.Serializable;
@@ -31,7 +33,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 @AllArgsConstructor
 public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService> {
 
-    public FamilyDomain(java.math.BigDecimal key, FamilyService service){
+    public FamilyDomain(Integer key, FamilyService service){
         this.id = key;
         this._service = service;
     }
@@ -41,7 +43,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     @Getter
     @Setter
     @ApiModelProperty(value =  "自增主键")
-    private java.math.BigDecimal id;
+    private Integer id;
     /**
     * 名称
     */
@@ -103,14 +105,14 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         @Getter
         @Setter
         @ApiModelProperty(value =  "自增主键")
-        private java.math.BigDecimal id;
+        private Integer id;
         /**
-        * 家庭ID
+        * 关联用户
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "家庭ID")
-        private java.math.BigDecimal familyId;
+        @ApiModelProperty(value =  "关联用户")
+        private Integer familyId;
         /**
         * 家庭名称
         */
@@ -135,14 +137,14 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         @Getter
         @Setter
         @ApiModelProperty(value =  "自增主键")
-        private java.math.BigDecimal id;
+        private Integer id;
         /**
         * 家庭ID
         */
         @Getter
         @Setter
         @ApiModelProperty(value =  "家庭ID")
-        private java.math.BigDecimal familyId;
+        private Integer familyId;
         /**
         * 家庭名称
         */
@@ -203,23 +205,22 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     /**
      * 加載關聯數據
      * @param tClass
-     * @param  filters
-     * @param orders
+     * @param query
      * @return
      * @param <T>
      */
     @Override
-    public <T> FamilyDomain loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders) {
+    public <T> FamilyDomain loadRelated(Class<T> tClass, LambdaQuery<T> query) {
         LoadFlag.LoadFlagBuilder builder = LoadFlag.builder();
         if (tClass.equals(FamilyAddressDomain.class)) {
-            builder.loadFamilyMemberDomain = true;
+            builder.loadFamilyAddressDomain = true;
         }
         if (tClass.equals(FamilyMemberDomain.class)) {
             builder.loadFamilyMemberDomain = true;
         }
         LoadFlag loadFlag = builder.build();
-        LoadFlagUtils.addFilters(loadFlag, FiltersUtils.toFilters(filters));
-        LoadFlagUtils.addOrders(loadFlag, orders);
+        LoadFlagUtils.addFilters(loadFlag, FiltersUtils.toFilters(query), FiltersUtils.getEntityName(tClass));
+        LoadFlagUtils.addOrders(loadFlag, OrdersUtils.toOrders(query));
         return this._service.find(this, loadFlag);
     }
 
@@ -277,13 +278,13 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
             if ((null == loadFlag.loadFamilyAddressDomain || BooleanUtil.isFalse(loadFlag.loadFamilyAddressDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadFamilyAddressDomain)) {
                 loadFlag.loadFamilyAddressDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, FiltersUtils.getEntityFiltersEx(loadFlagSource.getFilters(), FamilyDomain.FamilyAddressDomain.class));
+                LoadFlagUtils.addFilters(loadFlag, FiltersUtils.getEntityFiltersEx(loadFlagSource.getFilters(), FamilyDomain.FamilyAddressDomain.class), FiltersUtils.getEntityName(FamilyDomain.FamilyAddressDomain.class));
             }
             // 合併FamilyMemberDomain
             if ((null == loadFlag.loadFamilyMemberDomain || BooleanUtil.isFalse(loadFlag.loadFamilyMemberDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadFamilyMemberDomain)) {
                 loadFlag.loadFamilyMemberDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, FiltersUtils.getEntityFiltersEx(loadFlagSource.getFilters(), FamilyDomain.FamilyMemberDomain.class));
+                LoadFlagUtils.addFilters(loadFlag, FiltersUtils.getEntityFiltersEx(loadFlagSource.getFilters(), FamilyDomain.FamilyMemberDomain.class), FiltersUtils.getEntityName(FamilyDomain.FamilyMemberDomain.class));
             }
             LoadFlagUtils.addOrders(loadFlag, loadFlagSource.getOrders());
             return loadFlag;

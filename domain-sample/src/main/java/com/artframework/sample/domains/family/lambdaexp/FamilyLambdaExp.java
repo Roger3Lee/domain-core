@@ -51,7 +51,7 @@ public class FamilyLambdaExp{
     /**
     * REF  target lambda
     */
-    public static BiConsumer<FamilyDomain.FamilyAddressDomain,java.math.BigDecimal> familyAddressFamilyIdTargetSetLambda =FamilyDomain.FamilyAddressDomain::setFamilyId;
+    public static BiConsumer<FamilyDomain.FamilyAddressDomain,Integer> familyAddressFamilyIdTargetSetLambda =FamilyDomain.FamilyAddressDomain::setFamilyId;
 
      /**
      * REF  source lambda
@@ -87,7 +87,7 @@ public class FamilyLambdaExp{
     /**
     * REF  target lambda
     */
-    public static BiConsumer<FamilyDomain.FamilyMemberDomain,java.math.BigDecimal> familyMemberFamilyIdTargetSetLambda =FamilyDomain.FamilyMemberDomain::setFamilyId;
+    public static BiConsumer<FamilyDomain.FamilyMemberDomain,Integer> familyMemberFamilyIdTargetSetLambda =FamilyDomain.FamilyMemberDomain::setFamilyId;
 
      /**
      * REF  source lambda

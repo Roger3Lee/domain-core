@@ -1,16 +1,13 @@
 package com.artframework.domain.core.uitls;
 
 import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.lambda.LambdaCache;
 import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.lambda.query.LogicalOperator;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 /**
  * @author li.pengcheng
@@ -31,48 +28,49 @@ public class FiltersUtils {
      * @param entityClass
      * @return
      */
-    public static <T> List<LambdaQuery.Condition> getEntityFilters(Map<String, List<LambdaQuery.Condition>> filters, Class<T> entityClass) {
+    public static <T> LambdaQuery.ConditionGroup getEntityFilters(Map<String, LambdaQuery.ConditionGroup> filters, Class<T> entityClass) {
         return getEntityFilters(filters, getEntityName(entityClass));
     }
 
-    @SafeVarargs
-    public static List<LambdaQuery.Condition> combine(List<LambdaQuery.Condition>... filters) {
-        return Arrays.stream(filters).flatMap(List::stream).collect(Collectors.toList());
-    }
 
-    public static <T> List<LambdaQuery.Condition> getEntityFiltersEx(Map<String, List<LambdaQuery.Condition>> filters, Class<T> entityClass) {
+    public static <T> LambdaQuery.ConditionGroup getEntityFiltersEx(Map<String, LambdaQuery.ConditionGroup> filters, Class<T> entityClass) {
         return getEntityFilters(filters, getEntityName(entityClass));
     }
 
-    public static <T> List<LambdaQuery.Condition> getEntityFilters(Map<String, List<LambdaQuery.Condition>> filters, String entity) {
-        List<LambdaQuery.Condition> list = filters.get(entity);
-        if (ObjectUtil.isNull(list)) {
-            list = ListUtil.empty();
-        }
-        return list;
+    public static <T> LambdaQuery.ConditionGroup getEntityFilters(Map<String, LambdaQuery.ConditionGroup> filters, String entity) {
+        return filters.get(entity);
     }
 
     public static <DO> void buildWrapper(LambdaQueryWrapper<DO> wrapper, LambdaQuery.ConditionGroup filter, Class<DO> doClass) {
-        for (Object child : filter.children) {
+        Consumer<LambdaQueryWrapper<DO>> consumer = x -> {
+        };
+        for (Object child : filter.condition) {
             if (child instanceof LambdaQuery.Condition) {
-                applyCondition(wrapper, (LambdaQuery.Condition) child, doClass);
+                consumer = consumer.andThen(x -> applyCondition(x, (LambdaQuery.Condition) child, doClass));
             } else if (child instanceof LambdaQuery.ConditionGroup) {
-                LambdaQuery.ConditionGroup childGroup =   (LambdaQuery.ConditionGroup) child ;
-                if (childGroup.operator.equals(LogicalOperator.OR)) {
-                    wrapper.or(x -> buildWrapper(wrapper, childGroup, doClass));
+                LambdaQuery.ConditionGroup childGroup = (LambdaQuery.ConditionGroup) child;
+                if (childGroup.op.equals(LogicalOperator.OR)) {
+                    consumer = consumer.andThen(x -> x.or(y -> buildWrapper(y, childGroup, doClass)));
                 }
-                if(childGroup.operator.equals(LogicalOperator.AND)){
-                    wrapper.and(x -> buildWrapper(wrapper, childGroup, doClass));
+                if (childGroup.op.equals(LogicalOperator.AND)) {
+                    consumer = consumer.andThen(x -> x.and(y -> buildWrapper(y, childGroup, doClass)));
                 }
             }
         }
+        Consumer<LambdaQueryWrapper<DO>> finalConsumer = consumer;
+        if (filter.op.equals(LogicalOperator.AND)) {
+            consumer.accept(wrapper);
+        }
+        if (filter.op.equals(LogicalOperator.OR)) {
+            wrapper.or(finalConsumer);
+        }
     }
 
-    private static <F> void applyCondition(
+    private static <F> LambdaQueryWrapper<F> applyCondition(
             LambdaQueryWrapper<F> wrapper,
             LambdaQuery.Condition filter, Class<F> doClass
     ) {
-        switch (filter.getOperator()) {
+        switch (filter.getOp()) {
             case IN:
                 if (filter.getValue() instanceof Iterable) {
                     wrapper.in(LambdaCache.DOLambda(doClass, filter.getField()), ListUtil.toList((Iterable) filter.getValue()));
@@ -129,5 +127,13 @@ public class FiltersUtils {
                     wrapper.eq(LambdaCache.DOLambda(doClass, filter.getField()), filter.getValue());
                 }
         }
+        return wrapper;
+    }
+
+    public static <T> LambdaQuery.ConditionGroup toFilters(LambdaQuery<T> query) {
+        if (null == query) {
+            return null;
+        }
+        return query.getCondition();
     }
 }

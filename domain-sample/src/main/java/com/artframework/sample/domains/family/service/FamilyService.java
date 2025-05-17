@@ -35,7 +35,7 @@ public interface FamilyService extends BaseDomainService {
     * @param request 请求体
     * @return
     */
-    java.math.BigDecimal insert(FamilyDomain request);
+    Integer insert(FamilyDomain request);
 
     /**
     * 修改
@@ -55,12 +55,12 @@ public interface FamilyService extends BaseDomainService {
     * @param key 数据ID
     * @return 成功OR失败
     */
-    Boolean delete(java.math.BigDecimal key);
+    Boolean delete(Integer key);
     /**
     * 删除
     * @param key 数据ID
     * @param loadFlag 數據加載參數
     * @return 成功OR失败
     */
-    Boolean delete(java.math.BigDecimal key, FamilyDomain.LoadFlag loadFlag);
+    Boolean delete(Integer key, FamilyDomain.LoadFlag loadFlag);
 }

@@ -26,10 +26,10 @@ public class FamilyController {
     /**
     * 新增
     * @param request 请求体
-    * @return java.math.BigDecimal
+    * @return Integer
     */
     @PutMapping()
-    public java.math.BigDecimal insert(@RequestBody FamilyDomain request){
+    public Integer insert(@RequestBody FamilyDomain request){
         return familyService.insert(request);
     }
 
@@ -49,7 +49,7 @@ public class FamilyController {
     * @return 成功OR失败
     */
     @DeleteMapping
-    public Boolean delete(@RequestParam("key") java.math.BigDecimal key){
+    public Boolean delete(@RequestParam("key") Integer key){
         return familyService.delete(key);
     }
 }

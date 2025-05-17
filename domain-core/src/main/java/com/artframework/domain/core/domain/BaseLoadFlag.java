@@ -17,7 +17,7 @@ public class BaseLoadFlag {
      * filter信息
      */
     @Getter
-    private Map<String, List<LambdaQuery.Condition>> filters = new HashMap<>();
+    private Map<String, LambdaQuery.ConditionGroup> filters = new HashMap<>();
 
     /**
      * 排序

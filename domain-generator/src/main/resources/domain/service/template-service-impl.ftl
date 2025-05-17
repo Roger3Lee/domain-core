@@ -5,6 +5,7 @@ import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.repository.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.lambdaexp.*;
 import ${corePackage}.service.impl.*;
+import ${corePackage}.lambda.query.LambdaQuery;
 
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import org.springframework.stereotype.Service;
@@ -99,21 +100,21 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
                 <#assign getRelatedPropertyList=NameUtils.genListGetter(relateTable.name)/>
             if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.${loadProperty}())){
                  <#if (relateTable.fkList?size>0)>
-                List<LambdaFilter<${dtoClassName}.${relatedDtoClassName}>> lambdaFilters = new ArrayList<>();
+                LambdaQuery<${dtoClassName}.${relatedDtoClassName}> lambdaQuery = LambdaQuery.of(${dtoClassName}.${relatedDtoClassName}.class);
                     <#list relateTable.fkList as fk>
                      <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
                      <#assign relatedTargetLambda=NameUtils.fieldRelatedTargetLambda(relateTable.name,fk.fkTargetColumn)/>
                      <#if fk.fkSourceColumn??>
-                lambdaFilters.add(LambdaFilter.build(${lambdaClassName}.${relatedTargetLambda},<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(this))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(resp)</#if>));
+                lambdaQuery.eq(${lambdaClassName}.${relatedTargetLambda},<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(this))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(resp)</#if>);
                      <#else>
-                lambdaFilters.add(LambdaFilter.build(${lambdaClassName}.${relatedTargetLambda},${fk.sourceValue}));
+                lambdaQuery.eq(${lambdaClassName}.${relatedTargetLambda},${fk.sourceValue});
                      </#if>
                     </#list>
                  </#if>
                 <#if relateTable.many>
                 List<${dtoClassName}.${relatedDtoClassName}> queryList = ${NameUtils.getFieldName(relateRepositoryClassName)}.queryList(
-                                 FiltersUtils.combine(FiltersUtils.toFilters(lambdaFilters), FiltersUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class)),
-                                 OrdersUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class))
+                    LambdaQueryUtils.combine(lambdaQuery, FiltersUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class),
+                                 OrdersUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class)))
                                             .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
                 if (CollectionUtil.isEmpty(resp.${getRelatedPropertyList}())){
                     resp.${setRelatedPropertyList}(queryList);
@@ -122,8 +123,8 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
                 }
                 <#else>
                 ${dtoClassName}.${relatedDtoClassName} item= ${NameUtils.getFieldName(relateRepositoryClassName)}.query(
-                                 FiltersUtils.combine(FiltersUtils.toFilters(lambdaFilters), FiltersUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class)),
-                                 OrdersUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class));
+                    LambdaQueryUtils.combine(lambdaQuery, FiltersUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class),
+                                 OrdersUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class)));
                 if(ObjectUtil.isNotNull(item)){
                     item.set_thisDomain(resp);
                 }
@@ -232,7 +233,7 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
     public Boolean update(${dtoClassName} request){
 <#if (source.relatedTable?size>0)>
         Serializable keyId = ${lambdaClassName}.dtoKeyLambda.apply(request);
-        ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindDomain(keyId, null));
+        ${dtoClassName} old = find(new ${NameUtils.getName(source.name)}FindDomain(keyId, request.getLoadFlag()));
         return update(request,old);
 <#else>
         if(request.getChanged()){
@@ -374,18 +375,18 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
         if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.${loadProperty}())){
             //删除关联数据${relateTable.name}
             <#if (relateTable.fkList?size>0)>
-            List<LambdaFilter<${dtoClassName}.${relatedDtoClassName}>> lambdaFilters = new ArrayList<>();
+            LambdaQuery<${dtoClassName}.${relatedDtoClassName}> lambdaQuery = LambdaQuery.of(${dtoClassName}.${relatedDtoClassName}.class);
                 <#list relateTable.fkList as fk>
                  <#assign relatedSourceLambda=NameUtils.fieldRelatedSourceLambda(source.mainTable.name,relateTable.name,fk.fkSourceColumn)/>
                  <#assign relatedTargetLambda=NameUtils.fieldRelatedTargetLambda(relateTable.name,fk.fkTargetColumn)/>
                  <#if fk.fkSourceColumn??>
-            lambdaFilters.add(LambdaFilter.build(${lambdaClassName}.${relatedTargetLambda},<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(this))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(old)</#if>));
+            lambdaQuery.eq(${lambdaClassName}.${relatedTargetLambda},<#if fk.fkSourceConvertMethod?? &&(fk.fkSourceConvertMethod!='')>${fk.fkSourceConvertMethod}(${lambdaClassName}.${relatedSourceLambda}.apply(this))<#else>${lambdaClassName}.${relatedSourceLambda}.apply(old)</#if>);
                  <#else>
-            lambdaFilters.add(LambdaFilter.build(${lambdaClassName}.${relatedTargetLambda},${fk.sourceValue}));
+            lambdaQuery.eq(${lambdaClassName}.${relatedTargetLambda},${fk.sourceValue});
                  </#if>
                 </#list>
              </#if>
-            ${NameUtils.getFieldName(relateRepositoryClassName)}.deleteByFilter(FiltersUtils.toFilters(lambdaFilters));
+            ${NameUtils.getFieldName(relateRepositoryClassName)}.deleteByFilter(lambdaQuery);
         }
 </#if>
 </#list>

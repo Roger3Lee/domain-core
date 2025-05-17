@@ -23,12 +23,12 @@ public class FamilyMemberDO  {
     * 自增主键
     */
     @TableId(value = "id", type = IdType.INPUT)
-    private java.math.BigDecimal id;
+    private Integer id;
     /**
     * 家庭ID
     */
     @TableField("family_id")
-    private java.math.BigDecimal familyId;
+    private Integer familyId;
     /**
     * 家庭名称
     */

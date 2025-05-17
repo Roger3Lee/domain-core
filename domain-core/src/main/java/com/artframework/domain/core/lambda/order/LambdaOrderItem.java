@@ -4,6 +4,7 @@ package com.artframework.domain.core.lambda.order;
 import com.artframework.domain.core.MPFieldLambda;
 import com.artframework.domain.core.constants.Order;
 import com.artframework.domain.core.lambda.LambdaCache;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import java.io.Serializable;
 
 @AllArgsConstructor
 public class LambdaOrderItem {
-    public <T> LambdaOrderItem(MPFieldLambda.SSFunction<T, Serializable> field, Order order) {
+    public <T> LambdaOrderItem(SFunction<T, Serializable> field, Order order) {
         LambdaCache.LambdaInfo<T> lambdaInfo = LambdaCache.info(field);
         this.entity = lambdaInfo.getClazzName();
         this.field = lambdaInfo.getFieldName();

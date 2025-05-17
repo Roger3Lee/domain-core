@@ -2,9 +2,10 @@ package ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain;
 
 import ${corePackage}.domain.*;
 <#if (source.relatedTable?size>0)>
-import ${corePackage}.lambda.*;
+import ${corePackage}.lambda.query.*;
 import ${corePackage}.constants.*;
 import ${corePackage}.uitls.FiltersUtils;
+import ${corePackage}.uitls.OrdersUtils;
 import ${corePackage}.uitls.LoadFlagUtils;
 </#if>
 import lombok.*;
@@ -255,24 +256,23 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
     /**
      * 加載關聯數據
      * @param tClass
-     * @param  filters
-     * @param orders
+     * @param query
      * @return
      * @param <T>
      */
     @Override
-    public <T> ${className} loadRelated(Class<T> tClass, List<LambdaFilter<T>> filters, LambdaOrder<T> orders) {
+    public <T> ${className} loadRelated(Class<T> tClass, LambdaQuery<T> query) {
         LoadFlag.LoadFlagBuilder builder = LoadFlag.builder();
     <#list source.relatedTable as relateTable>
         <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
-        <#assign relatedLoadPropertyName=NameUtils.getFieldWithPrefix(relateClassName,"load")/>
+        <#assign relatedLoadPropertyName=NameUtils.getFieldWithPrefix(relateDtoClassName,"load")/>
         if (tClass.equals(${relateDtoClassName}.class)) {
             builder.${relatedLoadPropertyName} = true;
         }
     </#list>
         LoadFlag loadFlag = builder.build();
-        LoadFlagUtils.addFilters(loadFlag, FiltersUtils.toFilters(filters));
-        LoadFlagUtils.addOrders(loadFlag, orders);
+        LoadFlagUtils.addFilters(loadFlag, FiltersUtils.toFilters(query), FiltersUtils.getEntityName(tClass));
+        LoadFlagUtils.addOrders(loadFlag, OrdersUtils.toOrders(query));
         return this._service.find(this, loadFlag);
     }
 </#if>
@@ -334,7 +334,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
             if ((null == loadFlag.${relatedLoadPropertyName} || BooleanUtil.isFalse(loadFlag.${relatedLoadPropertyName})) &&
                     BooleanUtil.isTrue(loadFlagSource.${relatedLoadPropertyName})) {
                 loadFlag.${relatedLoadPropertyName} = true;
-                LoadFlagUtils.addFilters(loadFlag, FiltersUtils.getEntityFiltersEx(loadFlagSource.getFilters(), ${className}.${relateClassName}.class));
+                LoadFlagUtils.addFilters(loadFlag, FiltersUtils.getEntityFiltersEx(loadFlagSource.getFilters(), ${className}.${relateClassName}.class), FiltersUtils.getEntityName(${className}.${relateClassName}.class));
             }
     </#list>
             LoadFlagUtils.addOrders(loadFlag, loadFlagSource.getOrders());

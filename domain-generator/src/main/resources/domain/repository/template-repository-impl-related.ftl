@@ -53,4 +53,9 @@ public class ${relateRepositoryImplClassName} extends BaseRepositoryImpl<${relat
     public Class<${relateDOClassName}> getDOClass() {
         return ${relateDOClassName}.class;
     }
+
+    @Override
+    public Class<${relateDTOClassName}> getDomainClass() {
+        return ${relateDTOClassName}.class;
+    }
 }

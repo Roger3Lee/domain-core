@@ -23,7 +23,7 @@ public class FamilyDO  {
     * 自增主键
     */
     @TableId(value = "id", type = IdType.INPUT)
-    private java.math.BigDecimal id;
+    private Integer id;
     /**
     * 名称
     */

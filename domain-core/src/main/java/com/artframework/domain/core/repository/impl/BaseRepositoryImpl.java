@@ -36,7 +36,7 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         boolean hasFilter = false;
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
         //額外的filter
-        if (ObjectUtil.isNotNull(lambdaQuery) && ObjectUtil.isNotNull(lambdaQuery.hasFilter())) {
+        if (ObjectUtil.isNotNull(lambdaQuery) && lambdaQuery.hasFilter()) {
             hasFilter = true;
             FiltersUtils.buildWrapper(wrapper, lambdaQuery.getFilter(), this.getDOClass());
         }
@@ -158,7 +158,7 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
     /**
      * 通過實體的過濾條件刪除數據
      *
-     * @param filters
+     * @param lambdaQuery
      * @return
      */
     @Override
@@ -167,7 +167,6 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         if (ObjectUtil.isNotNull(lambdaQuery)) {
             LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
             FiltersUtils.buildWrapper(wrapper, lambdaQuery.getFilter(), this.getDOClass());
-
             return this.baseMapper.delete(wrapper);
         } else {
             log.error("無過濾條件刪除數據，系統忽略此刪除操作");

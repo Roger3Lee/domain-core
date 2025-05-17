@@ -40,4 +40,9 @@ public class FamilyAddressRepositoryImpl extends BaseRepositoryImpl<FamilyDomain
     public Class<FamilyAddressDO> getDOClass() {
         return FamilyAddressDO.class;
     }
+
+    @Override
+    public Class<FamilyDomain.FamilyAddressDomain> getDomainClass() {
+        return FamilyDomain.FamilyAddressDomain.class;
+    }
 }

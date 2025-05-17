@@ -6,8 +6,11 @@ import com.artframework.domain.core.lambda.LambdaCache;
 import com.artframework.domain.core.lambda.order.LambdaOrder;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,13 +23,16 @@ import java.util.function.Consumer;
  * @param <T> 实体类型
  */
 public class LambdaQuery<T> extends LambdaOrder<T> {
+    @Getter
     private final Class<T> entityClass;
     // 根逻辑组（默认 AND 连接）
     private final ConditionGroup rootGroup = new ConditionGroup(LogicalOperator.AND);
     // 当前处理的逻辑组（用于嵌套）
-    private ConditionGroup root = rootGroup;
+    @Getter
+    private ConditionGroup condition = rootGroup;
 
-    private LambdaQuery(Class<T> entityClass) {
+    protected LambdaQuery(Class<T> entityClass) {
+        super(entityClass);
         this.entityClass = entityClass;
     }
 
@@ -35,7 +41,7 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
     }
 
     public Boolean hasFilter() {
-        return CollUtil.isNotEmpty(root.children);
+        return CollUtil.isNotEmpty(condition.condition);
     }
 
     public LambdaQuery<T> and(Consumer<LambdaQuery<T>> consumer) {
@@ -52,52 +58,70 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
     private LambdaQuery<T> nestGroup(LogicalOperator operator, Consumer<LambdaQuery<T>> consumer) {
         // 创建新逻辑组
         ConditionGroup newGroup = new ConditionGroup(operator);
-        root.addChild(newGroup);
+        condition.addChild(newGroup);
 
         // 保存当前组上下文，进入新组
-        ConditionGroup previousGroup = root;
-        root = newGroup;
+        ConditionGroup previousGroup = condition;
+        condition = newGroup;
 
         // 执行用户定义的子条件
         consumer.accept(this);
 
         // 恢复上下文
-        root = previousGroup;
+        condition = previousGroup;
         return this;
     }
 
-    public LambdaQuery<T> eq(SFunction<T, Serializable> valueWarp, Serializable value) {
-        return addCondition(valueWarp, Op.EQ, value);
+    public LambdaQuery<T> where(SFunction<T, Serializable> column, Op op, Object value) {
+        return addCondition(column, op, value);
+    }
+
+    public LambdaQuery<T> where(String column, Op op, Object value) {
+        return addCondition(column, op, value);
+    }
+
+
+    public LambdaQuery<T> eq(SFunction<T, Serializable> column, Serializable value) {
+        return addCondition(column, Op.EQ, value);
     }
 
     protected LambdaQuery<T> addCondition(SFunction<T, Serializable> column, Op op, Object value) {
         // 创建新逻辑组
         Condition newGroup = new Condition(column, op, value);
-        root.addChild(newGroup);
+        condition.addChild(newGroup);
+        return this;
+    }
+
+    protected LambdaQuery<T> addCondition(String column, Op op, Object value) {
+        Condition newGroup = new Condition(entityClass.getCanonicalName(), column, op, value);
+        condition.addChild(newGroup);
         return this;
     }
 
     public ConditionGroup getFilter() {
-        return root;
+        return condition;
     }
 
 
     // 逻辑组定义（包含子条件）
+    @Data
+    @NoArgsConstructor
     public static class ConditionGroup {
-        public final LogicalOperator operator;
-        public final List<Object> children = new ArrayList<>();
+        public LogicalOperator op = LogicalOperator.AND;
+        public final List<Object> condition = new ArrayList<>();
 
         ConditionGroup(LogicalOperator operator) {
-            this.operator = operator;
+            this.op = operator;
         }
 
-        void addChild(Object child) {
-            children.add(child);
+        public void addChild(Object child) {
+            condition.add(child);
         }
     }
 
     // 条件定义（字段 + 操作符 + 值）
     @Data
+    @NoArgsConstructor
     public static class Condition {
         @JsonIgnore
         @ApiModelProperty(hidden = true)
@@ -108,23 +132,23 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
         @ApiModelProperty("字段")
         private String field;
         @ApiModelProperty("过滤条件规则， 默认是=")
-        private Op operator = Op.EQ;
+        private Op op = Op.EQ;
         @ApiModelProperty("值")
         private Object value;
 
-        Condition(SFunction<?, Serializable> column, Op operator, Object value) {
+        Condition(SFunction<?, Serializable> column, Op op, Object value) {
             LambdaCache.LambdaInfo lambdaInfo = LambdaCache.info(column);
             this.entity = lambdaInfo.getClazzName();
             this.field = lambdaInfo.getFieldName();
             this.columnFunction = column;
-            this.operator = operator;
+            this.op = op;
             this.value = value;
         }
 
-        Condition(String entity, String field, Op operator, Object value) {
+        Condition(String entity, String field, Op op, Object value) {
             this.entity = entity;
             this.field = field;
-            this.operator = operator;
+            this.op = op;
             this.value = value;
         }
     }
