@@ -4,8 +4,7 @@ import ${corePackage}.domain.*;
 <#if (source.relatedTable?size>0)>
 import ${corePackage}.lambda.query.*;
 import ${corePackage}.constants.*;
-import ${corePackage}.uitls.FiltersUtils;
-import ${corePackage}.uitls.OrdersUtils;
+import ${corePackage}.uitls.LambdaQueryUtils;
 import ${corePackage}.uitls.LoadFlagUtils;
 </#if>
 import lombok.*;
@@ -271,8 +270,8 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
         }
     </#list>
         LoadFlag loadFlag = builder.build();
-        LoadFlagUtils.addFilters(loadFlag, FiltersUtils.toFilters(query), FiltersUtils.getEntityName(tClass));
-        LoadFlagUtils.addOrders(loadFlag, OrdersUtils.toOrders(query));
+        LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.toFilters(query), LambdaQueryUtils.getEntityName(tClass));
+        LoadFlagUtils.addOrders(loadFlag, LambdaQueryUtils.toOrders(query));
         return this._service.find(this, loadFlag);
     }
 </#if>
@@ -334,7 +333,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
             if ((null == loadFlag.${relatedLoadPropertyName} || BooleanUtil.isFalse(loadFlag.${relatedLoadPropertyName})) &&
                     BooleanUtil.isTrue(loadFlagSource.${relatedLoadPropertyName})) {
                 loadFlag.${relatedLoadPropertyName} = true;
-                LoadFlagUtils.addFilters(loadFlag, FiltersUtils.getEntityFiltersEx(loadFlagSource.getFilters(), ${className}.${relateClassName}.class), FiltersUtils.getEntityName(${className}.${relateClassName}.class));
+                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFiltersEx(loadFlagSource.getFilters(), ${className}.${relateClassName}.class), LambdaQueryUtils.getEntityName(${className}.${relateClassName}.class));
             }
     </#list>
             LoadFlagUtils.addOrders(loadFlag, loadFlagSource.getOrders());

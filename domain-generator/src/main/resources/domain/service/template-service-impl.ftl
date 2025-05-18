@@ -113,8 +113,8 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
                  </#if>
                 <#if relateTable.many>
                 List<${dtoClassName}.${relatedDtoClassName}> queryList = ${NameUtils.getFieldName(relateRepositoryClassName)}.queryList(
-                    LambdaQueryUtils.combine(lambdaQuery, FiltersUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class),
-                                 OrdersUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class)))
+                    LambdaQueryUtils.combine(lambdaQuery, LambdaQueryUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class),
+                    LambdaQueryUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class)))
                                             .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
                 if (CollectionUtil.isEmpty(resp.${getRelatedPropertyList}())){
                     resp.${setRelatedPropertyList}(queryList);
@@ -123,8 +123,8 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
                 }
                 <#else>
                 ${dtoClassName}.${relatedDtoClassName} item= ${NameUtils.getFieldName(relateRepositoryClassName)}.query(
-                    LambdaQueryUtils.combine(lambdaQuery, FiltersUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class),
-                                 OrdersUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class)));
+                    LambdaQueryUtils.combine(lambdaQuery, LambdaQueryUtils.getEntityFilters(loadFlag.getFilters(), ${dtoClassName}.${relatedDtoClassName}.class),
+                    LambdaQueryUtils.getEntityOrders(loadFlag.getOrders(), ${dtoClassName}.${relatedDtoClassName}.class)));
                 if(ObjectUtil.isNotNull(item)){
                     item.set_thisDomain(resp);
                 }

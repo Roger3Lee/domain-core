@@ -10,8 +10,7 @@ import com.artframework.domain.core.lambda.order.LambdaOrderItem;
 import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.mapper.BatchBaseMapper;
 import com.artframework.domain.core.repository.BaseRepository;
-import com.artframework.domain.core.uitls.FiltersUtils;
-import com.artframework.domain.core.uitls.OrdersUtils;
+import com.artframework.domain.core.uitls.LambdaQueryUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -38,7 +37,7 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         //額外的filter
         if (ObjectUtil.isNotNull(lambdaQuery) && lambdaQuery.hasFilter()) {
             hasFilter = true;
-            FiltersUtils.buildWrapper(wrapper, lambdaQuery.getFilter(), this.getDOClass());
+            LambdaQueryUtils.buildFilterWrapper(wrapper, lambdaQuery.getFilter(), this.getDOClass());
         }
 
         if (noConditionThrowException && !hasFilter) {
@@ -48,7 +47,7 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         //排序
         if (ObjectUtil.isNotNull(lambdaQuery) && ObjectUtil.isNotNull(lambdaQuery.getOrderItems())) {
             for (LambdaOrderItem order : lambdaQuery.getOrderItems()) {
-                OrdersUtils.buildOrderWrapper(wrapper, order, this.getDOClass());
+                LambdaQueryUtils.buildOrderWrapper(wrapper, order, this.getDOClass());
             }
         }
         return wrapper;
@@ -166,7 +165,7 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         //額外的filter
         if (ObjectUtil.isNotNull(lambdaQuery)) {
             LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
-            FiltersUtils.buildWrapper(wrapper, lambdaQuery.getFilter(), this.getDOClass());
+            LambdaQueryUtils.buildFilterWrapper(wrapper, lambdaQuery.getFilter(), this.getDOClass());
             return this.baseMapper.delete(wrapper);
         } else {
             log.error("無過濾條件刪除數據，系統忽略此刪除操作");

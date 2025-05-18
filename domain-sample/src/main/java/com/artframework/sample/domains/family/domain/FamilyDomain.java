@@ -3,8 +3,7 @@ package com.artframework.sample.domains.family.domain;
 import com.artframework.domain.core.domain.*;
 import com.artframework.domain.core.lambda.query.*;
 import com.artframework.domain.core.constants.*;
-import com.artframework.domain.core.uitls.FiltersUtils;
-import com.artframework.domain.core.uitls.OrdersUtils;
+import com.artframework.domain.core.uitls.LambdaQueryUtils;
 import com.artframework.domain.core.uitls.LoadFlagUtils;
 import lombok.*;
 import java.io.Serializable;
@@ -219,8 +218,8 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
             builder.loadFamilyMemberDomain = true;
         }
         LoadFlag loadFlag = builder.build();
-        LoadFlagUtils.addFilters(loadFlag, FiltersUtils.toFilters(query), FiltersUtils.getEntityName(tClass));
-        LoadFlagUtils.addOrders(loadFlag, OrdersUtils.toOrders(query));
+        LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.toFilters(query), LambdaQueryUtils.getEntityName(tClass));
+        LoadFlagUtils.addOrders(loadFlag, LambdaQueryUtils.toOrders(query));
         return this._service.find(this, loadFlag);
     }
 
@@ -278,13 +277,13 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
             if ((null == loadFlag.loadFamilyAddressDomain || BooleanUtil.isFalse(loadFlag.loadFamilyAddressDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadFamilyAddressDomain)) {
                 loadFlag.loadFamilyAddressDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, FiltersUtils.getEntityFiltersEx(loadFlagSource.getFilters(), FamilyDomain.FamilyAddressDomain.class), FiltersUtils.getEntityName(FamilyDomain.FamilyAddressDomain.class));
+                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFiltersEx(loadFlagSource.getFilters(), FamilyDomain.FamilyAddressDomain.class), LambdaQueryUtils.getEntityName(FamilyDomain.FamilyAddressDomain.class));
             }
             // 合併FamilyMemberDomain
             if ((null == loadFlag.loadFamilyMemberDomain || BooleanUtil.isFalse(loadFlag.loadFamilyMemberDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadFamilyMemberDomain)) {
                 loadFlag.loadFamilyMemberDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, FiltersUtils.getEntityFiltersEx(loadFlagSource.getFilters(), FamilyDomain.FamilyMemberDomain.class), FiltersUtils.getEntityName(FamilyDomain.FamilyMemberDomain.class));
+                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFiltersEx(loadFlagSource.getFilters(), FamilyDomain.FamilyMemberDomain.class), LambdaQueryUtils.getEntityName(FamilyDomain.FamilyMemberDomain.class));
             }
             LoadFlagUtils.addOrders(loadFlag, loadFlagSource.getOrders());
             return loadFlag;
