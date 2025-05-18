@@ -12,7 +12,7 @@ public enum Op {
     IN("IN"),
     NOT_IN("NOTIN"),
     LIKE("LIKE"),
-    NOT_LIKE("NOTLIKE"),
+    NOT_LIKE("NOT_LIKE"),
     LIKE_LEFT("LIKE_LEFT"),
 
     LIKE_RIGHT("LIKE_RIGHT"),
@@ -24,12 +24,7 @@ public enum Op {
     LE("<="),
 
     ISNULL("ISNULL"),
-    NOTNULL("NOTNULL"),
-
-    /**
-     * 不過濾任何數據
-     */
-    NIL("NIL"),;
+    NOTNULL("NOTNULL"),;
 
     private String code;
 

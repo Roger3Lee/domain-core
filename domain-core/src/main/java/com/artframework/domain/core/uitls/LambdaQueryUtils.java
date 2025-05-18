@@ -27,7 +27,14 @@ public class LambdaQueryUtils {
     }
 
     private static <T> void combineFilter(LambdaQuery<T> lambdaQuery, LambdaQuery.ConditionGroup filter) {
-        lambdaQuery.getCondition().addChild(filter);
+        //如果是AND , 直接將過濾條件添加到根目錄下
+        if (filter.getOp().equals(LogicalOperator.AND)) {
+            for (Object item : filter.getCondition()) {
+                lambdaQuery.getCondition().addChild(item);
+            }
+        } else {
+            lambdaQuery.getCondition().addChild(filter);
+        }
     }
 
 
@@ -92,27 +99,27 @@ public class LambdaQueryUtils {
     }
 
     public static <DO> void buildFilterWrapper(LambdaQueryWrapper<DO> wrapper, LambdaQuery.ConditionGroup filter, Class<DO> doClass) {
-        Consumer<LambdaQueryWrapper<DO>> consumer = x -> {
-        };
-        for (Object child : filter.condition) {
+        if (CollUtil.isEmpty(filter.getCondition())) {
+            return;
+        }
+        Consumer<LambdaQueryWrapper<DO>> consumer = null;
+        for (Object child : filter.getCondition()) {
             if (child instanceof LambdaQuery.Condition) {
-                consumer = consumer.andThen(x -> applyCondition(x, (LambdaQuery.Condition) child, doClass));
+                consumer = consumer == null ? x -> applyCondition(x, (LambdaQuery.Condition) child, doClass) :
+                        consumer.andThen(x -> applyCondition(x, (LambdaQuery.Condition) child, doClass));
             } else if (child instanceof LambdaQuery.ConditionGroup) {
                 LambdaQuery.ConditionGroup childGroup = (LambdaQuery.ConditionGroup) child;
-                if (childGroup.op.equals(LogicalOperator.OR)) {
-                    consumer = consumer.andThen(x -> x.or(y -> buildFilterWrapper(y, childGroup, doClass)));
-                }
-                if (childGroup.op.equals(LogicalOperator.AND)) {
-                    consumer = consumer.andThen(x -> x.and(y -> buildFilterWrapper(y, childGroup, doClass)));
-                }
+                consumer = consumer == null ? x -> buildFilterWrapper(x, childGroup, doClass) :
+                        consumer.andThen(x -> buildFilterWrapper(x, childGroup, doClass));
             }
         }
-        Consumer<LambdaQueryWrapper<DO>> finalConsumer = consumer;
-        if (filter.op.equals(LogicalOperator.AND)) {
-            consumer.accept(wrapper);
-        }
-        if (filter.op.equals(LogicalOperator.OR)) {
-            wrapper.or(finalConsumer);
+        if (null != consumer) {
+            if (filter.getOp().equals(LogicalOperator.AND)) {
+                consumer.accept(wrapper);
+            }
+            if (filter.getOp().equals(LogicalOperator.OR)) {
+                wrapper.or(consumer);
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package com.artframework.sample.controllers;
 
+import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.sample.domains.family.domain.*;
 import com.artframework.sample.domains.family.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -20,7 +21,12 @@ public class FamilyController {
     */
     @PostMapping("/query")
     public FamilyDomain find(@RequestBody FamilyFindDomain request){
-        return familyService.find(request);
+        FamilyDomain findDomain = FamilyDomain.load(request.getKey(), familyService);
+        findDomain.loadRelated(FamilyDomain.FamilyMemberDomain.class, x ->
+                x.eq(FamilyDomain.FamilyMemberDomain::getName, "王芳")
+                        .or(y -> y.like(FamilyDomain.FamilyMemberDomain::getName, "张三")));
+        findDomain.loadRelated(FamilyDomain.FamilyAddressDomain.class);
+        return findDomain;
     }
 
     /**
