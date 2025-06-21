@@ -1,7 +1,6 @@
 package com.artframework.domain.core.repository.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.constants.SaveState;
 import com.artframework.domain.core.domain.BaseDomain;
@@ -10,7 +9,7 @@ import com.artframework.domain.core.lambda.order.LambdaOrderItem;
 import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.mapper.BatchBaseMapper;
 import com.artframework.domain.core.repository.BaseRepository;
-import com.artframework.domain.core.uitls.LambdaQueryUtils;
+import com.artframework.domain.core.utils.LambdaQueryUtils;
 import com.artframework.domain.core.utils.GenericsUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -31,41 +30,48 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
     @Autowired
     protected BaseMapper<DO> baseMapper;
 
-    private Class<D> domainClass;
+    private final Class<D> domainClass;
+    private final Class<DO> doClass;
 
-    private Class<DO> doClass;
-
+    @SuppressWarnings("unchecked")
     public BaseRepositoryImpl() {
         this.domainClass = GenericsUtils.getSuperClassGenericType(this.getClass(), 0);
         this.doClass = GenericsUtils.getSuperClassGenericType(this.getClass(), 1);
     }
 
+    /**
+     * 构建查询条件包装器
+     */
     private LambdaQueryWrapper<DO> buildQueryWrapper(LambdaQuery<D> lambdaQuery) {
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<>();
         if (ObjectUtil.isNull(lambdaQuery)) {
             return wrapper;
         }
 
-        // 额外的filter
+        // 构建过滤条件
         if (lambdaQuery.hasFilter()) {
             LambdaQueryUtils.buildFilterWrapper(wrapper, lambdaQuery.getFilter(), this.doClass);
         }
 
-        // 排序
-        if (ObjectUtil.isNotNull(lambdaQuery.getOrderItems())) {
-            for (LambdaOrderItem order : lambdaQuery.getOrderItems()) {
-                LambdaQueryUtils.buildOrderWrapper(wrapper, order, this.doClass);
-            }
+        // 构建排序条件
+        List<LambdaOrderItem> orderItems = lambdaQuery.getOrderItems();
+        if (CollUtil.isNotEmpty(orderItems)) {
+            orderItems.forEach(order -> LambdaQueryUtils.buildOrderWrapper(wrapper, order, this.doClass));
         }
         return wrapper;
     }
 
     /**
+     * 验证查询条件不为空
+     */
+    private void validateQueryCondition(LambdaQuery<D> lambdaQuery) {
+        if (ObjectUtil.isNull(lambdaQuery) || !lambdaQuery.hasFilter()) {
+            throw new IllegalArgumentException("不允许在不加任何过滤条件的情况下执行操作");
+        }
+    }
+
+    /**
      * 通过字段查询唯一一条数据
-     *
-     * @param value
-     * @param valueWarp
-     * @return
      */
     @Override
     public D query(Serializable value, SFunction<D, Serializable> valueWarp) {
@@ -74,16 +80,17 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
 
     @Override
     public D query(LambdaQuery<D> lambdaQuery) {
-        if (ObjectUtil.isNull(lambdaQuery) || !lambdaQuery.hasFilter()) {
-            throw new IllegalArgumentException("不允许在不加任何过滤条件的情况下查询数据");
-        }
+        validateQueryCondition(lambdaQuery);
+
         LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery);
-        wrapper = wrapper.last("limit 1");
-        List<D> list = convert2DTO(this.baseMapper.selectList(wrapper));
-        if (CollUtil.isEmpty(list)) {
+        // 使用 selectOne 替代 selectList + limit 1
+        DO doEntity = this.baseMapper.selectOne(wrapper.last("limit 1"));
+        if (doEntity == null) {
             return null;
         }
-        return list.get(0);
+
+        List<D> result = convert2DTO(Collections.singletonList(doEntity));
+        return CollUtil.isEmpty(result) ? null : result.get(0);
     }
 
     @Override
@@ -93,148 +100,158 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
 
     @Override
     public List<D> queryList(LambdaQuery<D> lambdaQuery) {
-        if (ObjectUtil.isNull(lambdaQuery) || !lambdaQuery.hasFilter()) {
-            throw new IllegalArgumentException("不允许在不加任何过滤条件的情况下查询数据");
-        }
+        validateQueryCondition(lambdaQuery);
+
         LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery);
-        return convert2DTO(this.baseMapper.selectList(wrapper));
+        List<DO> doList = this.baseMapper.selectList(wrapper);
+        return convert2DTO(doList);
     }
 
     @Override
     public IPage<D> queryPage(PageDomain pageDomain, LambdaQuery<D> lambdaQuery) {
         LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery);
-        return this.baseMapper.selectPage(new Page<>(pageDomain.getPageNum(), pageDomain.getPageSize()), wrapper)
-                .convert(x -> convert2DTO(ListUtil.toList(x)).get(0));
+        Page<DO> page = new Page<>(pageDomain.getPageNum(), pageDomain.getPageSize());
+
+        // 优化：直接转换单个对象，避免创建不必要的列表
+        return this.baseMapper.selectPage(page, wrapper)
+                .convert(this::convertSingleDO2DTO);
+    }
+
+    /**
+     * 转换单个DO为DTO
+     */
+    private D convertSingleDO2DTO(DO doEntity) {
+        List<D> result = convert2DTO(Collections.singletonList(doEntity));
+        return CollUtil.isEmpty(result) ? null : result.get(0);
     }
 
     /**
      * 插入一条数据
-     *
-     * @param item
-     * @return 新增后数据
      */
     @Override
     public D insert(D item) {
-        List<D> insertResponse = insert(CollUtil.newArrayList(item));
+        if (item == null) {
+            throw new IllegalArgumentException("插入对象不能为空");
+        }
+        List<D> insertResponse = insert(Collections.singletonList(item));
         return insertResponse.get(0);
     }
 
     /**
-     * 新增列表
-     *
-     * @param list
-     * @return 新增后数据列表
+     * 批量新增
      */
     @Override
     public List<D> insert(List<D> list) {
         if (CollUtil.isEmpty(list)) {
             return Collections.emptyList();
         }
-        List<DO> tList = convert2DO(list);
-        if (list.size() == 1) {
-            this.baseMapper.insert(tList.get(0));
+
+        List<DO> doList = convert2DO(list);
+
+        // 执行插入操作
+        if (doList.size() == 1) {
+            this.baseMapper.insert(doList.get(0));
         } else {
-            if (BatchBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())) {
-                ((BatchBaseMapper) this.baseMapper).insertBatch(tList);
+            // 优化：使用 instanceof 替代反射
+            if (this.baseMapper instanceof BatchBaseMapper) {
+                ((BatchBaseMapper<DO>) this.baseMapper).insertBatch(doList);
             } else {
-                for (DO d : tList) {
-                    this.baseMapper.insert(d);
-                }
+                // 批量插入退化为循环插入
+                doList.forEach(this.baseMapper::insert);
             }
         }
-        // 覆盖列表， 目的是将自赋值的字段的值返回
+
+        // 回填自增字段并触发回调
         for (int i = 0; i < list.size(); i++) {
-            convert2DTO(tList.get(i), list.get(i));
-            // 触发保存后的回调
+            convert2DTO(doList.get(i), list.get(i));
             list.get(i).afterSave(SaveState.INSERT);
         }
+
         return list;
     }
 
     /**
      * 批量删除
-     *
-     * @param list
-     * @return 受影响行数
      */
     @Override
     public int delete(List<D> list) {
         if (CollUtil.isEmpty(list)) {
             return 0;
         }
-        List<Serializable> keyList = list.stream().map(x -> keyLambda().apply(x)).collect(Collectors.toList());
-        return this.baseMapper.deleteBatchIds(keyList);
+
+        Function<D, Serializable> keyFunc = keyLambda();
+        List<Serializable> keyList = list.stream()
+                .map(keyFunc)
+                .filter(ObjectUtil::isNotNull)
+                .collect(Collectors.toList());
+
+        return CollUtil.isEmpty(keyList) ? 0 : this.baseMapper.deleteBatchIds(keyList);
     }
 
     /**
-     * 通过实体的过滤条件删除数据
-     *
-     * @param lambdaQuery
-     * @return
+     * 通过过滤条件删除数据
      */
     @Override
     public int deleteByFilter(LambdaQuery<D> lambdaQuery) {
-        if (ObjectUtil.isNull(lambdaQuery) || !lambdaQuery.hasFilter()) {
-            throw new IllegalArgumentException("不允许在不加任何过滤条件的情况下删除数据");
-        }
-        // 额外的filter
+        validateQueryCondition(lambdaQuery);
+
         LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<>();
         LambdaQueryUtils.buildFilterWrapper(wrapper, lambdaQuery.getFilter(), this.doClass);
         return this.baseMapper.delete(wrapper);
     }
 
     /**
-     * 根据ID删除一行数据
-     *
-     * @param id
-     * @return 受影响行数
+     * 根据ID删除
      */
     @Override
     public int deleteById(Serializable id) {
+        if (id == null) {
+            return 0;
+        }
         return this.baseMapper.deleteById(id);
     }
 
     /**
      * 更新一条数据
-     *
-     * @param item
-     * @return 更新后数据
      */
     @Override
     public int update(D item) {
-        return update(CollUtil.newArrayList(item));
+        if (item == null) {
+            return 0;
+        }
+        return update(Collections.singletonList(item));
     }
 
     /**
-     * 更新列表
-     *
-     * @param list
-     * @return 更新后数据列表
+     * 批量更新
      */
     @Override
     public int update(List<D> list) {
         if (CollUtil.isEmpty(list)) {
             return 0;
         }
-        int effect = 0;
-        List<DO> tList = convert2DO(list);
-        if (list.size() == 1) {
-            effect = this.baseMapper.updateById(tList.get(0));
+
+        int totalEffect = 0;
+        List<DO> doList = convert2DO(list);
+
+        if (doList.size() == 1) {
+            totalEffect = this.baseMapper.updateById(doList.get(0));
         } else {
-            if (BatchBaseMapper.class.isAssignableFrom(this.baseMapper.getClass())) {
-                return ((BatchBaseMapper) this.baseMapper).batchUpdate(tList);
+            // 优化：使用 instanceof 替代反射
+            if (this.baseMapper instanceof BatchBaseMapper) {
+                totalEffect = ((BatchBaseMapper<DO>) this.baseMapper).batchUpdate(doList);
             } else {
-                for (DO d : tList) {
-                    effect += this.baseMapper.updateById(d);
+                // 批量更新退化为循环更新
+                for (DO doEntity : doList) {
+                    totalEffect += this.baseMapper.updateById(doEntity);
                 }
             }
         }
 
         // 触发保存后的回调
-        for (D item : list) {
-            item.afterSave(SaveState.UPDATE);
-        }
-        return effect;
+        list.forEach(item -> item.afterSave(SaveState.UPDATE));
+
+        return totalEffect;
     }
 
     public abstract List<DO> convert2DO(List<D> list);

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
-import com.artframework.domain.core.uitls.*;
+import com.artframework.domain.core.utils.*;
 import com.artframework.domain.core.lambda.*;
 import cn.hutool.core.collection.*;
 import cn.hutool.core.util.*;
@@ -38,9 +38,9 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
 
     @PostConstruct
     public void init(){
-        this._DomainRepositoryMap.put(FamilyDomain.class.getCanonicalName(), this.familyRepository);
-        this._DomainRepositoryMap.put(FamilyDomain.FamilyAddressDomain.class.getCanonicalName(), this.familyAddressRepository);
-        this._DomainRepositoryMap.put(FamilyDomain.FamilyMemberDomain.class.getCanonicalName(), this.familyMemberRepository);
+        this.addRepository(FamilyDomain.class, this.familyRepository);
+        this.addRepository(FamilyDomain.FamilyAddressDomain.class, this.familyAddressRepository);
+        this.addRepository(FamilyDomain.FamilyMemberDomain.class, this.familyMemberRepository);
     }
 
    /**

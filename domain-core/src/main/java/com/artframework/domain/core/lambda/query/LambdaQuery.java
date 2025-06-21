@@ -27,11 +27,12 @@ import java.util.function.Consumer;
 public class LambdaQuery<T> extends LambdaOrder<T> {
     @Getter
     private final Class<T> entityClass;
+    
     // 根逻辑组（默认 AND 连接）
     private final ConditionGroup rootGroup = new ConditionGroup(LogicalOperator.AND);
+    
     // 当前处理的逻辑组（用于嵌套）
-    @Getter
-    private ConditionGroup condition = rootGroup;
+    private ConditionGroup currentGroup = rootGroup;
 
     protected LambdaQuery(Class<T> entityClass) {
         super(entityClass);
@@ -39,17 +40,33 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
     }
 
     public static <T> LambdaQuery<T> of(Class<T> entityClass) {
-        return new LambdaQuery<T>(entityClass);
+        return new LambdaQuery<>(entityClass);
     }
 
+    /**
+     * 检查是否有过滤条件
+     */
     public Boolean hasFilter() {
-        return CollUtil.isNotEmpty(condition.condition);
+        return CollUtil.isNotEmpty(rootGroup.getCondition());
     }
 
+    /**
+     * 获取根过滤条件组
+     */
+    public ConditionGroup getFilter() {
+        return rootGroup;
+    }
+
+    /**
+     * AND 嵌套条件组
+     */
     public LambdaQuery<T> and(Consumer<LambdaQuery<T>> consumer) {
         return nestGroup(LogicalOperator.AND, consumer);
     }
 
+    /**
+     * OR 嵌套条件组
+     */
     public LambdaQuery<T> or(Consumer<LambdaQuery<T>> consumer) {
         return nestGroup(LogicalOperator.OR, consumer);
     }
@@ -60,152 +77,173 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
     private LambdaQuery<T> nestGroup(LogicalOperator operator, Consumer<LambdaQuery<T>> consumer) {
         // 创建新逻辑组
         ConditionGroup newGroup = new ConditionGroup(operator);
-        condition.addChild(newGroup);
+        currentGroup.addChild(newGroup);
 
         // 保存当前组上下文，进入新组
-        ConditionGroup previousGroup = condition;
-        condition = newGroup;
+        ConditionGroup previousGroup = currentGroup;
+        currentGroup = newGroup;
 
         // 执行用户定义的子条件
         consumer.accept(this);
 
         // 恢复上下文
-        condition = previousGroup;
+        currentGroup = previousGroup;
         return this;
     }
 
+    /**
+     * 添加条件到当前组
+     */
     protected LambdaQuery<T> addCondition(SFunction<T, Serializable> column, Op op, Object value) {
-        // 创建新逻辑组
-        Condition newGroup = new Condition(column, op, value);
-        condition.addChild(newGroup);
+        Condition condition = new Condition(column, op, value);
+        currentGroup.addChild(condition);
         return this;
     }
 
-    public ConditionGroup getFilter() {
-        return condition;
+    // ==================== 条件方法 ====================
+    
+    public LambdaQuery<T> eq(SFunction<T, Serializable> column, Object value) {
+        return addCondition(column, Op.EQ, value);
     }
 
+    public LambdaQuery<T> ne(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.NE, val);
+    }
 
-    // 逻辑组定义（包含子条件）
+    public LambdaQuery<T> gt(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.GT, val);
+    }
+
+    public LambdaQuery<T> ge(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.GE, val);
+    }
+
+    public LambdaQuery<T> lt(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.LT, val);
+    }
+
+    public LambdaQuery<T> le(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.LE, val);
+    }
+
+    public LambdaQuery<T> like(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.LIKE, val);
+    }
+
+    public LambdaQuery<T> notLike(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.NOT_LIKE, val);
+    }
+
+    public LambdaQuery<T> likeLeft(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.LIKE_LEFT, val);
+    }
+
+    public LambdaQuery<T> likeRight(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.LIKE_RIGHT, val);
+    }
+
+    public LambdaQuery<T> in(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.IN, val);
+    }
+    
+    public LambdaQuery<T> notIn(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.NOT_IN, val);
+    }
+    
+    public LambdaQuery<T> isNull(SFunction<T, Serializable> column) {
+        return addCondition(column, Op.ISNULL, null);
+    }
+    
+    public LambdaQuery<T> notNull(SFunction<T, Serializable> column) {
+        return addCondition(column, Op.NOTNULL, null);
+    }
+
+    // ==================== 内部类 ====================
+
+    /**
+     * 逻辑组定义（包含子条件）
+     */
     @Data
     @NoArgsConstructor
     public static class ConditionGroup {
         private LogicalOperator op = LogicalOperator.AND;
         private List<Object> condition = new ArrayList<>();
 
-        ConditionGroup(LogicalOperator operator) {
+        public ConditionGroup(LogicalOperator operator) {
             this.op = operator;
         }
 
         public void addChild(Object child) {
-            condition.add(child);
+            if (child != null) {
+                condition.add(child);
+            }
         }
 
         /**
-         * @param condition
+         * 设置条件列表，支持从Map反序列化
          */
         public void setCondition(List<Object> condition) {
-            if (CollUtil.isNotEmpty(condition)) {
-                for (int i = 0; i < condition.size(); i++) {
-                    Object item = condition.get(i);
-                    if (item instanceof Map) {
-                        if (((Map<?, ?>) item).containsKey("condition")) {
-                            item = BeanUtil.mapToBean((Map<?, ?>) item, ConditionGroup.class, true, CopyOptions.create());
-                        } else if (((Map<?, ?>) item).containsKey("field")) {
-                            item = BeanUtil.mapToBean((Map<?, ?>) item, Condition.class, true, CopyOptions.create());
-                        }
-                        condition.set(i, item);
+            if (CollUtil.isEmpty(condition)) {
+                this.condition = new ArrayList<>();
+                return;
+            }
+
+            // 处理反序列化的Map对象
+            List<Object> processedConditions = new ArrayList<>();
+            for (Object item : condition) {
+                if (item instanceof Map) {
+                    Map<?, ?> map = (Map<?, ?>) item;
+                    if (map.containsKey("condition")) {
+                        // 转换为 ConditionGroup
+                        item = BeanUtil.mapToBean(map, ConditionGroup.class, true, CopyOptions.create());
+                    } else if (map.containsKey("field")) {
+                        // 转换为 Condition
+                        item = BeanUtil.mapToBean(map, Condition.class, true, CopyOptions.create());
                     }
                 }
+                processedConditions.add(item);
             }
-            this.condition = condition;
+            this.condition = processedConditions;
         }
     }
 
-    // 条件定义（字段 + 操作符 + 值）
+    /**
+     * 条件定义（字段 + 操作符 + 值）
+     */
     @Data
     @NoArgsConstructor
     public static class Condition {
         @JsonIgnore
         @ApiModelProperty(hidden = true)
-        private SFunction<?, ?> columnFunction;
+        private SFunction<?, Serializable> columnFunction;
+        
         @ApiModelProperty(hidden = true)
         @JsonIgnore
         private String entity;
+        
         @ApiModelProperty("字段")
         private String field;
-        @ApiModelProperty("过滤条件规则， 默认是=")
+        
+        @ApiModelProperty("过滤条件规则，默认是=")
         private Op op = Op.EQ;
+        
         @ApiModelProperty("值")
         private Object value;
 
-        Condition(SFunction<?, Serializable> column, Op op, Object value) {
+        public Condition(SFunction<?, Serializable> column, Op op, Object value) {
             LambdaCache.LambdaInfo lambdaInfo = LambdaCache.info(column);
             this.entity = lambdaInfo.getClazzName();
             this.field = lambdaInfo.getFieldName();
             this.columnFunction = column;
-            this.op = op;
+            this.op = op != null ? op : Op.EQ;
             this.value = value;
         }
 
-        Condition(String entity, String field, Op op, Object value) {
+        public Condition(String entity, String field, Op op, Object value) {
             this.entity = entity;
             this.field = field;
-            this.op = op;
+            this.op = op != null ? op : Op.EQ;
             this.value = value;
         }
-    }
-
-    public LambdaQuery<T> eq(SFunction<T, Serializable> column, Object value) {
-        return this.addCondition(column, Op.EQ, value);
-    }
-
-    public LambdaQuery<T> ne(SFunction<T, Serializable> column, Object val) {
-        return this.addCondition(column, Op.NE, val);
-    }
-
-    public LambdaQuery<T> gt(SFunction<T, Serializable> column, Object val) {
-        return this.addCondition(column, Op.GT, val);
-    }
-
-    public LambdaQuery<T> ge(SFunction<T, Serializable> column, Object val) {
-        return this.addCondition(column, Op.GE, val);
-    }
-
-    public LambdaQuery<T> lt(SFunction<T, Serializable> column, Object val) {
-        return this.addCondition(column, Op.LT, val);
-    }
-
-    public LambdaQuery<T> le(SFunction<T, Serializable> column, Object val) {
-        return this.addCondition(column, Op.LE, val);
-    }
-
-    public LambdaQuery<T> like(SFunction<T, Serializable> column, Object val) {
-        return this.addCondition(column, Op.LIKE, val);
-    }
-
-    public LambdaQuery<T> notLike(SFunction<T, Serializable> column, Object val) {
-        return this.addCondition(column, Op.NOT_LIKE, val);
-    }
-
-    public LambdaQuery<T> likeLeft(SFunction<T, Serializable> column, Object val) {
-        return this.addCondition(column, Op.LIKE_LEFT, val);
-    }
-
-    public LambdaQuery<T> likeRight(SFunction<T, Serializable> column, Object val) {
-        return this.addCondition(column, Op.LIKE_RIGHT, val);
-    }
-
-    public LambdaQuery<T> in(SFunction<T, Serializable> column, Object val) {
-        return this.addCondition( column, Op.IN, val);
-    }
-    public LambdaQuery<T> notIn(SFunction<T, Serializable> column, Object val) {
-        return this.addCondition( column, Op.NOT_IN, val);
-    }
-    public LambdaQuery<T> isNull(SFunction<T, Serializable> column) {
-        return this.addCondition( column, Op.ISNULL, null);
-    }
-    public LambdaQuery<T> notNull(SFunction<T, Serializable> column) {
-        return this.addCondition( column, Op.NOTNULL, null);
     }
 }

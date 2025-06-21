@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
-    <property name="APP_NAME" value="public-notarial-be"/>
+    <property name="APP_NAME" value="domain-sample"/>
     <property name="LOG_PATH" value="${LOG_ROOT:-./logs}/${APP_NAME}"/>
     <property name="ENCODING" value="UTF-8"/>
     <property name="MAX_HISTORY" value="3"/>

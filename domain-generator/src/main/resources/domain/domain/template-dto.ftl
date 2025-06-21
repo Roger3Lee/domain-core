@@ -4,8 +4,8 @@ import ${corePackage}.domain.*;
 <#if (source.relatedTable?size>0)>
 import ${corePackage}.lambda.query.*;
 import ${corePackage}.constants.*;
-import ${corePackage}.uitls.LambdaQueryUtils;
-import ${corePackage}.uitls.LoadFlagUtils;
+import ${corePackage}.utils.LambdaQueryUtils;
+import ${corePackage}.utils.LoadFlagUtils;
 </#if>
 import lombok.*;
 import java.io.Serializable;
@@ -333,7 +333,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
             if ((null == loadFlag.${relatedLoadPropertyName} || BooleanUtil.isFalse(loadFlag.${relatedLoadPropertyName})) &&
                     BooleanUtil.isTrue(loadFlagSource.${relatedLoadPropertyName})) {
                 loadFlag.${relatedLoadPropertyName} = true;
-                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFiltersEx(loadFlagSource.getFilters(), ${className}.${relateClassName}.class), LambdaQueryUtils.getEntityName(${className}.${relateClassName}.class));
+                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFilters(loadFlagSource.getFilters(), ${className}.${relateClassName}.class), LambdaQueryUtils.getEntityName(${className}.${relateClassName}.class));
             }
     </#list>
             LoadFlagUtils.addOrders(loadFlag, loadFlagSource.getOrders());

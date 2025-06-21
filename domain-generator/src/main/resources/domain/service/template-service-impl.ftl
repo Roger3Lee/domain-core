@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 <#if (source.relatedTable?size>0)>
-import ${corePackage}.uitls.*;
+import ${corePackage}.utils.*;
 import ${corePackage}.lambda.*;
 import cn.hutool.core.collection.*;
 import cn.hutool.core.util.*;
@@ -52,11 +52,11 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
 <#if (source.relatedTable?size>0)>
     @PostConstruct
     public void init(){
-        this._DomainRepositoryMap.put(${dtoClassName}.class.getCanonicalName(), this.${repositoryName});
+        this.addRepository(${dtoClassName}.class, this.${repositoryName});
     <#list source.relatedTable as relateTable>
         <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.tableName)/>
         <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
-        this._DomainRepositoryMap.put(${dtoClassName}.${relateDtoClassName}.class.getCanonicalName(), this.${NameUtils.getFieldName(relateRepositoryClassName)});
+        this.addRepository(${dtoClassName}.${relateDtoClassName}.class, this.${NameUtils.getFieldName(relateRepositoryClassName)});
     </#list>
     }
 <#else>
