@@ -26,7 +26,7 @@ public enum Op {
     ISNULL("ISNULL"),
     NOTNULL("NOTNULL"),;
 
-    private String code;
+    private final String code;
 
     Op(String code) {
         this.code = code;

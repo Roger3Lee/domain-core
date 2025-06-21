@@ -209,7 +209,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
      * @param <T>
      */
     @Override
-    public <T> FamilyDomain loadRelated(Class<T> tClass, LambdaQuery<T> query) {
+    public <T> void loadRelated(Class<T> tClass, LambdaQuery<T> query) {
         LoadFlag.LoadFlagBuilder builder = LoadFlag.builder();
         if (tClass.equals(FamilyAddressDomain.class)) {
             builder.loadFamilyAddressDomain = true;
@@ -220,7 +220,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         LoadFlag loadFlag = builder.build();
         LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.toFilters(query), LambdaQueryUtils.getEntityName(tClass));
         LoadFlagUtils.addOrders(loadFlag, LambdaQueryUtils.toOrders(query));
-        return this._service.find(this, loadFlag);
+        this._service.find(this, loadFlag);
     }
 
      /**

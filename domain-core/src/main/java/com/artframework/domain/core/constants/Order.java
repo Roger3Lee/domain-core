@@ -11,7 +11,7 @@ public enum Order {
     ASC("ASC"),
     DESC("DESC"),;
 
-    private String code;
+    private final String code;
 
 
     Order(String code) {

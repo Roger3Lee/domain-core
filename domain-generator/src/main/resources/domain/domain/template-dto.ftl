@@ -260,7 +260,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
      * @param <T>
      */
     @Override
-    public <T> ${className} loadRelated(Class<T> tClass, LambdaQuery<T> query) {
+    public <T> void loadRelated(Class<T> tClass, LambdaQuery<T> query) {
         LoadFlag.LoadFlagBuilder builder = LoadFlag.builder();
     <#list source.relatedTable as relateTable>
         <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
@@ -272,7 +272,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
         LoadFlag loadFlag = builder.build();
         LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.toFilters(query), LambdaQueryUtils.getEntityName(tClass));
         LoadFlagUtils.addOrders(loadFlag, LambdaQueryUtils.toOrders(query));
-        return this._service.find(this, loadFlag);
+        this._service.find(this, loadFlag);
     }
 </#if>
 </#if>

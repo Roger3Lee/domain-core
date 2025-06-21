@@ -12,7 +12,7 @@ public enum SaveState {
     UPDATE("UPDATE")
     ;
 
-    private String code;
+    private final String code;
 
     SaveState(String code) {
         this.code = code;
