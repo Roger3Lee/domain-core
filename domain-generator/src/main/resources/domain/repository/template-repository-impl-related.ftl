@@ -48,14 +48,4 @@ public class ${relateRepositoryImplClassName} extends BaseRepositoryImpl<${relat
     public SFunction<${relateDTOClassName}, Serializable> keyLambda() {
         return ${lambdaClassName}.${NameUtils.fieldTargetKeyLambda(fieldName)};
     }
-
-    @Override
-    public Class<${relateDOClassName}> getDOClass() {
-        return ${relateDOClassName}.class;
-    }
-
-    @Override
-    public Class<${relateDTOClassName}> getDomainClass() {
-        return ${relateDTOClassName}.class;
-    }
 }

@@ -35,14 +35,4 @@ public class FamilyAddressRepositoryImpl extends BaseRepositoryImpl<FamilyDomain
     public SFunction<FamilyDomain.FamilyAddressDomain, Serializable> keyLambda() {
         return FamilyLambdaExp.familyAddressDomainKeyLambda;
     }
-
-    @Override
-    public Class<FamilyAddressDO> getDOClass() {
-        return FamilyAddressDO.class;
-    }
-
-    @Override
-    public Class<FamilyDomain.FamilyAddressDomain> getDomainClass() {
-        return FamilyDomain.FamilyAddressDomain.class;
-    }
 }

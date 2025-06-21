@@ -11,6 +11,7 @@ import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.mapper.BatchBaseMapper;
 import com.artframework.domain.core.repository.BaseRepository;
 import com.artframework.domain.core.uitls.LambdaQueryUtils;
+import com.artframework.domain.core.utils.GenericsUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -30,31 +31,37 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
     @Autowired
     protected BaseMapper<DO> baseMapper;
 
-    private LambdaQueryWrapper<DO> buildQueryWrapper(LambdaQuery<D> lambdaQuery,
-                                                     boolean noConditionThrowException) {
-        boolean hasFilter = false;
-        LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
-        //額外的filter
-        if (ObjectUtil.isNotNull(lambdaQuery) && lambdaQuery.hasFilter()) {
-            hasFilter = true;
-            LambdaQueryUtils.buildFilterWrapper(wrapper, lambdaQuery.getFilter(), this.getDOClass());
+    private Class<D> domainClass;
+
+    private Class<DO> doClass;
+
+    public BaseRepositoryImpl() {
+        this.domainClass = GenericsUtils.getSuperClassGenericType(this.getClass(), 0);
+        this.doClass = GenericsUtils.getSuperClassGenericType(this.getClass(), 1);
+    }
+
+    private LambdaQueryWrapper<DO> buildQueryWrapper(LambdaQuery<D> lambdaQuery) {
+        LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<>();
+        if (ObjectUtil.isNull(lambdaQuery)) {
+            return wrapper;
         }
 
-        if (noConditionThrowException && !hasFilter) {
-            throw new IllegalArgumentException("不允許不加過濾條件查詢數據");
+        // 额外的filter
+        if (lambdaQuery.hasFilter()) {
+            LambdaQueryUtils.buildFilterWrapper(wrapper, lambdaQuery.getFilter(), this.doClass);
         }
 
-        //排序
-        if (ObjectUtil.isNotNull(lambdaQuery) && ObjectUtil.isNotNull(lambdaQuery.getOrderItems())) {
+        // 排序
+        if (ObjectUtil.isNotNull(lambdaQuery.getOrderItems())) {
             for (LambdaOrderItem order : lambdaQuery.getOrderItems()) {
-                LambdaQueryUtils.buildOrderWrapper(wrapper, order, this.getDOClass());
+                LambdaQueryUtils.buildOrderWrapper(wrapper, order, this.doClass);
             }
         }
         return wrapper;
     }
 
     /**
-     * 通過字段查詢唯一一條數據
+     * 通过字段查询唯一一条数据
      *
      * @param value
      * @param valueWarp
@@ -62,12 +69,15 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
      */
     @Override
     public D query(Serializable value, SFunction<D, Serializable> valueWarp) {
-        return query(LambdaQuery.of(getDomainClass()).eq(valueWarp, value));
+        return query(LambdaQuery.of(domainClass).eq(valueWarp, value));
     }
 
     @Override
     public D query(LambdaQuery<D> lambdaQuery) {
-        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery, true);
+        if (ObjectUtil.isNull(lambdaQuery) || !lambdaQuery.hasFilter()) {
+            throw new IllegalArgumentException("不允许在不加任何过滤条件的情况下查询数据");
+        }
+        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery);
         wrapper = wrapper.last("limit 1");
         List<D> list = convert2DTO(this.baseMapper.selectList(wrapper));
         if (CollUtil.isEmpty(list)) {
@@ -78,20 +88,23 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
 
     @Override
     public List<D> queryList(Serializable value, SFunction<D, Serializable> valueWarp) {
-        return queryList(LambdaQuery.of(getDomainClass()).eq(valueWarp, value));
+        return queryList(LambdaQuery.of(domainClass).eq(valueWarp, value));
     }
 
     @Override
     public List<D> queryList(LambdaQuery<D> lambdaQuery) {
-        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery, true);
+        if (ObjectUtil.isNull(lambdaQuery) || !lambdaQuery.hasFilter()) {
+            throw new IllegalArgumentException("不允许在不加任何过滤条件的情况下查询数据");
+        }
+        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery);
         return convert2DTO(this.baseMapper.selectList(wrapper));
     }
 
-
     @Override
     public IPage<D> queryPage(PageDomain pageDomain, LambdaQuery<D> lambdaQuery) {
-        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery, false);
-        return this.baseMapper.selectPage(new Page<>(pageDomain.getPageNum(), pageDomain.getPageSize()), wrapper).convert(x -> convert2DTO(ListUtil.toList(x)).get(0));
+        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery);
+        return this.baseMapper.selectPage(new Page<>(pageDomain.getPageNum(), pageDomain.getPageSize()), wrapper)
+                .convert(x -> convert2DTO(ListUtil.toList(x)).get(0));
     }
 
     /**
@@ -129,15 +142,14 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
                 }
             }
         }
-        //覆蓋列表， 目的是將自賦值的字段的值返回
+        // 覆盖列表， 目的是将自赋值的字段的值返回
         for (int i = 0; i < list.size(); i++) {
             convert2DTO(tList.get(i), list.get(i));
-            //觸發保存後的回調
+            // 触发保存后的回调
             list.get(i).afterSave(SaveState.INSERT);
         }
         return list;
     }
-
 
     /**
      * 批量删除
@@ -155,26 +167,24 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
     }
 
     /**
-     * 通過實體的過濾條件刪除數據
+     * 通过实体的过滤条件删除数据
      *
      * @param lambdaQuery
      * @return
      */
     @Override
     public int deleteByFilter(LambdaQuery<D> lambdaQuery) {
-        //額外的filter
-        if (ObjectUtil.isNotNull(lambdaQuery)) {
-            LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<DO>();
-            LambdaQueryUtils.buildFilterWrapper(wrapper, lambdaQuery.getFilter(), this.getDOClass());
-            return this.baseMapper.delete(wrapper);
-        } else {
-            log.error("無過濾條件刪除數據，系統忽略此刪除操作");
-            return 0;
+        if (ObjectUtil.isNull(lambdaQuery) || !lambdaQuery.hasFilter()) {
+            throw new IllegalArgumentException("不允许在不加任何过滤条件的情况下删除数据");
         }
+        // 额外的filter
+        LambdaQueryWrapper<DO> wrapper = new LambdaQueryWrapper<>();
+        LambdaQueryUtils.buildFilterWrapper(wrapper, lambdaQuery.getFilter(), this.doClass);
+        return this.baseMapper.delete(wrapper);
     }
 
     /**
-     * 删除一行数据BYid
+     * 根据ID删除一行数据
      *
      * @param id
      * @return 受影响行数
@@ -206,7 +216,7 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         if (CollUtil.isEmpty(list)) {
             return 0;
         }
-        Integer effect = 0;
+        int effect = 0;
         List<DO> tList = convert2DO(list);
         if (list.size() == 1) {
             effect = this.baseMapper.updateById(tList.get(0));
@@ -215,13 +225,12 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
                 return ((BatchBaseMapper) this.baseMapper).batchUpdate(tList);
             } else {
                 for (DO d : tList) {
-                    this.baseMapper.updateById(d);
+                    effect += this.baseMapper.updateById(d);
                 }
-                effect = tList.size();
             }
         }
 
-        //觸發保存後的回調
+        // 触发保存后的回调
         for (D item : list) {
             item.afterSave(SaveState.UPDATE);
         }
@@ -235,8 +244,4 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
     public abstract void convert2DTO(DO item, D targetItem);
 
     public abstract Function<D, Serializable> keyLambda();
-
-    public abstract Class<DO> getDOClass();
-
-    public abstract Class<D> getDomainClass();
 }

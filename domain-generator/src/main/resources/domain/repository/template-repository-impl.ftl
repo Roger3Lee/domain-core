@@ -44,14 +44,4 @@ public class ${repositoryImplClassName} extends BaseRepositoryImpl<${dtoClassNam
     public SFunction<${dtoClassName}, Serializable> keyLambda() {
         return ${lambdaClassName}.dtoKeyLambda;
     }
-
-    @Override
-    public Class<${doClassName}> getDOClass() {
-        return ${doClassName}.class;
-    }
-
-    @Override
-    public Class<${dtoClassName}> getDomainClass() {
-        return ${dtoClassName}.class;
-    }
 }

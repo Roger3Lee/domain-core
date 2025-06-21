@@ -56,7 +56,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     @Getter
     @Setter
     @ApiModelProperty(value =  "家庭成员数量")
-    private java.math.BigDecimal personCount;
+    private Integer personCount;
 
 
     /**

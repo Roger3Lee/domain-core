@@ -30,17 +30,6 @@ public class GenerateUtils {
             domainDtoGenerator.setTemplateFilePath(FTLConstants.FIND_REQUEST_PATH);
             FileUtils.saveFile(path + File.separator + getDomainFolderName(domainInfo) + File.separator + "domain" + File.separator, domainInfo.nameSuffix("FindDomain") + ".java", domainDtoGenerator.generate(domainInfo));
 
-//            domainDtoGenerator.setTemplateFilePath(FTLConstants.PAGE_REQUEST_PATH);
-//            FileUtils.saveFile(path + File.separator + getDomainFolderName(domainInfo) + File.separator + "domain"+File.separator, domainInfo.nameSuffix("PageDomain") + ".java", domainDtoGenerator.generate(domainInfo));
-
-
-//            domainDtoGenerator.setTemplateFilePath(FTLConstants.UPDATE_REQUEST_PATH);
-//            FileUtils.saveFile(path + File.separator + getDomainFolderName(domainInfo) + File.separator + "domain"+File.separator, domainInfo.nameSuffix("UpdateDomain") + ".java", domainDtoGenerator.generate(domainInfo));
-//
-//            domainDtoGenerator.setTemplateFilePath(FTLConstants.CREATE_REQUEST_PATH);
-//            FileUtils.saveFile(path + File.separator + getDomainFolderName(domainInfo) + File.separator + "domain"+File.separator, domainInfo.nameSuffix("CreateDomain") + ".java", domainDtoGenerator.generate(domainInfo));
-
-
             domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_PATH);
             FileUtils.saveFile(path + File.separator + getDomainFolderName(domainInfo) + File.separator + "repository" + File.separator, domainInfo.nameSuffix("Repository") + ".java", domainDtoGenerator.generate(domainInfo), null != overWrite ? overWrite : false);
 
@@ -54,14 +43,6 @@ public class GenerateUtils {
 
                 domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_IMPL_RELATED_PATH);
                 FileUtils.saveFile(path + File.separator + getDomainFolderName(domainInfo) + File.separator + "repository"+File.separator+"impl" + File.separator, relateTableInfo.nameSuffix("RepositoryImpl") + ".java", domainDtoGenerator.generate(domainInfo), null != overWrite ? overWrite : false);
-            }
-            if (domainInfo.getAggregate() != null) {
-                domainDtoGenerator.putParam("table", domainInfo.getAggregate());
-                domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_RELATED_PATH);
-                FileUtils.saveFile(path + File.separator + getDomainFolderName(domainInfo) + File.separator + "repository" + File.separator, domainInfo.getAggregate().nameSuffix("Repository") + ".java", domainDtoGenerator.generate(domainInfo), null != overWrite ? overWrite : false);
-
-                domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_IMPL_RELATED_PATH);
-                FileUtils.saveFile(path + File.separator + getDomainFolderName(domainInfo) + File.separator + "repository"+File.separator+"impl" + File.separator, domainInfo.getAggregate().nameSuffix("RepositoryImpl") + ".java", domainDtoGenerator.generate(domainInfo), null != overWrite ? overWrite : false);
             }
 
             domainDtoGenerator.setTemplateFilePath(FTLConstants.DOMAIN_SERVICE_PATH);

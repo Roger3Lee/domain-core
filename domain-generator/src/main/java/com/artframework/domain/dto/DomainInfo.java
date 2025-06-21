@@ -40,7 +40,6 @@ public class DomainInfo {
     private TableInfo mainTable;
 
     private List<RelateTableInfo> relatedTable;
-    private RelateTableInfo aggregate;
 
     public String getFolder() {
         return StringUtils.isNotEmpty(this.folder) ? StrUtil.replace(this.folder, "/", ".") : NameUtils.packageName(this.getName());
@@ -64,7 +63,6 @@ public class DomainInfo {
                 .description(domainMetaInfo.getDescription())
                 .mainTable(tableInfo)
                 .relatedTable(domainMetaInfo.getRelatedList().stream().map(x -> RelateTableInfo.convert(x, tableInfo)).collect(Collectors.toList()))
-                .aggregate(RelateTableInfo.convert(domainMetaInfo.getAggregate(), tableInfo))
                 .build();
     }
 

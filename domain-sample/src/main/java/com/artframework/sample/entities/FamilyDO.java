@@ -33,5 +33,5 @@ public class FamilyDO  {
     * 家庭成员数量
     */
     @TableField("person_count")
-    private java.math.BigDecimal personCount;
+    private Integer personCount;
 }

@@ -28,19 +28,19 @@ public class GlobalSetting {
     public Map<String, TableMetaInfo> tableMetaInfoMap = new HashMap<>();
     private List<DomainMetaInfo> domainMetaInfoList = new ArrayList<>();
 
-
     public List<DomainMetaInfo> getDomainList() {
         return domainMetaInfoList;
     }
 
     public List<TableMetaInfo> getTableList() {
-        if (INSTANCE.getDomainList().size()>0) {
+        if (INSTANCE.getDomainList().size() > 0) {
             List<TableMetaInfo> tableMetaInfos = new ArrayList<>();
             for (DomainMetaInfo domainMetaInfo : INSTANCE.getDomainList()) {
                 if (INSTANCE.tableMetaInfoMap.containsKey(domainMetaInfo.getMainTable())) {
                     tableMetaInfos.add(INSTANCE.tableMetaInfoMap.get(domainMetaInfo.getMainTable()));
                 }
-                if (null != domainMetaInfo.getAggregate() && INSTANCE.tableMetaInfoMap.containsKey(domainMetaInfo.getAggregate().getTable())) {
+                if (null != domainMetaInfo.getAggregate()
+                        && INSTANCE.tableMetaInfoMap.containsKey(domainMetaInfo.getAggregate().getTable())) {
                     tableMetaInfos.add(INSTANCE.tableMetaInfoMap.get(domainMetaInfo.getAggregate().getTable()));
                 }
 
@@ -51,7 +51,7 @@ public class GlobalSetting {
                 });
             }
             return tableMetaInfos;
-        }else{
+        } else {
             return new ArrayList<>(INSTANCE.tableMetaInfoMap.values());
         }
     }
@@ -63,11 +63,11 @@ public class GlobalSetting {
             Map<String, ColumnMetaInfo> columns = tableMetaInfo.getColumn().stream()
                     .collect(Collectors.toMap(ColumnMetaInfo::getName, x -> x, (x, y) -> x));
 
-            //有继承关系
+            // 有继承关系
             if (StrUtil.isNotBlank(tableMetaInfo.getInherit())) {
                 List<ColumnMetaInfo> columnMetaInfos = getTableColumns(tableMetaInfo.getInherit());
-                for (ColumnMetaInfo item:columnMetaInfos) {
-                    if(!columns.containsKey(item.getName())){
+                for (ColumnMetaInfo item : columnMetaInfos) {
+                    if (!columns.containsKey(item.getName())) {
                         columnList.add(item);
                     }
                 }
@@ -77,32 +77,54 @@ public class GlobalSetting {
         return Collections.emptyList();
     }
 
+    public void setTableInfos(List<TableInfo> tableInfos) {
+        List<TableMetaInfo> tableMetaInfos = tableInfos.stream().map(GlobalSetting::convert)
+                .collect(Collectors.toList());
+        INSTANCE.tableMetaInfoMap = tableMetaInfos.stream()
+                .collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
+    }
+
+    public static void loadDomainConfig(File domainFile) throws JAXBException, IOException {
+        DomainCollection domainCollection = XmlUtils
+                .xmlToBean(StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())), DomainCollection.class);
+        if (ObjectUtil.isNotEmpty(domainCollection)) {
+            INSTANCE.domainMetaInfoList = domainCollection.getDomain();
+        }
+    }
+
     public static void load(String tableXml, String domainXml) throws JAXBException {
         INSTANCE = new GlobalSetting();
         TableCollection tableCollection = XmlUtils.xmlToBean(tableXml, TableCollection.class);
         DomainCollection domainCollection = XmlUtils.xmlToBean(domainXml, DomainCollection.class);
 
         INSTANCE.domainMetaInfoList = domainCollection.getDomain();
-        INSTANCE.tableMetaInfoMap = tableCollection.getTables().stream().collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
+        INSTANCE.tableMetaInfoMap = tableCollection.getTables().stream()
+                .collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
     }
 
     public static void load(File tableFile, File domainFile) throws IOException, JAXBException {
-        load(StreamUtils.readAsString(Files.newInputStream(tableFile.toPath())),StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())));
+        load(StreamUtils.readAsString(Files.newInputStream(tableFile.toPath())),
+                StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())));
     }
 
-    public static void loadFromDB(DataSourceConfig dataSourceConfig, File domainFile) throws IOException, JAXBException {
+    public static void loadFromDB(DataSourceConfig dataSourceConfig, File domainFile)
+            throws IOException, JAXBException {
 
         TableQuery tableQuery = new TableQuery(dataSourceConfig);
         List<TableInfo> tableInfos = tableQuery.queryTables();
-        List<TableMetaInfo> tableMetaInfos = tableInfos.stream().map(GlobalSetting::convert).collect(Collectors.toList());
-        if (dataSourceConfig.getDbType().equals(DbType.POSTGRE_SQL) || dataSourceConfig.getDbType().equals(DbType.ORACLE)) {
+        List<TableMetaInfo> tableMetaInfos = tableInfos.stream().map(GlobalSetting::convert)
+                .collect(Collectors.toList());
+        if (dataSourceConfig.getDbType().equals(DbType.POSTGRE_SQL)
+                || dataSourceConfig.getDbType().equals(DbType.ORACLE)) {
             tableMetaInfos.forEach(x -> x.setKeyGenerator(false));
         }
-        INSTANCE.tableMetaInfoMap =  tableMetaInfos.stream().collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
-        DomainCollection domainCollection = XmlUtils.xmlToBean(StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())), DomainCollection.class);
-       if(ObjectUtil.isNotEmpty(domainCollection)){
-           INSTANCE.domainMetaInfoList = domainCollection.getDomain();
-       }
+        INSTANCE.tableMetaInfoMap = tableMetaInfos.stream()
+                .collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
+        DomainCollection domainCollection = XmlUtils
+                .xmlToBean(StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())), DomainCollection.class);
+        if (ObjectUtil.isNotEmpty(domainCollection)) {
+            INSTANCE.domainMetaInfoList = domainCollection.getDomain();
+        }
     }
 
     public static TableMetaInfo convert(TableInfo tableInfo) {
@@ -110,11 +132,11 @@ public class GlobalSetting {
         table.setName(tableInfo.getName());
         List<ColumnMetaInfo> columnMetaInfos = new ArrayList<>();
 
-        Set<String> colset=new HashSet<>();
+        Set<String> colset = new HashSet<>();
         for (TableField tableField : tableInfo.getFields()) {
-            if(colset.contains(tableField.getName())){
+            if (colset.contains(tableField.getName())) {
                 continue;
-            }else{
+            } else {
                 colset.add(tableField.getName());
             }
             ColumnMetaInfo column = new ColumnMetaInfo();
