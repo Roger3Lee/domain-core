@@ -1,4 +1,3 @@
-
 spring:
   application:
     name: domain-sample
@@ -14,6 +13,11 @@ server:
   servlet:
     context-path: /sample
 
+# 启用 PostgreSQL 支持
+domain:
+  postgresql:
+    enabled: true
+
 mybatis-plus:
   mapper-locations:
     - classpath*:mapper/**/*.xml
@@ -28,6 +32,7 @@ mybatis-plus:
 logging:
   level:
     com.artframework.sample.mappers: DEBUG
+    com.artframework.domain.postgresql: DEBUG
     root: INFO
 #
 #springfox:

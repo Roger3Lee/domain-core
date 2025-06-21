@@ -1,7 +1,8 @@
 package com.artframework.sample.mappers;
 
 import org.apache.ibatis.annotations.Mapper;
-
+import com.artframework.domain.core.mapper.BatchBaseMapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.artframework.sample.entities.*;
 
 /**
@@ -11,5 +12,5 @@ import com.artframework.sample.entities.*;
 * @version v1.0
 */
 @Mapper
-public interface FamilyAddressMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<FamilyAddressDO> {
+public interface FamilyAddressMapper extends BatchBaseMapper<FamilyAddressDO> {
 }

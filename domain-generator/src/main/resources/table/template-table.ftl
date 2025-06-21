@@ -36,7 +36,7 @@ public class ${className} <#if source.inheritBaseEntity>extends ${source.baseEnt
     * ${column.comment}
     */
     <#if column.key>
-    @TableId(value = "${column.name}", type = IdType.<#if source.keyGenerator>AUTO<#else>INPUT</#if>)
+    @TableId(value = "${column.name}", type = IdType.<#if source.keyGenerator>AUTO<#else>ASSIGN_ID</#if>)
     <#else>
     @TableField("${column.name}")
     </#if>

@@ -1,6 +1,31 @@
 # 简介
 ## 功能
 此框架提供基于DDD（领域驱动）脚手架功能，开发者可根据业务需要定义好领域模型来生成包含:实体（Entity）、聚合及聚合根（Aggregate，Aggregate Root）、仓储（Repository）、领域服务（Domain Service）在内的代码。
+
+## 数据库支持
+
+框架提供了针对不同数据库的专门支持模块，使用者可以根据项目需求选择相应的依赖包：
+
+### MySQL 支持
+- **模块**：`domain-mysql-support`
+- **功能**：提供 MySQL 特有的批量操作，包括批量插入、ON DUPLICATE KEY UPDATE、REPLACE INTO、INSERT IGNORE 等
+- **适用场景**：使用 MySQL 数据库的项目
+
+### PolarDB 支持
+- **模块**：`domain-polardb-support`
+- **功能**：PolarDB-O 兼容 Oracle 语法，提供 INSERT ALL 批量插入、MERGE 批量更新等高级功能
+- **适用场景**：使用阿里云 PolarDB-O（Oracle 兼容版）的项目
+
+### PostgreSQL 支持
+- **模块**：`domain-postgresql-support`
+- **功能**：提供 PostgreSQL 特有功能，包括 ON CONFLICT、COPY 批量导入、RETURNING 子句、MERGE 操作等
+- **适用场景**：使用 PostgreSQL 数据库的项目
+
+### Oracle 支持
+- **模块**：`domain-oracle-support`
+- **功能**：提供 Oracle 原生的批量操作，包括 INSERT ALL、MERGE 语句等
+- **适用场景**：使用 Oracle 数据库的项目
+
 ## DDD概念介绍
 
 ![img](https://pic1.zhimg.com/80/v2-40c06b92067ce29b1fdf5cc5404f6f48_720w.webp)
@@ -38,49 +63,47 @@
 
 基于config/table-list.xml和config/domain-config.xml文件生成的代码提供的spring boot样例。
 
+### 数据库支持模块
+
+- **domain-mysql-support**：MySQL 数据库专用支持模块
+- **domain-polardb-support**：PolarDB 数据库专用支持模块  
+- **domain-postgresql-support**：PostgreSQL 数据库专用支持模块
+
 ## 依赖
 Mybatis plus, mapstruct、hutool
 
-## 领域域配置文件和表配置文件
+## 快速开始
 
-### 表配置文件
+### 1. 选择数据库支持模块
 
-#### XML样例
-
-### 领域域配置文件
-
-### XML样例
+根据您使用的数据库类型，选择相应的支持模块：
 
 ```xml
-<domains>
-    <domain name="user" description="用戶域" main-table="user_info">
-        <related table="user_address" many="false" fk="id:user_id"/>
-        <related table="user_family_member" many="true" fk="id:user_id"/>
-    </domain>
-</domains>
+<!-- MySQL 支持 -->
+<dependency>
+    <groupId>com.artframework</groupId>
+    <artifactId>domain-mysql-support</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
+
+<!-- PolarDB 支持 -->
+<dependency>
+    <groupId>com.artframework</groupId>
+    <artifactId>domain-polardb-support</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
+
+<!-- PostgreSQL 支持 -->
+<dependency>
+    <groupId>com.artframework</groupId>
+    <artifactId>domain-postgresql-support</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
+
+<!-- Oracle 支持 -->
+<dependency>
+    <groupId>com.artframework</groupId>
+    <artifactId>domain-oracle-support</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
 ```
-
-### XML介绍
-| 属性        | 类型   | 描述                                              |
-| ----------- | ------ | ------------------------------------------------- |
-| name        | STRING | 域名称                                            |
-| description | STRING | 域描述                                            |
-| main-table  | STRING | 模型的实体                                        |
-| related     | STRING | 实体关联的值/引用对象集合                         |
-| - table     | STRING | 值/引用对象的表名                                 |
-| - many      | BOOL   | 是否为一对多，true为一对多， false为一对          |
-| - fk        | STRING | 实体和值/引用对象的对应的表的关联字段。使用：隔开 |
-
-# 样例
-
-### 脚手架生成代码结构
-
-- controller: 生成domain服务的增删改查和分页查询接口
-
-- domain：生成包括领域服务（Domain Service）、仓储（Repository）在内的代码。同时通过实体或值/引用类型的状态进行数据的增删改查操作。
-
-- entities：通过表配置文件生成的mybatis plus表实体类
-
-- mappers: 通过表配置文件生成的mybatis plus mapper类
-
-

@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
 
 public class LoadFlagUtils {
     public static <T extends BaseLoadFlag> T addFilters(T loadFlag, LambdaQuery.ConditionGroup filter ,String entityName) {
-        if (ObjectUtil.isNotEmpty(filter)) {
-                loadFlag.getFilters().merge(entityName, filter, (x, y) -> {
-                    x.addChild(y);
-                    return x;
-                });
+        if (ObjectUtil.isNotEmpty(filter) && CollUtil.isNotEmpty(filter.getCondition())) {
+            loadFlag.getFilters().merge(entityName, filter, (x, y) -> {
+                x.addChild(y);
+                return x;
+            });
         }
         return loadFlag;
     }

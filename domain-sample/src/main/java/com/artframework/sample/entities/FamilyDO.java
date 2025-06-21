@@ -6,32 +6,31 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
-* family
-*
-* @author auto
-* @version v1.0
-*/
+ * family
+ *
+ * @author auto
+ * @version v1.0
+ */
 @Getter
 @Setter
 @ToString
-@TableName(value="family", autoResultMap = true)
+@TableName(value = "family", autoResultMap = true)
 @KeySequence("seq_family_id")
-public class FamilyDO  {
-
+public class FamilyDO {
 
     /**
-    * 自增主键
-    */
-    @TableId(value = "id", type = IdType.INPUT)
+     * 自增主键
+     */
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Integer id;
     /**
-    * 名称
-    */
+     * 名称
+     */
     @TableField("name")
     private String name;
     /**
-    * 家庭成员数量
-    */
+     * 家庭成员数量
+     */
     @TableField("person_count")
     private Integer personCount;
 }

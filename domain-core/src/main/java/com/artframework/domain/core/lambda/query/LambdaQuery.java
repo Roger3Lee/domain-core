@@ -27,10 +27,10 @@ import java.util.function.Consumer;
 public class LambdaQuery<T> extends LambdaOrder<T> {
     @Getter
     private final Class<T> entityClass;
-    
+
     // 根逻辑组（默认 AND 连接）
     private final ConditionGroup rootGroup = new ConditionGroup(LogicalOperator.AND);
-    
+
     // 当前处理的逻辑组（用于嵌套）
     private ConditionGroup currentGroup = rootGroup;
 
@@ -95,13 +95,15 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
      * 添加条件到当前组
      */
     protected LambdaQuery<T> addCondition(SFunction<T, Serializable> column, Op op, Object value) {
-        Condition condition = new Condition(column, op, value);
-        currentGroup.addChild(condition);
+        // 直接添加条件到当前组，不创建不必要的ConditionGroup包装
+        if (value != null || op == Op.ISNULL || op == Op.NOTNULL) {
+            this.currentGroup.addChild(new Condition(column, op, value));
+        }
         return this;
     }
 
     // ==================== 条件方法 ====================
-    
+
     public LambdaQuery<T> eq(SFunction<T, Serializable> column, Object value) {
         return addCondition(column, Op.EQ, value);
     }
@@ -145,15 +147,15 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
     public LambdaQuery<T> in(SFunction<T, Serializable> column, Object val) {
         return addCondition(column, Op.IN, val);
     }
-    
+
     public LambdaQuery<T> notIn(SFunction<T, Serializable> column, Object val) {
         return addCondition(column, Op.NOT_IN, val);
     }
-    
+
     public LambdaQuery<T> isNull(SFunction<T, Serializable> column) {
         return addCondition(column, Op.ISNULL, null);
     }
-    
+
     public LambdaQuery<T> notNull(SFunction<T, Serializable> column) {
         return addCondition(column, Op.NOTNULL, null);
     }
@@ -216,17 +218,17 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
         @JsonIgnore
         @ApiModelProperty(hidden = true)
         private SFunction<?, Serializable> columnFunction;
-        
+
         @ApiModelProperty(hidden = true)
         @JsonIgnore
         private String entity;
-        
+
         @ApiModelProperty("字段")
         private String field;
-        
+
         @ApiModelProperty("过滤条件规则，默认是=")
         private Op op = Op.EQ;
-        
+
         @ApiModelProperty("值")
         private Object value;
 

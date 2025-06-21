@@ -6,47 +6,45 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
-* family_member
-*
-* @author auto
-* @version v1.0
-*/
+ * family_member
+ *
+ * @author auto
+ * @version v1.0
+ */
 @Getter
 @Setter
 @ToString
-@TableName(value="family_member", autoResultMap = true)
+@TableName(value = "family_member", autoResultMap = true)
 @KeySequence("seq_family_member_id")
-public class FamilyMemberDO  {
-
-
+public class FamilyMemberDO {
     /**
-    * 自增主键
-    */
-    @TableId(value = "id", type = IdType.INPUT)
+     * 自增主键
+     */
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Integer id;
     /**
-    * 家庭ID
-    */
+     * 家庭ID
+     */
     @TableField("family_id")
     private Integer familyId;
     /**
-    * 家庭名称
-    */
+     * 家庭名称
+     */
     @TableField("family_name")
     private String familyName;
     /**
-    * 姓名
-    */
+     * 姓名
+     */
     @TableField("name")
     private String name;
     /**
-    * 电话
-    */
+     * 电话
+     */
     @TableField("phone")
     private String phone;
     /**
-    * 成员关系
-    */
+     * 成员关系
+     */
     @TableField("type")
     private String type;
 }

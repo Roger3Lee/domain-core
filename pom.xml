@@ -23,6 +23,10 @@
         <module>domain-dependencies</module>
         <module>domain-generator</module>
         <module>domain-sample</module>
+<!--        <module>domain-mysql-support</module>-->
+<!--        <module>domain-polardb-support</module>-->
+        <module>domain-postgresql-support</module>
+<!--        <module>domain-oracle-support</module>-->
     </modules>
 
     <dependencyManagement>
@@ -30,6 +34,26 @@
             <dependency>
                 <groupId>com.artframework</groupId>
                 <artifactId>domain-generator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.artframework</groupId>
+                <artifactId>domain-mysql-support</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.artframework</groupId>
+                <artifactId>domain-polardb-support</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.artframework</groupId>
+                <artifactId>domain-postgresql-support</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.artframework</groupId>
+                <artifactId>domain-oracle-support</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

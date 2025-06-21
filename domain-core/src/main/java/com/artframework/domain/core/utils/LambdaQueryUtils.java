@@ -3,13 +3,14 @@ package com.artframework.domain.core.utils;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.artframework.domain.core.constants.Op;
 import com.artframework.domain.core.lambda.LambdaCache;
 import com.artframework.domain.core.lambda.order.LambdaOrderItem;
 import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.lambda.query.LogicalOperator;
-import com.artframework.domain.core.constants.Op;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -43,16 +44,20 @@ public class LambdaQueryUtils {
 
     /**
      * 合并过滤条件到查询对象
+     * 智能合并：避免不必要的嵌套
      */
     private static <T> void combineFilter(LambdaQuery<T> lambdaQuery, LambdaQuery.ConditionGroup filter) {
-        // 如果是 AND 操作，直接将过滤条件添加到根目录下
-        if (LogicalOperator.AND.equals(filter.getOp())) {
-            for (Object item : filter.getCondition()) {
-                lambdaQuery.getFilter().addChild(item);
-            }
+        if (filter == null || CollUtil.isEmpty(filter.getCondition())) {
+            return;
+        }
+
+        LambdaQuery.ConditionGroup rootFilter = lambdaQuery.getFilter();
+        List<Object> conditionList = new ArrayList<>();
+        if (isAndLogic(filter, conditionList)) {
+            conditionList.forEach(rootFilter::addChild);
         } else {
-            // OR 操作，将整个条件组作为子组添加
-            lambdaQuery.getFilter().addChild(filter);
+            // 3. 其他情况保持原有逻辑，但会生成嵌套结构
+            rootFilter.addChild(filter);
         }
     }
 
@@ -128,6 +133,34 @@ public class LambdaQueryUtils {
         return filters.get(entityName);
     }
 
+
+    private static Boolean isAndLogic(LambdaQuery.ConditionGroup rootGroup, List<Object> conditionList) {
+        if (!LogicalOperator.AND.equals(rootGroup.getOp())) {
+            return false;
+        }
+
+        // OR子组的组合
+        boolean isAndGroup = true;
+        for (Object child : rootGroup.getCondition()) {
+            if (child instanceof LambdaQuery.ConditionGroup) {
+                LambdaQuery.ConditionGroup group = (LambdaQuery.ConditionGroup) child;
+                if (LogicalOperator.OR.equals(group.getOp())) {
+                    isAndGroup = false;
+                } else {
+                    if (!isAndLogic(group, conditionList)) {
+                        conditionList.add(group);
+                    }
+                }
+            } else {
+                conditionList.add(child);
+            }
+        }
+
+        //都是and条件
+        return isAndGroup;
+    }
+
+
     /**
      * 构建过滤条件到 MyBatis Plus 查询包装器
      * 
@@ -142,27 +175,26 @@ public class LambdaQueryUtils {
             return;
         }
 
-        Consumer<LambdaQueryWrapper<DO>> consumer = null;
-
         for (Object child : filter.getCondition()) {
             if (child instanceof LambdaQuery.Condition) {
-                LambdaQuery.Condition condition = (LambdaQuery.Condition) child;
-                consumer = consumer == null
-                        ? w -> applyCondition(w, condition, doClass)
-                        : consumer.andThen(w -> applyCondition(w, condition, doClass));
+                applyCondition(wrapper, (LambdaQuery.Condition) child, doClass);
             } else if (child instanceof LambdaQuery.ConditionGroup) {
-                LambdaQuery.ConditionGroup childGroup = (LambdaQuery.ConditionGroup) child;
-                consumer = consumer == null
-                        ? w -> buildFilterWrapper(w, childGroup, doClass)
-                        : consumer.andThen(w -> buildFilterWrapper(w, childGroup, doClass));
-            }
-        }
-
-        if (consumer != null) {
-            if (LogicalOperator.AND.equals(filter.getOp())) {
-                consumer.accept(wrapper);
-            } else if (LogicalOperator.OR.equals(filter.getOp())) {
-                wrapper.or(consumer);
+                List<Object> conditionList = new ArrayList<>();
+                if (isAndLogic((LambdaQuery.ConditionGroup) child, conditionList)) {
+                    conditionList.forEach(x -> {
+                        if (x instanceof LambdaQuery.Condition) {
+                            applyCondition(wrapper, (LambdaQuery.Condition) x, doClass);
+                        } else {
+                            buildFilterWrapper(wrapper, (LambdaQuery.ConditionGroup) x, doClass);
+                        }
+                    });
+                } else {
+                    if (LogicalOperator.AND.equals(((LambdaQuery.ConditionGroup) child).getOp())) {
+                        wrapper.and(w -> buildFilterWrapper(w, (LambdaQuery.ConditionGroup) child, doClass));
+                    } else {
+                        wrapper.or(w -> buildFilterWrapper(w, (LambdaQuery.ConditionGroup) child, doClass));
+                    }
+                }
             }
         }
     }
