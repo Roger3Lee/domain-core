@@ -25,7 +25,7 @@ mybatis-plus:
     map-underscore-to-camel-case: true
   global-config:
     db-config:
-      id-type: ASSIGN_ID
+      id-type: INPUT
 
     banner: false
 

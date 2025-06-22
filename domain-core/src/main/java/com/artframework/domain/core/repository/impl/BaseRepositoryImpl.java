@@ -154,7 +154,7 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         } else {
             // 优化：使用 instanceof 替代反射
             if (this.baseMapper instanceof BatchBaseMapper) {
-                ((BatchBaseMapper<DO>) this.baseMapper).insertBatch(doList);
+                ((BatchBaseMapper<DO>) this.baseMapper).batchInsert(doList);
             } else {
                 // 批量插入退化为循环插入
                 doList.forEach(this.baseMapper::insert);

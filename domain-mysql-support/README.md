@@ -54,7 +54,7 @@ public class UserService {
     
     public void batchInsertUsers(List<UserDO> users) {
         // 批量插入
-        userMapper.insertBatch(users);
+        userMapper.batchInsert(users);
         
         // 插入或更新
         userMapper.insertOrUpdateBatch(users);

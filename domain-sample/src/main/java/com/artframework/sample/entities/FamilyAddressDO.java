@@ -19,9 +19,9 @@ import lombok.ToString;
 public class FamilyAddressDO {
 
     /**
-     * 自增主键
+     * 序列主键
      */
-    @TableId(value = "id", type = IdType.ASSIGN_ID)
+    @TableId(value = "id", type = IdType.INPUT)
     private Integer id;
     /**
      * 关联用户

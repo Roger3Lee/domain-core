@@ -18,9 +18,9 @@ import lombok.ToString;
 @KeySequence("seq_family_member_id")
 public class FamilyMemberDO {
     /**
-     * 自增主键
+     * 序列主键
      */
-    @TableId(value = "id", type = IdType.ASSIGN_ID)
+    @TableId(value = "id", type = IdType.INPUT)
     private Integer id;
     /**
      * 家庭ID
