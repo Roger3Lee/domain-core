@@ -27,8 +27,8 @@
     </extensions>
     <actions>
         <group id="domain-group" text="Domain" description="領域">
-            <add-to-group group-id="MainMenu" anchor="last"/>
-            <action class="com.artframework.domain.plugin.ToolMenu" id="tool-menu" text="Generator" description="代碼生成器"/>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action class="com.artframework.domain.plugin.ToolMenu" id="tool-menu" text="Domain Generator" description="代碼生成器"/>
         </group>
     </actions>
     <extensions defaultExtensionNs="com.intellij">

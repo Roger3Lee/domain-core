@@ -17,7 +17,7 @@ public class Program {
                 // 数据源配置
                 DataSourceConfig dataSourceConfig = new DataSourceConfig.Builder(
                                 "jdbc:postgresql://127.0.0.1:5432/postgres", "postgres", "123456")
-                                .dbQuery(new CustomPostgreSqlQuery())
+                                        .dbQuery(new CustomPostgreSqlQuery())
                                 .schema("family")
                                 .keyWordsHandler(new PostgreSqlKeyWordsHandler())
                                 .addConnectionProperty("currentSchema", "family")

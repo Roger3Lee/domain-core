@@ -2,7 +2,6 @@ package com.artframework.domain.postgresql.methods;
 
 import com.artframework.domain.core.batch.BatchOperationType;
 import com.artframework.domain.core.batch.EnhancedBatchMethod;
-import com.artframework.domain.core.utils.TableInfoUtils;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
@@ -134,7 +133,7 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
 
         // PostgreSQL 自增主键完全省略
         if (shouldIncludeKeyColumn(tableInfo)) {
-            KeySequence keySequence = TableInfoUtils.getKeySequence(tableInfo);
+            KeySequence keySequence = tableInfo.getKeySequence();
             if (keySequence != null) {
                 // 序列主键：使用 nextval
                 params.append("nextval('").append(keySequence.value()).append("')");
@@ -182,12 +181,7 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
         }
 
         // INPUT 类型且有序列：包含并使用序列生成值
-        if (tableInfo.getIdType() == IdType.INPUT && TableInfoUtils.hasKeySequence(tableInfo)) {
-            return true;
-        }
-
-        // 其他情况不包含主键列
-        return false;
+        return tableInfo.getIdType() == IdType.INPUT && null == tableInfo.getKeySequence();
     }
 
     /**

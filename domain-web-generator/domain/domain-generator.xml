@@ -1,0 +1,15 @@
+<domains>
+    <domain name="datasource" description="数据源" main-table="datasource_config">
+        <related description="数据表" table="datasource_table" many="true" fk="id:ds_id"/>
+        <related description="数据表的列" table="datasource_table_column" many="true" fk="id:ds_id"/>
+    </domain>
+    <domain name="project" description="项目" main-table="project">
+        <related description="领域模型基本配置" table="domain_config" many="true" fk="id:project_id" />
+    </domain>
+    <domain name="domain" description="项目" main-table="domain_config">
+        <related description="领域ER关系连线" table="domain_config_line" many="true" fk="id:project_id" redundancy="project_id:project_id">
+            <ref description="连线" name="line"  many="true" table="domain_config_line_config" fk="id:domain_id|line_code:line_code"/>
+        </related>
+        <related description="领域ER关系连线自定义配置（常量列）" table="domain_config_line_config" many="true" fk="id:domain_id"  redundancy="project_id:project_id"/>
+    </domain>
+</domains>

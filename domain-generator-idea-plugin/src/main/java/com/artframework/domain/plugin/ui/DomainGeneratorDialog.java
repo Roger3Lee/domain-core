@@ -1,10 +1,8 @@
 package com.artframework.domain.plugin.ui;
 
 import com.artframework.domain.config.GlobalSetting;
-import com.artframework.domain.customize.MyPostgreSqlQuery;
-import com.artframework.domain.customize.MyPostgreSqlTypeConvert;
+import com.artframework.domain.customize.CustomPostgreSqlQuery;
 import com.artframework.domain.plugin.SettingsCache;
-import com.artframework.domain.utils.GenerateUtils;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
 import com.baomidou.mybatisplus.generator.config.converts.MySqlTypeConvert;
 import com.baomidou.mybatisplus.generator.config.querys.MySqlQuery;
@@ -260,13 +258,16 @@ public class DomainGeneratorDialog extends JDialog {
                 builder.dbQuery(new MySqlQuery())
                         .typeConvert(new MySqlTypeConvert())
                         .keyWordsHandler(new MySqlKeyWordsHandler())
+                        .addConnectionProperty("useUnicode", "true")
+                        .addConnectionProperty("characterEncoding", "UTF-8")
                         .databaseQueryClass(SQLQuery.class);
             } else if (Objects.equals(db_type.getSelectedItem(), POLAR_DB) || Objects.equals(db_type.getSelectedItem(), PG)) {
-                builder.dbQuery(new MyPostgreSqlQuery(t_schema.getText()))
+                builder.dbQuery(new CustomPostgreSqlQuery(t_schema.getText()))
                         .schema(t_schema.getText())
-                        .typeConvert(new MyPostgreSqlTypeConvert())
                         .keyWordsHandler(new PostgreSqlKeyWordsHandler())
                         .addConnectionProperty("currentSchema",t_schema.getText())
+                        .addConnectionProperty("useUnicode", "true")
+                        .addConnectionProperty("characterEncoding", "UTF-8")
                         .databaseQueryClass(SQLQuery.class);
             }
 
@@ -276,7 +277,7 @@ public class DomainGeneratorDialog extends JDialog {
             Messages.showInfoMessage(this.contentPane, "连接成功", "提示");
         } catch (Exception ex) {
 //            Notification
-            Messages.showErrorDialog(this.contentPane, ex.getMessage(), "错误");
+            Messages.showErrorDialog(this.contentPane, ex.toString(), "错误");
         }
     }
 
@@ -290,9 +291,9 @@ public class DomainGeneratorDialog extends JDialog {
                         .keyWordsHandler(new MySqlKeyWordsHandler())
                         .databaseQueryClass(SQLQuery.class);
             } else if (Objects.equals(db_type.getSelectedItem(), POLAR_DB) || Objects.equals(db_type.getSelectedItem(), PG)) {
-                builder.dbQuery(new MyPostgreSqlQuery(t_schema.getText()))
+                builder.dbQuery(new CustomPostgreSqlQuery(t_schema.getText()))
                         .schema(t_schema.getText())
-                        .typeConvert(new MyPostgreSqlTypeConvert())
+                        .typeConvert(new PostgreSqlKeyWordsHandler())
                         .keyWordsHandler(new PostgreSqlKeyWordsHandler())
                         .addConnectionProperty("currentSchema",t_schema.getText())
                         .databaseQueryClass(SQLQuery.class);
@@ -325,7 +326,7 @@ public class DomainGeneratorDialog extends JDialog {
             Messages.showInfoMessage(this.contentPane, "生成成功", "提示");
         } catch (Exception ex) {
 //            Notification
-            Messages.showErrorDialog(this.contentPane, ex.getMessage(), "错误");
+            Messages.showErrorDialog(this.contentPane, ex.toString(), "错误");
         }
     }
 
