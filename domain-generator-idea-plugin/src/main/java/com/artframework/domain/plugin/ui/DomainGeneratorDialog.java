@@ -2,6 +2,7 @@ package com.artframework.domain.plugin.ui;
 
 import com.artframework.domain.config.GlobalSetting;
 import com.artframework.domain.customize.CustomPostgreSqlQuery;
+import com.artframework.domain.utils.GenerateUtils;
 import com.artframework.domain.plugin.SettingsCache;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
 import com.baomidou.mybatisplus.generator.config.converts.MySqlTypeConvert;
@@ -262,7 +263,7 @@ public class DomainGeneratorDialog extends JDialog {
                         .addConnectionProperty("characterEncoding", "UTF-8")
                         .databaseQueryClass(SQLQuery.class);
             } else if (Objects.equals(db_type.getSelectedItem(), POLAR_DB) || Objects.equals(db_type.getSelectedItem(), PG)) {
-                builder.dbQuery(new CustomPostgreSqlQuery(t_schema.getText()))
+                builder.dbQuery(new CustomPostgreSqlQuery())
                         .schema(t_schema.getText())
                         .keyWordsHandler(new PostgreSqlKeyWordsHandler())
                         .addConnectionProperty("currentSchema",t_schema.getText())
@@ -289,13 +290,16 @@ public class DomainGeneratorDialog extends JDialog {
                 builder.dbQuery(new MySqlQuery())
                         .typeConvert(new MySqlTypeConvert())
                         .keyWordsHandler(new MySqlKeyWordsHandler())
+                        .addConnectionProperty("useUnicode", "true")
+                        .addConnectionProperty("characterEncoding", "UTF-8")
                         .databaseQueryClass(SQLQuery.class);
             } else if (Objects.equals(db_type.getSelectedItem(), POLAR_DB) || Objects.equals(db_type.getSelectedItem(), PG)) {
-                builder.dbQuery(new CustomPostgreSqlQuery(t_schema.getText()))
+                builder.dbQuery(new CustomPostgreSqlQuery())
                         .schema(t_schema.getText())
-                        .typeConvert(new PostgreSqlKeyWordsHandler())
                         .keyWordsHandler(new PostgreSqlKeyWordsHandler())
                         .addConnectionProperty("currentSchema",t_schema.getText())
+                        .addConnectionProperty("useUnicode", "true")
+                        .addConnectionProperty("characterEncoding", "UTF-8")
                         .databaseQueryClass(SQLQuery.class);
             }
 
