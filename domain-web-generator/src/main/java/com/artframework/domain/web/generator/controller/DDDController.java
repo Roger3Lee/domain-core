@@ -1,55 +1,67 @@
-package com.artframework.domain.web.controller;
+package com.artframework.domain.web.generator.controller;
 
-import com.artframework.domain.web.domain.ddd.domain.*;
-import com.artframework.domain.web.domain.ddd.service.*;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.artframework.domain.web.generator.application.DomainModelApplicationService;
+import com.artframework.domain.web.generator.dto.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 
-@RestController()
-@RequestMapping("/DDD/v1")
+/**
+ * 领域模型管理控制器
+ * 
+ * @author auto
+ * @version v1.0
+ */
+@Api(tags = "领域模型管理")
+@RestController
+@RequestMapping("/api/v1/domain")
 public class DDDController {
+
     @Autowired
-    private DDDService dDDService;
+    private DomainModelApplicationService applicationService;
 
-    /**
-    * 查找
-    * @param request 请求体
-    * @return DDDDomain
-    */
-    @PostMapping("/query")
-    public DDDDomain find(@RequestBody DDDFindDomain request){
-        return dDDService.find(request);
+    @PostMapping("/page")
+    @ApiOperation("分页查询领域模型")
+    public ApiResponse<PageResult<DomainConfigDTO>> page(@RequestBody @Valid DomainPageRequest request) {
+        PageResult<DomainConfigDTO> pageResult = applicationService.page(request);
+        return ApiResponse.success(pageResult);
     }
 
-    /**
-    * 新增
-    * @param request 请求体
-    * @return Integer
-    */
-    @PutMapping()
-    public Integer insert(@RequestBody DDDDomain request){
-        return dDDService.insert(request);
+    @GetMapping("/{id}")
+    @ApiOperation("获取领域模型详情")
+    public ApiResponse<DomainConfigDTO> detail(@PathVariable Integer id) {
+        DomainConfigDTO response = applicationService.getById(id);
+        return ApiResponse.success(response);
     }
 
-    /**
-    * 修改
-    * @param request 请求体
-    * @return 成功OR失败
-    */
-    @PostMapping()
-    public Boolean update(@RequestBody DDDDomain request){
-        return dDDService.update(request);
+    @PostMapping("/add")
+    @ApiOperation("新增领域模型")
+    public ApiResponse<Integer> add(@RequestBody @Valid DomainConfigDTO request) {
+        Integer id = applicationService.add(request);
+        return ApiResponse.success(id);
     }
 
-    /**
-    * 删除
-    * @param key 数据ID
-    * @return 成功OR失败
-    */
-    @DeleteMapping
-    public Boolean delete(@RequestParam("key") Integer key){
-        return dDDService.delete(key);
+    @PutMapping("/edit")
+    @ApiOperation("编辑领域模型")
+    public ApiResponse<Boolean> edit(@RequestBody @Valid DomainConfigDTO request) {
+        Boolean result = applicationService.edit(request);
+        return ApiResponse.success(result);
+    }
+
+    @DeleteMapping("/{id}")
+    @ApiOperation("删除领域模型")
+    public ApiResponse<Boolean> delete(@PathVariable Integer id) {
+        Boolean result = applicationService.delete(id);
+        return ApiResponse.success(result);
+    }
+
+    @PostMapping("/{id}/generate")
+    @ApiOperation("生成领域模型代码")
+    public ApiResponse<Boolean> generateCode(@PathVariable Integer id) {
+        Boolean result = applicationService.generateCode(id);
+        return ApiResponse.success(result);
     }
 }

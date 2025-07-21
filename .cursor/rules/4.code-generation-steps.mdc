@@ -1,6 +1,4 @@
 ---
-description: 生成代码
-globs: **/src/main/java/**/*
 alwaysApply: true
 ---
 - 步骤1：分析领域模型XML配置，读取domain-*.xml文件理解领域模型结构
