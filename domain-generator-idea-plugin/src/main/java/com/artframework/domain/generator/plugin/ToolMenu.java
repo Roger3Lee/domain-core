@@ -1,6 +1,6 @@
-package com.artframework.domain.plugin;
+package com.artframework.domain.generator.plugin;
 
-import com.artframework.domain.plugin.ui.DomainGeneratorDialog;
+import com.artframework.domain.generator.plugin.ui.DomainGeneratorDialog;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 

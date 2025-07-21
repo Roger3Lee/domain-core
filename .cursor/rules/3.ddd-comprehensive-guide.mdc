@@ -1,0 +1,322 @@
+---
+description: DDD框架介紹
+globs: **/src/main/java/**/*
+alwaysApply: true
+---
+# 综合DDD开发规范指南
+
+本指南整合了项目DDD（领域驱动设计）开发的核心规范，涵盖了从领域模型定义到具体编码实现的关键方面。
+
+---
+
+## 1. 领域模型结构与XML配置 (`domain-model-structure.mdc`)
+
+- 项目采用DDD分层架构：business/core(领域模型和服务接口)、business/application(应用服务)、present/api(API定义)、present/server(REST控制器)
+- 领域模型XML配置文件位于1-domain目录下，定义聚合根和关联实体结构，不允许修改
+- 自动生成的领域模型类(*Domain.java)和服务接口(*Service.java)位于business/core层，不允许修改
+- `<domain>`节点定义聚合根实体，包含folder、name、description、main-table属性
+- `<related>`节点定义关联实体，包含table、many、fk、redundancy属性
+- `<ref>`节点定义引用关系，包含name、table、many、fk、redundancy属性
+- 外键关系格式为"主表字段:关联表字段"，支持一对一和一对多关系
+- 冗余关系通过redundancy属性定义，用于数据同步
+- 中间表也需要定义相应的`<related>`节点，支持复杂的多对多关系
+- 引用关系支持嵌套，可以在关联实体上定义进一步的引用
+
+### 示例: domain-regulars.xml
+```xml
+<domains>
+    <!-- 定义"常客管理"聚合根 -->
+    <domain folder="regulars" name="notarial_regulars" description="常客管理" main-table="notarial_regulars">
+        
+        <!-- 关联"人员"表，一对多关系 -->
+        <related table="notarial_regulars_person" many="true" fk="id:regulars_id">
+            <!-- 在"人员"实体上定义到"文件"和"文档"的引用 -->
+            <ref name="document" table="notarial_regulars_document" many="true" fk="id:ref_id"/>
+            <ref name="file" table="notarial_regulars_file" many="true" fk="id:ref_id"/>
+        </related>
+        
+        <!-- 关联"文档"表，一对多关系 -->
+        <related table="notarial_regulars_document" many="true" fk="id:regulars_id"/>
+        
+        <!-- 关联"文件"表，一对多关系 -->
+        <related table="notarial_regulars_file" many="true" fk="id:regulars_id"/>
+    </domain>
+</domains>
+```
+
+---
+
+## 2. 领域服务核心方法 (`domain-service-methods.mdc`)
+
+- 使用`Domain.load(id, service)`静态方法通过主键加载聚合根实体
+- 使用`Domain.loadByKey(key, keyLambda, service)`通过业务键加载实体
+- 使用`domain.loadRelated(relatedClass)`加载指定类型的所有关联实体
+- 使用`domain.loadRelated(relatedClass, filters)`带过滤条件加载关联实体
+- 使用`domain.loadRelated(relatedClass, filters, order)`带过滤和排序加载关联实体
+- 使用`service.find(request)`根据查询条件查找领域实体，会根据request中的LoadFlag加载关联数据
+- 使用`service.find(domain, loadFlag)`根据领域对象和加载标志查找实体
+- 使用`service.insert(domain)`插入新的领域实体，自动处理关联实体的外键设置
+- 使用`service.update(newDomain, originalDomain, false)`进行标准更新，比较差异只更新变化的字段
+- 使用`service.delete(id)`删除主实体，支持级联软删除
+- 使用`service.deleteRelated(relatedClass, filters)`删除符合条件的关联实体
+- 使用`service.queryPage(relatedClass, pageDomain, filters, order)`分页查询关联实体
+- 使用`service.queryList(relatedClass, filters, order)`列表查询关联实体，数据量大时慎用
+
+### 示例: 加载实体
+```java
+// 1. 通过主键ID加载
+NotarialRegularsDomain domain = NotarialRegularsDomain.load(1L, regularsService);
+
+// 2. 通过业务键(如业务编号code)加载
+NotarialRegularsDomain domainByKey = NotarialRegularsDomain.loadByKey(
+          "REG001", NotarialRegularsDomain::getCode, regularsService);
+```
+
+### 示例: 加载关联实体
+```java
+// 1. 先加载主实体
+NotarialRegularsDomain domain = NotarialRegularsDomain.load(1L, regularsService);
+
+// 2. 再加载其关联的 "人员" 实体
+domain.loadRelated(NotarialRegularsDomain.NotarialRegularsPersonDomain.class);
+
+// 3. 加载关联实体并附加过滤条件
+domain.loadRelated(NotarialRegularsDomain.NotarialRegularsPersonDomain.class, 
+          ListUtil.toList(
+              LambdaFilter.build(PersonDomain::getStatus, "ACTIVE"),
+              LambdaFilter.build(PersonDomain::getType, "VIP")
+          ));
+```
+
+### 示例: 更新实体
+```java
+// 推荐使用此方法进行更新
+// newDomain: 包含更新数据的领域对象
+// originalDomain: 从数据库查询出的原始领域对象
+// false: 表示不重新从数据库加载原始数据，直接使用传入的originalDomain进行比较
+regularsService.update(newDomain, originalDomain, false);
+```
+
+---
+
+## 3. CRUD操作实践 (`crud-operations.mdc`)
+
+- 新增操作：使用`Convert.INSTANCE.convert()`转换Request为Domain，调用`service.insert()`执行插入
+- 查询详情：使用`Domain.load()`加载主实体，然后使用`loadRelated()`加载关联实体
+- 更新操作：先查询原始Domain，转换Request为新Domain，设置LoadFlag，调用`service.update(newDomain, originalDomain, false)`
+- 删除操作：使用`service.delete(id)`删除主实体，自动级联删除关联实体
+- 关联实体新增：通过更新主实体方式添加关联实体，设置相应的LoadFlag
+- 关联实体删除：使用`service.deleteRelated()`删除特定的关联实体
+- 分页查询：使用`service.queryPage()`进行分页查询，构建LambdaFilter过滤条件
+- 批量操作：合理使用批量查询和批量更新，避免循环调用数据库
+- 嵌套加载：上一次`loadRelated()`的数据可作为下一次查询的条件，支持多层级关联
+- 更新策略：使用`update(newDomain, originalDomain, false)`避免重新加载数据，提升性能
+- 事务处理：复杂操作确保在同一事务中完成，使用`@Transactional`注解
+- 错误处理：资源不存在时返回404，业务规则验证失败返回400
+
+### 示例: 新增操作
+```java
+// 应用服务层方法
+public Long addRegulars(NotarialRegularsAddRequest request) {
+    // 1. 使用MapStruct将Request DTO转换为Domain对象
+    NotarialRegularsDomain domain = Convert.INSTANCE.convert(request);
+    // 2. 调用领域服务的insert方法，返回主键ID
+    return regularsService.insert(domain);
+}
+```
+
+### 示例: 查询操作 (查询详情)
+```java
+// 应用服务层方法
+private NotarialRegularsDomain getRegularsDetail(Long regularsId) {
+    // 1. 使用静态load方法加载主实体
+    NotarialRegularsDomain domain = NotarialRegularsDomain.load(regularsId, regularsService);
+
+    // 2. 使用实例方法loadRelated加载关联的文档和文件
+    // Op.ISNULL用于查询顶层文件(refId为空)
+    domain.loadRelated(NotarialRegularsDomain.NotarialRegularsDocumentDomain.class,
+        LambdaFilter.build(NotarialRegularsDomain.NotarialRegularsDocumentDomain::getRefId, null, Op.ISNULL));
+    domain.loadRelated(NotarialRegularsDomain.NotarialRegularsFileDomain.class,
+        LambdaFilter.build(NotarialRegularsDomain.NotarialRegularsFileDomain::getRefId, null, Op.ISNULL));
+
+    return domain;
+}
+```
+
+### 示例: 更新操作
+```java
+// 应用服务层方法
+public Boolean editRegulars(NotarialRegularsEditRequest request) {
+    // 1. 获取更新前的原始数据（包含关联实体）
+    NotarialRegularsDomain originalDomain = getRegularsDetail(request.getId());
+
+    // 2. 将包含更新数据的Request DTO转换为新的Domain对象
+    NotarialRegularsDomain newDomain = Convert.INSTANCE.convertEdit(request);
+
+    // 3. 设置LoadFlag，指定本次需要更新的关联实体范围
+    newDomain.setLoadFlag(NotarialRegularsDomain.LoadFlag.builder()
+            .loadNotarialRegularsDocument(true) // 更新文档
+            .loadNotarialRegularsFile(true)     // 更新文件
+            .build());
+
+    // 4. 执行更新，false表示不重新从数据库加载数据，直接使用提供的originalDomain进行比较
+    return regularsService.update(newDomain, originalDomain, false);
+}
+```
+
+### 示例: 删除关联实体
+```java
+// 应用服务层方法
+public Boolean delPerson(Long regularsId, Long personId) {
+    // 1. 删除关联人本身
+    regularsService.deleteRelated(NotarialRegularsDomain.NotarialRegularsPersonDomain.class,
+            ListUtil.toList(
+                LambdaFilter.build(NotarialRegularsDomain.NotarialRegularsPersonDomain::getRegularsId, regularsId),
+                LambdaFilter.build(NotarialRegularsDomain.NotarialRegularsPersonDomain::getId, personId)
+            ));
+
+    // 2. 删除与该关联人相关的文档和文件
+    regularsService.deleteRelated(NotarialRegularsDomain.NotarialRegularsDocumentDomain.class,
+            ListUtil.toList(
+                LambdaFilter.build(NotarialRegularsDomain.NotarialRegularsDocumentDomain::getRegularsId, regularsId),
+                LambdaFilter.build(NotarialRegularsDomain.NotarialRegularsDocumentDomain::getRefId, personId)
+            ));
+
+    return true;
+}
+```
+
+---
+
+## 4. `LoadFlag`数据加载策略 (`load-flag-usage.mdc`)
+
+- 使用`LoadFlag.builder()`构建精确的数据加载策略，避免N+1查询问题
+- 查询详情时使用`LoadFlag`加载所有相关的关联数据
+- 更新操作时使用`LoadFlag`只加载需要更新的关联数据，其他关联数据保持不变
+- `LoadFlag`既控制查询时需要加载哪些关联数据，也控制更新时需要更新哪些关联数据范围
+- 在`domain.setLoadFlag()`中设置加载标志后，调用`service.find()`方法加载数据
+- `LoadFlag`中每个关联实体都有对应的布尔属性，如`loadNotarialRegularsPerson(true)`
+- 不设置`LoadFlag`或设置为`false`的关联实体不会被加载或更新
+- 合理使用`LoadFlag`可以显著提升查询性能，减少不必要的数据库访问
+- 在级联更新场景中，`LoadFlag`确保只更新指定的关联实体，避免误操作
+- `LoadFlag`支持链式调用，可以一次性设置多个关联实体的加载标志
+
+### 示例: 使用LoadFlag控制加载/更新范围
+```java
+// 使用场景：只加载/更新人员和文件信息，不加载/更新文档信息
+
+// 1. 构建LoadFlag实例
+NotarialRegularsDomain.LoadFlag loadFlag = LoadFlag.builder()
+    .loadNotarialRegularsPerson(true)    // 加载/更新人员信息
+    .loadNotarialRegularsDocument(false)  // 不加载/更新文档信息
+    .loadNotarialRegularsFile(true)       // 加载/更新文件信息
+    .build();
+
+// 2. 将LoadFlag设置到Domain对象中
+domain.setLoadFlag(loadFlag);
+
+// 3. 在查询或更新时使用
+// 查询时，只会加载Person和File两个关联表的数据
+regularsService.find(domain, loadFlag);
+
+// 更新时，只会处理Person和File两个关联表的变更
+regularsService.update(newDomain, originalDomain, false);
+```
+
+---
+
+## 5. `LambdaFilter`查询条件构建 (`lambda-filter-usage.mdc`)
+
+- 使用`LambdaFilter.build(lambda, value)`构建类型安全的查询条件，避免硬编码字段名
+- 使用Lambda表达式引用字段，如`LambdaFilter.build(PersonDomain::getName, "张三")`
+- 支持多种操作符：`EQ`(等于)、`LIKE`(模糊匹配)、`IN`(包含)、`ISNULL`(为空)、`GT`(大于)、`LT`(小于)
+- 多个过滤条件使用`ListUtil.toList()`组合，条件之间是`AND`关系
+- `LIKE`操作自动处理通配符，无需手动添加`%`符号
+- `IN`操作传入`List`集合，支持批量匹配
+- `ISNULL`操作检查字段是否为空，常用于过滤`refId`为空的数据
+- 日期范围查询使用`GT`和`LT`操作符组合实现
+- 字符串模糊查询使用`LIKE`操作，自动忽略大小写
+- 动态查询条件根据参数是否为空决定是否添加到过滤列表
+- 嵌套字段查询使用点号语法，如`PersonDomain::getAddress.getCity`
+- 枚举类型查询直接使用枚举值作为比较对象
+
+### 示例: 构建查询过滤条件
+```java
+// 场景：分页查询常客的关联人员，并支持按姓名模糊查询
+public PageResult<NotarialRegularsPersonResponse> pagePerson(Long regularsId, NotarialRegularsPersonPageRequest request) {
+    
+    // 1. 构建过滤条件列表
+    List<LambdaFilter<NotarialRegularsDomain.NotarialRegularsPersonDomain>> filterList =
+        ListUtil.toList(
+            // 等于操作 (EQ)
+            LambdaFilter.build(NotarialRegularsDomain.NotarialRegularsPersonDomain::getRegularsId, regularsId)
+        );
+
+    // 2. 动态添加模糊查询条件
+    if (StringUtils.isNotEmpty(request.getNameHant())) {
+        filterList.add(
+            // 模糊匹配 (LIKE)
+            LambdaFilter.build(NotarialRegularsDomain.NotarialRegularsPersonDomain::getNameHant,
+            request.getNameHant(), Op.LIKE)
+        );
+    }
+    
+    // 3. 将过滤条件传入查询方法
+    IPage<NotarialRegularsDomain.NotarialRegularsPersonDomain> page = regularsService.queryPage(
+        NotarialRegularsDomain.NotarialRegularsPersonDomain.class,
+        pageDomain,
+        filterList, // 在此使用
+        ...
+    );
+    ...
+}
+```
+
+---
+
+## 6. `LambdaOrder`排序条件构建 (`lambda-order-usage.mdc`)
+
+- 使用`LambdaOrder.build(lambda, order)`构建类型安全的排序条件
+- 使用Lambda表达式引用排序字段，如`LambdaOrder.build(PersonDomain::getCreateTime, Order.DES)`
+- `Order`枚举支持`ASC`(升序)和`DES`(降序)两种排序方式
+- `Order.getOrder(orderBy)`方法可以从字符串转换为`Order`枚举
+- 使用`LambdaOrder.buildByFieldName()`根据字段名字符串构建排序条件
+- 多字段排序需要多次调用，框架会按调用顺序应用排序规则
+- 日期字段排序常用于按创建时间或修改时间排序
+- 数字字段排序常用于按ID或优先级排序
+- 字符串字段排序会按字典序进行，支持中文排序
+- 空值排序默认放在最后，可以通过数据库配置调整
+- 分页查询中排序条件影响结果集的顺序
+- 排序字段建议添加数据库索引以提升查询性能
+
+### 示例: 构建排序条件
+```java
+// 场景：分页查询，并支持动态排序
+public PageResult<NotarialRegularsPersonResponse> pagePerson(NotarialRegularsPersonPageRequest request) {
+    
+    // ... 构建分页和过滤条件 ...
+
+    // 1. 使用 buildByFieldName 根据前端传入的字段名和排序方向构建排序条件
+    LambdaOrder<NotarialRegularsDomain.NotarialRegularsPersonDomain> order = 
+        LambdaOrder.buildByFieldName(
+            NotarialRegularsDomain.NotarialRegularsPersonDomain.class,
+            request.getOrderField(), // e.g., "createTime"
+            Order.getOrder(request.getOrderBy()) // e.g., "desc"
+        );
+
+    // 2. 将排序条件传入查询方法
+    IPage<NotarialRegularsDomain.NotarialRegularsPersonDomain> page = regularsService.queryPage(
+        NotarialRegularsDomain.NotarialRegularsPersonDomain.class,
+        pageDomain,
+        filterList,
+        order // 在此使用
+    );
+    ...
+}
+
+// 示例2: 使用Lambda表达式硬编码排序
+LambdaOrder<NotarialRegularsDomain.NotarialRegularsPersonDomain> order = 
+    LambdaOrder.build(NotarialRegularsDomain.NotarialRegularsPersonDomain::getCreateTime, Order.DESC);
+```
+
+

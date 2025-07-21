@@ -1,11 +1,11 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-    <id>com.artframework.domain.domain-plugin</id>
+    <id>com.artframework.domain.domain-generator-plugin</id>
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>Domain-Code-Generator</name>
+    <name>Domain-Code-Generator-plugin</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor email="support@artframework.com" url="https://XXX">Art Framework</vendor>
@@ -26,12 +26,12 @@
 
     </extensions>
     <actions>
-        <group id="domain-group" text="Domain" description="領域">
+        <group id="com.artframework.domain.domain-generator-plugin.group" text="Domain Code Generator" description="领域模型代碼生成器">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
-            <action class="com.artframework.domain.plugin.ToolMenu" id="tool-menu" text="Domain Generator" description="代碼生成器"/>
+            <action id="com.artframework.domain.domain-generator-plugin.action" class="com.artframework.domain.generator.plugin.ToolMenu" text="Domain Code Generator" description="领域模型代碼生成器"/>
         </group>
     </actions>
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="com.artframework.domain.plugin.SettingsCache"></projectService>
+        <projectService serviceImplementation="com.artframework.domain.generator.plugin.SettingsCache"></projectService>
     </extensions>
 </idea-plugin>

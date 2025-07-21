@@ -2,9 +2,9 @@
   "name": "DDD代碼生成工具",
   "describe": "DDD代碼生成工具",
   "avatar": "",
-  "version": "4.6.3",
+  "version": "4.9.4",
   "createdTime": "2025-4-18 15:24:57",
-  "updatedTime": "2025-7-19 18:18:45",
+  "updatedTime": "2025-7-21 16:57:52",
   "dbConns": [],
   "profile": {
     "default": {
@@ -553,7 +553,7 @@
         "refKey": "extProps",
         "hideInGraph": true,
         "value": "拓展属性",
-        "enable": true,
+        "enable": false,
         "freeze": false
       },
       {
@@ -632,7 +632,54 @@
       "#DDE5FF"
     ],
     "DDLToggleCase": "L",
-    "menuWidth": "408px"
+    "menuWidth": "408px",
+    "extAttrProps": {
+      "attr1": {
+        "editType": "",
+        "optionsData": "",
+        "optionsFetcher": ""
+      },
+      "attr2": {
+        "editType": "",
+        "optionsData": "",
+        "optionsFetcher": ""
+      },
+      "attr3": {
+        "editType": "",
+        "optionsData": "",
+        "optionsFetcher": ""
+      },
+      "attr4": {
+        "editType": "",
+        "optionsData": "",
+        "optionsFetcher": ""
+      },
+      "attr5": {
+        "editType": "",
+        "optionsData": "",
+        "optionsFetcher": ""
+      },
+      "attr6": {
+        "editType": "",
+        "optionsData": "",
+        "optionsFetcher": ""
+      },
+      "attr7": {
+        "editType": "",
+        "optionsData": "",
+        "optionsFetcher": ""
+      },
+      "attr8": {
+        "editType": "",
+        "optionsData": "",
+        "optionsFetcher": ""
+      },
+      "attr9": {
+        "editType": "",
+        "optionsData": "",
+        "optionsFetcher": ""
+      }
+    }
   },
   "entities": [
     {
@@ -654,9 +701,7 @@
         "map keys terminated by ':'": "",
         "store as textfile;": ""
       },
-      "sysProps": {
-        "nameTemplate": "{defKey}[{defName}]"
-      },
+      "sysProps": {},
       "notes": {},
       "headers": [
         {
@@ -1043,9 +1088,7 @@
         "map keys terminated by ':'": "",
         "store as textfile;": ""
       },
-      "sysProps": {
-        "nameTemplate": "{defKey}[{defName}]"
-      },
+      "sysProps": {},
       "notes": {},
       "headers": [
         {
@@ -1402,9 +1445,7 @@
         "map keys terminated by ':'": "",
         "store as textfile;": ""
       },
-      "sysProps": {
-        "nameTemplate": "{defKey}[{defName}]"
-      },
+      "sysProps": {},
       "notes": {},
       "headers": [
         {
@@ -1787,8 +1828,8 @@
           "defKey": "key",
           "defName": "是否是主键",
           "comment": "",
-          "type": "",
-          "len": "",
+          "type": "CHAR",
+          "len": "1",
           "scale": "",
           "primaryKey": false,
           "notNull": false,
@@ -1796,9 +1837,9 @@
           "defaultValue": "",
           "hideInGraph": false,
           "refDict": "",
-          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "baseType": "",
           "extProps": {},
-          "domain": "6F7C1C5C-D159-41E6-BF9D-54DEEFA79AFF",
+          "domain": "",
           "id": "2781A1C2-2F7A-44D5-85A2-FBB0C3C6074E"
         }
       ],
@@ -1825,9 +1866,7 @@
         "map keys terminated by ':'": "",
         "store as textfile;": ""
       },
-      "sysProps": {
-        "nameTemplate": "{defKey}[{defName}]"
-      },
+      "sysProps": {},
       "notes": {},
       "headers": [
         {
@@ -1999,7 +2038,8 @@
           "refDict": "",
           "extProps": {},
           "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
-          "id": "CFB7F4F3-87B3-4FFD-9407-4418451C9DBA"
+          "id": "CFB7F4F3-87B3-4FFD-9407-4418451C9DBA",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811"
         },
         {
           "defKey": "revision",
@@ -2210,7 +2250,449 @@
           "refDict": "",
           "extProps": {},
           "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
-          "id": "A8C8C32B-A7EB-4395-8769-A35E76191006"
+          "id": "A8C8C32B-A7EB-4395-8769-A35E76191006",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
+        }
+      ],
+      "correlations": [],
+      "indexes": [],
+      "type": "P"
+    },
+    {
+      "id": "E42295E9-0E89-4D1C-9A1C-B2C372F305B2",
+      "env": {
+        "base": {
+          "nameSpace": "",
+          "codeRoot": ""
+        }
+      },
+      "defKey": "domain_config_tables",
+      "defName": "领域模型的表列表",
+      "comment": "",
+      "properties": {
+        "partitioned by": "(date string)",
+        "row format delimited": "",
+        "fields terminated by ','": "",
+        "collection items terminated by '-'": "",
+        "map keys terminated by ':'": "",
+        "store as textfile;": ""
+      },
+      "sysProps": {
+        "nameTemplate": "{defKey}[{defName}]"
+      },
+      "notes": {},
+      "headers": [
+        {
+          "refKey": "hideInGraph",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defKey",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "defName",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "primaryKey",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "notNull",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "autoIncrement",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "domain",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "type",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "len",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "scale",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "comment",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "refDict",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defaultValue",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "isStandard",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "uiHint",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "extProps",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr1",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr2",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr3",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr4",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr5",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr6",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr7",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr8",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr9",
+          "freeze": false,
+          "hideInGraph": true
+        }
+      ],
+      "fields": [
+        {
+          "defKey": "id",
+          "defName": "主键",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": true,
+          "notNull": true,
+          "autoIncrement": true,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
+          "refDict": "",
+          "extProps": {},
+          "notes": {},
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "09AB824F-FBDA-45C8-BC5B-313922AFA67D",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811"
+        },
+        {
+          "defKey": "project_id",
+          "defName": "项目ID",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
+          "refDict": "",
+          "extProps": {},
+          "notes": {},
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "A6872191-FC3A-4549-80F3-E2831BB64EB0",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811"
+        },
+        {
+          "defKey": "domain_id",
+          "defName": "领域ID",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
+          "refDict": "",
+          "extProps": {},
+          "notes": {},
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "99302B09-6F55-482A-86C0-165254E13CF6",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811"
+        },
+        {
+          "defKey": "created_by",
+          "defName": "创建人",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": true,
+          "domain": "54611CCC-CA4B-42E1-9F32-4944C85B85A6",
+          "refDict": "",
+          "extProps": {},
+          "notes": {},
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "5DB03D58-C5BD-4CC9-B369-43252B77BE70",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
+        },
+        {
+          "defKey": "created_time",
+          "defName": "创建时间",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": true,
+          "domain": "7CFFA0D3-6A93-4DDC-BC10-DF21211064DC",
+          "refDict": "",
+          "extProps": {},
+          "notes": {},
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "9F0DEFC4-FE05-449E-A668-13261DF0629F",
+          "baseType": "89D69E81-EA34-42EE-9FA2-93B8BD27E098"
+        },
+        {
+          "defKey": "updated_by",
+          "defName": "更新人",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": true,
+          "domain": "54611CCC-CA4B-42E1-9F32-4944C85B85A6",
+          "refDict": "",
+          "extProps": {},
+          "notes": {},
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "EB99A703-9A65-481A-8D2E-710E06F3A9F1",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
+        },
+        {
+          "defKey": "updated_time",
+          "defName": "更新时间",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": true,
+          "domain": "7CFFA0D3-6A93-4DDC-BC10-DF21211064DC",
+          "refDict": "",
+          "extProps": {},
+          "notes": {},
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "554C5ABA-C90A-4932-A4FA-945BABD52993",
+          "baseType": "89D69E81-EA34-42EE-9FA2-93B8BD27E098"
+        },
+        {
+          "defKey": "table_name",
+          "defName": "表名",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "759B6CFD-D8BB-4428-B220-2EADE68BA95C"
+        },
+        {
+          "defKey": "x",
+          "defName": "位置X",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "1A0BDC09-0792-4174-9E8E-80BE8DF44B8E",
+          "extProps": {},
+          "domain": "FF4459C5-6B45-4DBF-8FC0-E06239BC05B4",
+          "id": "40417B1D-29D3-431F-A824-668B73037CAB"
+        },
+        {
+          "defKey": "y",
+          "defName": "位置Y",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "1A0BDC09-0792-4174-9E8E-80BE8DF44B8E",
+          "extProps": {},
+          "domain": "FF4459C5-6B45-4DBF-8FC0-E06239BC05B4",
+          "id": "D55B866A-4F37-47F6-9E54-D43D18293DE8"
+        },
+        {
+          "defKey": "w",
+          "defName": "宽度",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "1A0BDC09-0792-4174-9E8E-80BE8DF44B8E",
+          "extProps": {},
+          "domain": "FF4459C5-6B45-4DBF-8FC0-E06239BC05B4",
+          "id": "1546E89E-7649-4C9D-A108-1781FB81F58F"
+        },
+        {
+          "defKey": "h",
+          "defName": "高度",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "1A0BDC09-0792-4174-9E8E-80BE8DF44B8E",
+          "extProps": {},
+          "domain": "FF4459C5-6B45-4DBF-8FC0-E06239BC05B4",
+          "id": "C14A801E-D790-453A-BB3F-C0F1B33CB9DA"
         }
       ],
       "correlations": [],
@@ -2236,9 +2718,7 @@
         "map keys terminated by ':'": "",
         "store as textfile;": ""
       },
-      "sysProps": {
-        "nameTemplate": "{defKey}[{defName}]"
-      },
+      "sysProps": {},
       "notes": {},
       "headers": [
         {
@@ -2420,7 +2900,8 @@
           "attr7": "",
           "attr8": "",
           "attr9": "",
-          "id": "260DA566-01B2-49FD-A657-D8BD1A38500E"
+          "id": "260DA566-01B2-49FD-A657-D8BD1A38500E",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811"
         },
         {
           "defKey": "domain_id",
@@ -2447,7 +2928,8 @@
           "attr7": "",
           "attr8": "",
           "attr9": "",
-          "id": "ECA58764-53D5-4D1B-B077-3FD053314057"
+          "id": "ECA58764-53D5-4D1B-B077-3FD053314057",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811"
         },
         {
           "defKey": "created_by",
@@ -2741,9 +3223,7 @@
         "map keys terminated by ':'": "",
         "store as textfile;": ""
       },
-      "sysProps": {
-        "nameTemplate": "{defKey}[{defName}]"
-      },
+      "sysProps": {},
       "notes": {},
       "headers": [
         {
@@ -2925,7 +3405,8 @@
           "attr7": "",
           "attr8": "",
           "attr9": "",
-          "id": "7BF870BF-F923-4463-A992-516FE083FC83"
+          "id": "7BF870BF-F923-4463-A992-516FE083FC83",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811"
         },
         {
           "defKey": "domain_id",
@@ -2942,7 +3423,8 @@
           "refDict": "",
           "extProps": {},
           "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
-          "id": "4E027F6C-A2BF-4D68-828C-901B5936860A"
+          "id": "4E027F6C-A2BF-4D68-828C-901B5936860A",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811"
         },
         {
           "defKey": "created_by",
@@ -3228,15 +3710,15 @@
           "defKey": "many",
           "defName": "是否一对多",
           "comment": "",
-          "type": "",
-          "len": "",
+          "type": "CHAR",
+          "len": "1",
           "scale": "",
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
           "defaultValue": "",
           "hideInGraph": false,
-          "domain": "6F7C1C5C-D159-41E6-BF9D-54DEEFA79AFF",
+          "domain": "",
           "refDict": "",
           "extProps": {},
           "notes": {},
@@ -3250,7 +3732,7 @@
           "attr8": "",
           "attr9": "",
           "id": "1F10540A-F83F-4AA9-81A5-40FA24616CCC",
-          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
+          "baseType": ""
         }
       ],
       "correlations": [],
@@ -3276,7 +3758,6 @@
         "map keys terminated by ':'": "",
         "store as textfile;": ""
       },
-      "nameTemplate": "{defKey}[{defName}]",
       "notes": {},
       "headers": [
         {
@@ -3430,7 +3911,8 @@
           "attr7": "",
           "attr8": "",
           "attr9": "",
-          "id": "539AE47D-A24B-4BD7-A87A-BCCEBD110CAA"
+          "id": "539AE47D-A24B-4BD7-A87A-BCCEBD110CAA",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811"
         },
         {
           "defKey": "created_by",
@@ -3457,7 +3939,8 @@
           "attr7": "",
           "attr8": "",
           "attr9": "",
-          "id": "7DF91F21-5609-4F30-A18B-BC8A08ACFA8C"
+          "id": "7DF91F21-5609-4F30-A18B-BC8A08ACFA8C",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
         },
         {
           "defKey": "created_time",
@@ -3484,7 +3967,8 @@
           "attr7": "",
           "attr8": "",
           "attr9": "",
-          "id": "DF02E22B-8AB0-40F2-A042-B09B4D016FFD"
+          "id": "DF02E22B-8AB0-40F2-A042-B09B4D016FFD",
+          "baseType": "89D69E81-EA34-42EE-9FA2-93B8BD27E098"
         },
         {
           "defKey": "updated_by",
@@ -3511,7 +3995,8 @@
           "attr7": "",
           "attr8": "",
           "attr9": "",
-          "id": "93B5F317-E663-4160-B32E-DF147A37FE90"
+          "id": "93B5F317-E663-4160-B32E-DF147A37FE90",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
         },
         {
           "defKey": "updated_time",
@@ -3538,7 +4023,8 @@
           "attr7": "",
           "attr8": "",
           "attr9": "",
-          "id": "9A47239E-A4C4-4432-AD03-FC9672084C1B"
+          "id": "9A47239E-A4C4-4432-AD03-FC9672084C1B",
+          "baseType": "89D69E81-EA34-42EE-9FA2-93B8BD27E098"
         },
         {
           "defKey": "name",
@@ -3555,7 +4041,8 @@
           "refDict": "",
           "extProps": {},
           "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
-          "id": "2212692B-5A8F-4BA7-A096-EA1F74785443"
+          "id": "2212692B-5A8F-4BA7-A096-EA1F74785443",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
         },
         {
           "defKey": "domain_package",
@@ -3572,7 +4059,8 @@
           "refDict": "",
           "extProps": {},
           "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
-          "id": "A940C956-7C99-4926-ACD0-053C9D098EED"
+          "id": "A940C956-7C99-4926-ACD0-053C9D098EED",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
         },
         {
           "defKey": "controller_package",
@@ -3589,7 +4077,8 @@
           "refDict": "",
           "extProps": {},
           "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
-          "id": "DFA12A21-9C0B-47F1-AEC7-E26CD7966D8C"
+          "id": "DFA12A21-9C0B-47F1-AEC7-E26CD7966D8C",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
         },
         {
           "defKey": "do_package",
@@ -3606,7 +4095,8 @@
           "refDict": "",
           "extProps": {},
           "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
-          "id": "9FE60CF5-1C75-4C03-9211-55FED56B93FB"
+          "id": "9FE60CF5-1C75-4C03-9211-55FED56B93FB",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
         },
         {
           "defKey": "mapper_package",
@@ -3623,11 +4113,16 @@
           "refDict": "",
           "extProps": {},
           "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
-          "id": "B29494AA-1DCD-49B3-B085-58603FDB8761"
+          "id": "B29494AA-1DCD-49B3-B085-58603FDB8761",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
         }
       ],
       "correlations": [],
-      "indexes": []
+      "indexes": [],
+      "type": "P",
+      "sysProps": {
+        "nameTemplate": "{defKey}[{defName}]"
+      }
     }
   ],
   "views": [],
@@ -3652,6 +4147,7 @@
       "refEntities": [
         "30FDAA9C-5858-40DB-A1B4-9EA89310BDC4",
         "4D365773-B2F5-44DB-83D0-6A353BFA2794",
+        "E42295E9-0E89-4D1C-9A1C-B2C372F305B2",
         "429AEBBF-EA45-4771-94B1-62BD6BE9DAA2",
         "7061563D-8C46-466A-9163-350A9613AC52"
       ],

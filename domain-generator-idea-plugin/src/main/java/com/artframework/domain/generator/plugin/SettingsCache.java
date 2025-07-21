@@ -1,4 +1,4 @@
-package com.artframework.domain.plugin;
+package com.artframework.domain.generator.plugin;
 
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;

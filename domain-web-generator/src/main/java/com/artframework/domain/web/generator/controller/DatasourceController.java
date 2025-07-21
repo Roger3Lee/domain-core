@@ -1,80 +1,55 @@
-package com.artframework.domain.web.generator.controller;
+package com.artframework.domain.web.controller;
 
-import com.artframework.domain.web.generator.domain.datasource.domain.*;
-import com.artframework.domain.web.generator.application.DatasourceApplicationService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import lombok.RequiredArgsConstructor;
+import com.artframework.domain.web.domain.datasource.domain.*;
+import com.artframework.domain.web.domain.datasource.service.*;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
-/**
- * 数据源管理控制器
- */
-@RestController
-@RequestMapping("/api/datasource")
-@RequiredArgsConstructor
-@Api(tags = "数据源管理")
+@RestController()
+@RequestMapping("/datasource/v1")
 public class DatasourceController {
+    @Autowired
+    private DatasourceService datasourceService;
 
-    private final DatasourceApplicationService datasourceApplicationService;
-
-    @GetMapping("/list")
-    @ApiOperation("获取数据源列表")
-    public List<DatasourceDomain> list() {
-        return datasourceApplicationService.list();
+    /**
+    * 查找
+    * @param request 请求体
+    * @return DatasourceDomain
+    */
+    @PostMapping("/query")
+    public DatasourceDomain find(@RequestBody DatasourceFindDomain request){
+        return datasourceService.find(request);
     }
 
-    @GetMapping("/{id}")
-    @ApiOperation("根据ID获取数据源")
-    public DatasourceDomain getById(@ApiParam("数据源ID") @PathVariable Integer id) {
-        return datasourceApplicationService.getById(id);
+    /**
+    * 新增
+    * @param request 请求体
+    * @return Integer
+    */
+    @PutMapping()
+    public Integer insert(@RequestBody DatasourceDomain request){
+        return datasourceService.insert(request);
     }
 
-    @PostMapping
-    @ApiOperation("创建数据源")
-    public Integer create(@RequestBody DatasourceDomain datasource) {
-        return datasourceApplicationService.create(datasource);
+    /**
+    * 修改
+    * @param request 请求体
+    * @return 成功OR失败
+    */
+    @PostMapping()
+    public Boolean update(@RequestBody DatasourceDomain request){
+        return datasourceService.update(request);
     }
 
-    @PutMapping("/{id}")
-    @ApiOperation("更新数据源")
-    public Boolean update(@ApiParam("数据源ID") @PathVariable Integer id,
-            @RequestBody DatasourceDomain datasource) {
-        return datasourceApplicationService.update(id, datasource);
-    }
-
-    @DeleteMapping("/{id}")
-    @ApiOperation("删除数据源")
-    public Boolean delete(@ApiParam("数据源ID") @PathVariable Integer id) {
-        return datasourceApplicationService.delete(id);
-    }
-
-    @PostMapping("/{id}/test-connection")
-    @ApiOperation("测试数据库连接")
-    public Boolean testConnection(@ApiParam("数据源ID") @PathVariable Integer id) {
-        return datasourceApplicationService.testConnection(id);
-    }
-
-    @PostMapping("/{id}/load-tables")
-    @ApiOperation("加载数据库表结构")
-    public Boolean loadTables(@ApiParam("数据源ID") @PathVariable Integer id) {
-        return datasourceApplicationService.loadTableStructure(id);
-    }
-
-    @GetMapping("/{id}/tables")
-    @ApiOperation("获取数据库表列表")
-    public List<DatasourceDomain.DatasourceTableDomain> getTables(@ApiParam("数据源ID") @PathVariable Integer id) {
-        return datasourceApplicationService.getTableList(id);
-    }
-
-    @GetMapping("/{id}/tables/{tableName}/columns")
-    @ApiOperation("获取表字段列表")
-    public List<DatasourceDomain.DatasourceTableColumnDomain> getColumns(
-            @ApiParam("数据源ID") @PathVariable Integer id,
-            @ApiParam("表名") @PathVariable String tableName) {
-        return datasourceApplicationService.getColumnList(id, tableName);
+    /**
+    * 删除
+    * @param key 数据ID
+    * @return 成功OR失败
+    */
+    @DeleteMapping
+    public Boolean delete(@RequestParam("key") Integer key){
+        return datasourceService.delete(key);
     }
 }

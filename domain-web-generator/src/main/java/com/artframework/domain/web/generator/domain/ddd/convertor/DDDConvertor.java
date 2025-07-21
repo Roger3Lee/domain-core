@@ -12,6 +12,7 @@ import java.util.List;
 public interface  DDDConvertor{
     DDDConvertor INSTANCE= Mappers.getMapper(DDDConvertor.class);
 
+    @Mapping(target = "domainConfigTablesList", ignore = true)
     @Mapping(target = "domainConfigLineList", ignore = true)
     @Mapping(target = "domainConfigLineConfigList", ignore = true)
     DDDDomain copy(DDDDomain request);
@@ -24,6 +25,12 @@ public interface  DDDConvertor{
     DomainConfigDO convert2DO(DDDDomain request);
     List<DomainConfigDO> convert2DO(List<DDDDomain> request);
 
+    DDDDomain.DomainConfigTablesDomain convert2DomainConfigTablesDTO(DomainConfigTablesDO request);
+    void convert2DomainConfigTablesDTO(DomainConfigTablesDO request, @MappingTarget DDDDomain.DomainConfigTablesDomain target);
+    List<DDDDomain.DomainConfigTablesDomain> convert2DomainConfigTablesDTO(List<DomainConfigTablesDO>  request);
+    @BeanMapping(qualifiedByName = { "DDDConvertorDecorator"})
+    DomainConfigTablesDO convert2DomainConfigTablesDO(DDDDomain.DomainConfigTablesDomain request);
+    List<DomainConfigTablesDO> convert2DomainConfigTablesDO(List<DDDDomain.DomainConfigTablesDomain>  request);
     DDDDomain.DomainConfigLineDomain convert2DomainConfigLineDTO(DomainConfigLineDO request);
     void convert2DomainConfigLineDTO(DomainConfigLineDO request, @MappingTarget DDDDomain.DomainConfigLineDomain target);
     List<DDDDomain.DomainConfigLineDomain> convert2DomainConfigLineDTO(List<DomainConfigLineDO>  request);

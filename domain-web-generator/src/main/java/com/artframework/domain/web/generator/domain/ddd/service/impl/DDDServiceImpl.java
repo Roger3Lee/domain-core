@@ -31,6 +31,9 @@ public class DDDServiceImpl extends BaseDomainServiceImpl implements DDDService 
     private DDDRepository dDDRepository;
 
     @Autowired
+    private DomainConfigTablesRepository domainConfigTablesRepository;
+
+    @Autowired
     private DomainConfigLineRepository domainConfigLineRepository;
 
     @Autowired
@@ -39,6 +42,7 @@ public class DDDServiceImpl extends BaseDomainServiceImpl implements DDDService 
     @PostConstruct
     public void init(){
         this.addRepository(DDDDomain.class, this.dDDRepository);
+        this.addRepository(DDDDomain.DomainConfigTablesDomain.class, this.domainConfigTablesRepository);
         this.addRepository(DDDDomain.DomainConfigLineDomain.class, this.domainConfigLineRepository);
         this.addRepository(DDDDomain.DomainConfigLineConfigDomain.class, this.domainConfigLineConfigRepository);
     }
@@ -60,6 +64,19 @@ public class DDDServiceImpl extends BaseDomainServiceImpl implements DDDService 
     public DDDDomain find(DDDDomain response,DDDDomain.LoadFlag loadFlag){
         final DDDDomain resp = response;
         if (ObjectUtil.isNotNull(loadFlag)) {
+            if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.getLoadDomainConfigTablesDomain())){
+                LambdaQuery<DDDDomain.DomainConfigTablesDomain> lambdaQuery = LambdaQuery.of(DDDDomain.DomainConfigTablesDomain.class);
+                lambdaQuery.eq(DDDLambdaExp.domainConfigTables_domainIdTargetLambda,DDDLambdaExp.domainConfigId_RelatedDomainConfigTables_SourceLambda.apply(resp));
+                List<DDDDomain.DomainConfigTablesDomain> queryList = domainConfigTablesRepository.queryList(
+                    LambdaQueryUtils.combine(lambdaQuery, LambdaQueryUtils.getEntityFilters(loadFlag.getFilters(), DDDDomain.DomainConfigTablesDomain.class),
+                    LambdaQueryUtils.getEntityOrders(loadFlag.getOrders(), DDDDomain.DomainConfigTablesDomain.class)))
+                                            .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
+                if (CollectionUtil.isEmpty(resp.getDomainConfigTablesList())){
+                    resp.setDomainConfigTablesList(queryList);
+                } else {
+                    resp.getDomainConfigTablesList().addAll(queryList);
+                }
+            }
             if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.getLoadDomainConfigLineDomain())){
                 LambdaQuery<DDDDomain.DomainConfigLineDomain> lambdaQuery = LambdaQuery.of(DDDDomain.DomainConfigLineDomain.class);
                 lambdaQuery.eq(DDDLambdaExp.domainConfigLine_domainIdTargetLambda,DDDLambdaExp.domainConfigId_RelatedDomainConfigLine_SourceLambda.apply(resp));
@@ -113,6 +130,15 @@ public class DDDServiceImpl extends BaseDomainServiceImpl implements DDDService 
         //插入数据
         DDDDomain domain = dDDRepository.insert(request);
 
+        //插入关联数据domain_config_tables
+        if(CollUtil.isNotEmpty(request.getDomainConfigTablesList())){
+            request.getDomainConfigTablesList().forEach(x->{
+                DDDLambdaExp.domainConfigTablesDomainIdTargetSetLambda.accept(x, (Integer)DDDLambdaExp.domainConfigId_RelatedDomainConfigTables_SourceLambda.apply(domain));
+                DDDLambdaExp.domainConfigTablesProjectIdTargetSetLambda.accept(x, (Integer)DDDLambdaExp.domainConfigProjectId_RelatedDomainConfigTables_SourceLambda.apply(domain));
+            });
+            domainConfigTablesRepository.insert(request.getDomainConfigTablesList());
+        }
+
         //插入关联数据domain_config_line
         if(CollUtil.isNotEmpty(request.getDomainConfigLineList())){
             request.getDomainConfigLineList().forEach(x->{
@@ -151,6 +177,17 @@ public class DDDServiceImpl extends BaseDomainServiceImpl implements DDDService 
     @Transactional(rollbackFor = Exception.class)
     public Boolean update(DDDDomain request, DDDDomain domain){
         DDDDomain old = domain;
+        //更新关联数据domain_config_tables
+        if(ObjectUtil.isNotNull(request.getLoadFlag())
+            && (BooleanUtil.isTrue(request.getLoadFlag().getLoadAll()) || BooleanUtil.isTrue(request.getLoadFlag().getLoadDomainConfigTablesDomain()))){
+            if(CollUtil.isNotEmpty(request.getDomainConfigTablesList())){
+                request.getDomainConfigTablesList().forEach(x->{
+                    DDDLambdaExp.domainConfigTablesDomainIdTargetSetLambda.accept(x, (Integer)DDDLambdaExp.domainConfigId_RelatedDomainConfigTables_SourceLambda.apply(request));
+                    DDDLambdaExp.domainConfigTablesProjectIdTargetSetLambda.accept(x, (Integer)DDDLambdaExp.domainConfigProjectId_RelatedDomainConfigTables_SourceLambda.apply(request));
+                });
+            }
+            this.merge(old.getDomainConfigTablesList(), request.getDomainConfigTablesList(), DDDLambdaExp.domainConfigTablesDomainKeyLambda, domainConfigTablesRepository);
+        }
         //更新关联数据domain_config_line
         if(ObjectUtil.isNotNull(request.getLoadFlag())
             && (BooleanUtil.isTrue(request.getLoadFlag().getLoadAll()) || BooleanUtil.isTrue(request.getLoadFlag().getLoadDomainConfigLineDomain()))){
@@ -205,6 +242,12 @@ public class DDDServiceImpl extends BaseDomainServiceImpl implements DDDService 
             return false;
         }
 
+        if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.getLoadDomainConfigTablesDomain())){
+            //删除关联数据domain_config_tables
+            LambdaQuery<DDDDomain.DomainConfigTablesDomain> lambdaQuery = LambdaQuery.of(DDDDomain.DomainConfigTablesDomain.class);
+            lambdaQuery.eq(DDDLambdaExp.domainConfigTables_domainIdTargetLambda,DDDLambdaExp.domainConfigId_RelatedDomainConfigTables_SourceLambda.apply(old));
+            domainConfigTablesRepository.deleteByFilter(lambdaQuery);
+        }
         if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.getLoadDomainConfigLineDomain())){
             //删除关联数据domain_config_line
             LambdaQuery<DDDDomain.DomainConfigLineDomain> lambdaQuery = LambdaQuery.of(DDDDomain.DomainConfigLineDomain.class);

@@ -1,60 +1,55 @@
-package com.artframework.domain.web.generator.controller;
+package com.artframework.domain.web.controller;
 
-import com.artframework.domain.web.generator.domain.project.domain.*;
-import com.artframework.domain.web.generator.application.ProjectApplicationService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import lombok.RequiredArgsConstructor;
+import com.artframework.domain.web.domain.project.domain.*;
+import com.artframework.domain.web.domain.project.service.*;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
-/**
- * 项目管理控制器
- */
-@RestController
-@RequestMapping("/api/project")
-@RequiredArgsConstructor
-@Api(tags = "项目管理")
+@RestController()
+@RequestMapping("/project/v1")
 public class ProjectController {
+    @Autowired
+    private ProjectService projectService;
 
-    private final ProjectApplicationService projectApplicationService;
-
-    @GetMapping("/list")
-    @ApiOperation("获取项目列表")
-    public List<ProjectDomain> list() {
-        return projectApplicationService.list();
+    /**
+    * 查找
+    * @param request 请求体
+    * @return ProjectDomain
+    */
+    @PostMapping("/query")
+    public ProjectDomain find(@RequestBody ProjectFindDomain request){
+        return projectService.find(request);
     }
 
-    @GetMapping("/{id}")
-    @ApiOperation("根据ID获取项目")
-    public ProjectDomain getById(@ApiParam("项目ID") @PathVariable Integer id) {
-        return projectApplicationService.getById(id);
+    /**
+    * 新增
+    * @param request 请求体
+    * @return Integer
+    */
+    @PutMapping()
+    public Integer insert(@RequestBody ProjectDomain request){
+        return projectService.insert(request);
     }
 
-    @PostMapping
-    @ApiOperation("创建项目")
-    public Integer create(@RequestBody ProjectDomain project) {
-        return projectApplicationService.create(project);
+    /**
+    * 修改
+    * @param request 请求体
+    * @return 成功OR失败
+    */
+    @PostMapping()
+    public Boolean update(@RequestBody ProjectDomain request){
+        return projectService.update(request);
     }
 
-    @PutMapping("/{id}")
-    @ApiOperation("更新项目")
-    public Boolean update(@ApiParam("项目ID") @PathVariable Integer id,
-            @RequestBody ProjectDomain project) {
-        return projectApplicationService.update(id, project);
-    }
-
-    @DeleteMapping("/{id}")
-    @ApiOperation("删除项目")
-    public Boolean delete(@ApiParam("项目ID") @PathVariable Integer id) {
-        return projectApplicationService.delete(id);
-    }
-
-    @GetMapping("/{id}/domains")
-    @ApiOperation("获取项目的领域模型列表")
-    public List<ProjectDomain.DomainConfigDomain> getDomainConfigs(@ApiParam("项目ID") @PathVariable Integer id) {
-        return projectApplicationService.getDomainConfigs(id);
+    /**
+    * 删除
+    * @param key 数据ID
+    * @return 成功OR失败
+    */
+    @DeleteMapping
+    public Boolean delete(@RequestParam("key") Integer key){
+        return projectService.delete(key);
     }
 }

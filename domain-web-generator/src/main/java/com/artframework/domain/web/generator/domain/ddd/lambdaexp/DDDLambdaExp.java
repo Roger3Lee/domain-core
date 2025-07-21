@@ -33,6 +33,42 @@ public class DDDLambdaExp{
 
 
     /**
+    *  domain_config_tables lambda
+    */
+    public static SFunction<DDDDomain.DomainConfigTablesDomain, Serializable> domainConfigTablesDomainKeyLambda = DDDDomain.DomainConfigTablesDomain::getId;
+
+
+    /**
+    * REF  source lambda
+    */
+    public static SFunction<DDDDomain, Serializable> domainConfigId_RelatedDomainConfigTables_SourceLambda = DDDDomain::getId;
+
+    /**
+    * REF  target lambda
+    */
+    public static SFunction<DDDDomain.DomainConfigTablesDomain,Serializable> domainConfigTables_domainIdTargetLambda =DDDDomain.DomainConfigTablesDomain::getDomainId;
+
+    /**
+    * REF  target lambda
+    */
+    public static BiConsumer<DDDDomain.DomainConfigTablesDomain,Integer> domainConfigTablesDomainIdTargetSetLambda =DDDDomain.DomainConfigTablesDomain::setDomainId;
+
+     /**
+     * REF  source lambda
+     */
+     public static SFunction<DDDDomain, Serializable> domainConfigProjectId_RelatedDomainConfigTables_SourceLambda = DDDDomain::getProjectId;
+
+     /**
+     * REF  target lambda
+     */
+     public static SFunction<DDDDomain.DomainConfigTablesDomain,Serializable> domainConfigTables_projectIdTargetLambda =DDDDomain.DomainConfigTablesDomain::getProjectId;
+
+     /**
+     * REF  target lambda
+     */
+     public static BiConsumer<DDDDomain.DomainConfigTablesDomain,Integer> domainConfigTablesProjectIdTargetSetLambda =DDDDomain.DomainConfigTablesDomain::setProjectId;
+
+    /**
     *  domain_config_line lambda
     */
     public static SFunction<DDDDomain.DomainConfigLineDomain, Serializable> domainConfigLineDomainKeyLambda = DDDDomain.DomainConfigLineDomain::getId;

@@ -66,7 +66,7 @@ CREATE TABLE datasource_table_column(
     name VARCHAR(255),
     type VARCHAR(255),
     comment VARCHAR(900),
-    key VARCHAR(1),
+    key CHAR(1),
     PRIMARY KEY (id)
 );
 
@@ -112,10 +112,42 @@ COMMENT ON COLUMN domain_config.domain_xml IS '领域模型XML';
 COMMENT ON COLUMN domain_config.main_table IS '主表';
 COMMENT ON COLUMN domain_config.folder IS '目录';
 
+DROP TABLE IF EXISTS domain_config_tables;
+CREATE TABLE domain_config_tables(
+    id SERIAL NOT NULL,
+    project_id INTEGER,
+    domain_id INTEGER,
+    created_by VARCHAR(90),
+    created_time TIMESTAMP,
+    updated_by VARCHAR(90),
+    updated_time TIMESTAMP,
+    table_name VARCHAR(255),
+    x NUMERIC(24,6),
+    y NUMERIC(24,6),
+    w NUMERIC(24,6),
+    h NUMERIC(24,6),
+    PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE domain_config_tables IS '领域模型的表列表';
+COMMENT ON COLUMN domain_config_tables.id IS '主键';
+COMMENT ON COLUMN domain_config_tables.project_id IS '项目ID';
+COMMENT ON COLUMN domain_config_tables.domain_id IS '领域ID';
+COMMENT ON COLUMN domain_config_tables.created_by IS '创建人';
+COMMENT ON COLUMN domain_config_tables.created_time IS '创建时间';
+COMMENT ON COLUMN domain_config_tables.updated_by IS '更新人';
+COMMENT ON COLUMN domain_config_tables.updated_time IS '更新时间';
+COMMENT ON COLUMN domain_config_tables.table_name IS '表名';
+COMMENT ON COLUMN domain_config_tables.x IS '位置X';
+COMMENT ON COLUMN domain_config_tables.y IS '位置Y';
+COMMENT ON COLUMN domain_config_tables.w IS '宽度';
+COMMENT ON COLUMN domain_config_tables.h IS '高度';
+
 DROP TABLE IF EXISTS domain_config_line_config;
 CREATE TABLE domain_config_line_config(
     id SERIAL NOT NULL,
     project_id INTEGER,
+    domain_id INTEGER,
     created_by VARCHAR(90),
     created_time TIMESTAMP,
     updated_by VARCHAR(90),
@@ -133,6 +165,7 @@ CREATE TABLE domain_config_line_config(
 COMMENT ON TABLE domain_config_line_config IS '领域模型表关联信息';
 COMMENT ON COLUMN domain_config_line_config.id IS '主键';
 COMMENT ON COLUMN domain_config_line_config.project_id IS '项目ID';
+COMMENT ON COLUMN domain_config_line_config.domain_id IS '领域ID';
 COMMENT ON COLUMN domain_config_line_config.created_by IS '创建人';
 COMMENT ON COLUMN domain_config_line_config.created_time IS '创建时间';
 COMMENT ON COLUMN domain_config_line_config.updated_by IS '更新人';
@@ -149,6 +182,7 @@ DROP TABLE IF EXISTS domain_config_line;
 CREATE TABLE domain_config_line(
     id SERIAL NOT NULL,
     project_id INTEGER,
+    domain_id INTEGER,
     created_by VARCHAR(90),
     created_time TIMESTAMP,
     updated_by VARCHAR(90),
@@ -159,13 +193,14 @@ CREATE TABLE domain_config_line(
     source_colunm VARCHAR(255),
     target_table VARCHAR(255),
     target_colunm VARCHAR(255),
-    many VARCHAR(1),
+    many CHAR(1),
     PRIMARY KEY (id)
 );
 
 COMMENT ON TABLE domain_config_line IS '领域模型表之间关联连线配置（用于配置常量关联关系）';
 COMMENT ON COLUMN domain_config_line.id IS '主键';
 COMMENT ON COLUMN domain_config_line.project_id IS '项目ID';
+COMMENT ON COLUMN domain_config_line.domain_id IS '领域ID';
 COMMENT ON COLUMN domain_config_line.created_by IS '创建人';
 COMMENT ON COLUMN domain_config_line.created_time IS '创建时间';
 COMMENT ON COLUMN domain_config_line.updated_by IS '更新人';
@@ -178,8 +213,8 @@ COMMENT ON COLUMN domain_config_line.target_table IS '目标表';
 COMMENT ON COLUMN domain_config_line.target_colunm IS '目标列';
 COMMENT ON COLUMN domain_config_line.many IS '是否一对多';
 
-DROP TABLE IF EXISTS domain_project;
-CREATE TABLE domain_project(
+DROP TABLE IF EXISTS project;
+CREATE TABLE project(
     id SERIAL NOT NULL,
     created_by VARCHAR(90),
     created_time TIMESTAMP,
@@ -193,15 +228,15 @@ CREATE TABLE domain_project(
     PRIMARY KEY (id)
 );
 
-COMMENT ON TABLE domain_project IS '领域项目';
-COMMENT ON COLUMN domain_project.id IS '主键';
-COMMENT ON COLUMN domain_project.created_by IS '创建人';
-COMMENT ON COLUMN domain_project.created_time IS '创建时间';
-COMMENT ON COLUMN domain_project.updated_by IS '更新人';
-COMMENT ON COLUMN domain_project.updated_time IS '更新时间';
-COMMENT ON COLUMN domain_project.name IS '项目名称';
-COMMENT ON COLUMN domain_project.domain_package IS '领域package';
-COMMENT ON COLUMN domain_project.controller_package IS '控制器package';
-COMMENT ON COLUMN domain_project.do_package IS 'DO package';
-COMMENT ON COLUMN domain_project.mapper_package IS 'Mapper package';
+COMMENT ON TABLE project IS '领域项目';
+COMMENT ON COLUMN project.id IS '主键';
+COMMENT ON COLUMN project.created_by IS '创建人';
+COMMENT ON COLUMN project.created_time IS '创建时间';
+COMMENT ON COLUMN project.updated_by IS '更新人';
+COMMENT ON COLUMN project.updated_time IS '更新时间';
+COMMENT ON COLUMN project.name IS '项目名称';
+COMMENT ON COLUMN project.domain_package IS '领域package';
+COMMENT ON COLUMN project.controller_package IS '控制器package';
+COMMENT ON COLUMN project.do_package IS 'DO package';
+COMMENT ON COLUMN project.mapper_package IS 'Mapper package';
 

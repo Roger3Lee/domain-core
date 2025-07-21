@@ -1,9 +1,9 @@
-package com.artframework.domain.plugin.ui;
+package com.artframework.domain.generator.plugin.ui;
 
 import com.artframework.domain.config.GlobalSetting;
 import com.artframework.domain.customize.CustomPostgreSqlQuery;
+import com.artframework.domain.generator.plugin.SettingsCache;
 import com.artframework.domain.utils.GenerateUtils;
-import com.artframework.domain.plugin.SettingsCache;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
 import com.baomidou.mybatisplus.generator.config.converts.MySqlTypeConvert;
 import com.baomidou.mybatisplus.generator.config.querys.MySqlQuery;

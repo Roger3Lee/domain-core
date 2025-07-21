@@ -1,0 +1,150 @@
+---
+description: 项目技术栈和结构介绍
+globs: **/src/main/java/**/*
+alwaysApply: true
+---
+# 项目框架开发规范指南
+
+本指南旨在为开发人员提供项目整体框架的概览和核心开发规范，确保代码风格和架构设计的一致性。
+
+---
+
+## 1. 项目结构
+
+项目基于**领域驱动设计（DDD）** 的思想，采用经典的分层架构，各模块职责清晰：
+
+-   `/`:
+    -   `domain/`: 存放领域模型 (`*Domain.java`) 和领域服务接口 (`*Service.java`)。
+    -   `application/`: 存放应用服务 (`*AppService.java`)，负责编排领域服务和处理DTO转换，是业务用例的主要实现层。
+    -   `dataobject/`: 存放Mybatis-Plus数据库对象。
+    -   `mapper/`: 数据访问层，包含MyBatis-Plus的Mapper接口及XML文件。
+    -   `dto/`: 存放数据传输对象（DTOs）、Request/Response对象。
+    -   `controller/`: 包含对外暴露的RESTful API控制器 (`*Controller.java`)。
+
+---
+
+## 2. 核心技术栈
+
+-   **开发语言**: Java 1.8
+-   **核心框架**: Spring Boot 2.7.18
+-   **持久层框架**: MyBatis-Plus 3.4.3
+-   **代码简化**: Lombok 1.18.30
+-   **对象映射**: MapStruct 1.4.2.Final
+-   **工具包**: Hutool 5.8.23
+-   **API文档**: Swagger (通过`@Api`和`@ApiOperation`注解)
+
+---
+
+## 3. API设计规范 (Rest Controller)
+
+所有对外API应遵循统一的RESTful设计风格和规范。
+
+-   **注解**: 控制器类必须使用 `@RestController` 标注，并使用 `@RequestMapping` 定义统一的资源路径 (如 `/api/v1/regulars`)。
+-   **HTTP方法**: 方法应使用具体的HTTP动词注解，如 `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`。
+-   **请求处理**:
+    -   使用 `@RequestBody` 接收JSON格式的请求体。
+    -   对请求体DTO使用 `@Valid` 注解开启自动参数验证。
+    -   使用 `@PathVariable` 获取路径参数，`@RequestParam` 获取查询参数。
+-   **响应格式**: 所有API端点必须返回统一的 `ApiResponse<T>` 对象，以保证前端处理逻辑的一致性。
+
+### 示例: 标准Controller方法
+```java
+@Api(tags = "常客管理")
+@RestController
+@RequestMapping("/api/v1/regulars")
+public class RegularsController {
+
+    @Autowired
+    private RegularsApplicationService applicationService;
+
+    @PostMapping("/page")
+    @ApiOperation("分页查询常客")
+    public ApiResponse<PageResult<NotarialRegularsPageResponse>> page(
+        @RequestBody @Valid NotarialRegularsPageRequest request
+    ) {
+        PageResult<NotarialRegularsPageResponse> pageResult = applicationService.page(request);
+        // 始终返回ApiResponse.success()或.fail()
+        return ApiResponse.success(pageResult);
+    }
+
+    @GetMapping("/{id}")
+    @ApiOperation("获取常客详情")
+    public ApiResponse<NotarialRegularsDetailResponse> detail(@PathVariable Long id) {
+        NotarialRegularsDetailResponse response = applicationService.getById(id);
+        return ApiResponse.success(response);
+    }
+}
+```
+
+---
+
+## 4. 全局异常捕获
+
+项目采用基于`@RestControllerAdvice`的全局异常处理机制，拦截并格式化所有未捕获的异常。实际实现类为`mo.gov.dsaj.notarial.bootstrap.config.NotaryCustomExceptionHandler`。
+
+-   **实现方式**: 使用`@RestControllerAdvice(basePackages = "mo.gov.dsaj")`注解，使其只对指定包下的Controller生效。`@Order(Ordered.HIGHEST_PRECEDENCE)`确保该处理器优先执行。
+-   **异常分类处理**:
+    -   **业务异常 (`NotaryBizException`)**: 项目自定义的业务异常，处理器会记录错误日志，并根据异常类型（如`WARN`）构建特定的错误码和多语言错误信息返回。
+    -   **参数验证异常 (`MethodArgumentNotValidException`, `BindException`)**: 处理器会捕获JSR-303验证失败的异常，并提取第一个验证失败的字段名和错误信息，附加到标准错误提示后返回。
+    -   **系统级异常**: 包括`MyBatisSystemException` (数据库错误), `MaxUploadSizeExceededException` (文件上传超限), `MissingServletRequestParameterException` (缺少参数) 等，都会被捕获并映射为预定义的系统错误码和多语言描述。
+    -   **通用异常 (`Exception`)**: 最后的防线，捕获所有其他未处理的异常，记录日志并返回统一的"未知错误"提示，防止内部堆栈信息泄露。
+-   **统一响应**: 所有处理器最终都调用`ResponseUtil.getResult()`来构建统一的`ResultResponse<T>`对象，确保了响应结构的一致性。
+
+### 核心代码示例: NotaryCustomExceptionHandler
+```java
+@Slf4j
+@RestControllerAdvice(basePackages = "mo.gov.dsaj")
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class NotaryCustomExceptionHandler {
+
+    /**
+     * 自定义业务异常处理
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ExceptionHandler(NotaryBizException.class)
+    public ResultResponse<Object> handleBizException(NotaryBizException e) {
+        log.error(e.getMessage(), e);
+        String code = ErrorMessageUtil.handleErrorCode(e);
+        // ...根据类型处理code...
+        return ResponseUtil.getResult(code,
+                ErrorMessageUtil.handleErrorMessage(e),
+                Boolean.FALSE);
+    }
+
+    /**
+     * JSR-303参数验证异常处理 (如@Valid失败)
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResultResponse<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.error(e.getMessage(), e);
+        BindingResult result = e.getBindingResult();
+        FieldError error = result.getFieldErrors().get(0); // 获取第一个错误
+        String field = error.getField();
+        String message = ErrorMessageUtil.handleErrorMessage(error.getDefaultMessage());
+        // ...构建详细错误信息...
+        return ResponseUtil.getResult(
+                ErrorMessageUtil.handleErrorCode(SystemErrorCode.ARGUMENT_NOT_VALID_ERROR),
+                SystemErrorCode.ARGUMENT_NOT_VALID_ERROR.getLocalizedDescription(...) + message,
+                field);
+    }
+
+    /**
+     * 通用未知异常处理
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ExceptionHandler(value = Exception.class)
+    public ResultResponse<Object> defaultErrorHandler(Exception e) {
+        log.error(e.getMessage(), e);
+        String code = SystemErrorConfig.getSystemCode() + CustomSystemErrorCode.UNKNOWN_ERROR.getCode();
+        return ResponseUtil.getResult(
+                code,
+                MultiLanguageUtil.getStringMessageWithDefault(...),
+                Boolean.FALSE
+        );
+    }
+}
+```
+
+
+

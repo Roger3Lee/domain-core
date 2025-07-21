@@ -116,6 +116,20 @@ public class DDDDomain extends BaseAggregateDomain<DDDDomain,DDDService> {
 
 
     /**
+    * RELATE domain_config_tables
+    */
+    @Setter
+    @ApiModelProperty(value =  "RELATE domain_config_tables")
+    private java.util.List<DomainConfigTablesDomain> domainConfigTablesList;
+
+    public java.util.List<DomainConfigTablesDomain> getDomainConfigTablesList(){
+        if(ObjectUtil.isNotEmpty(this.domainConfigTablesList)){
+            ListUtil.toList(this.domainConfigTablesList).forEach(x -> x.set_thisDomain(this));
+        }
+        return this.domainConfigTablesList;
+    }
+
+    /**
     * RELATE domain_config_line
     */
     @Setter
@@ -151,6 +165,94 @@ public class DDDDomain extends BaseAggregateDomain<DDDDomain,DDDService> {
     @ApiModelProperty(value =  "加载数据標識類")
     private LoadFlag loadFlag;
 
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class DomainConfigTablesDomain extends BaseDomain{
+        /**
+        * 主键
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "主键")
+        private Integer id;
+        /**
+        * 项目ID
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "项目ID")
+        private Integer projectId;
+        /**
+        * 领域ID
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "领域ID")
+        private Integer domainId;
+        /**
+        * 创建人
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "创建人")
+        private String createdBy;
+        /**
+        * 创建时间
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "创建时间")
+        private java.time.LocalDateTime createdTime;
+        /**
+        * 更新人
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "更新人")
+        private String updatedBy;
+        /**
+        * 更新时间
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "更新时间")
+        private java.time.LocalDateTime updatedTime;
+        /**
+        * 表名
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "表名")
+        private String tableName;
+        /**
+        * 位置X
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "位置X")
+        private java.math.BigDecimal x;
+        /**
+        * 位置Y
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "位置Y")
+        private java.math.BigDecimal y;
+        /**
+        * 宽度
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "宽度")
+        private java.math.BigDecimal w;
+        /**
+        * 高度
+        */
+        @Getter
+        @Setter
+        @ApiModelProperty(value =  "高度")
+        private java.math.BigDecimal h;
+    }
     @NoArgsConstructor
     @AllArgsConstructor
     public static class DomainConfigLineDomain extends BaseDomain{
@@ -453,6 +555,9 @@ public class DDDDomain extends BaseAggregateDomain<DDDDomain,DDDService> {
     @Override
     public <T> void loadRelated(Class<T> tClass, LambdaQuery<T> query) {
         LoadFlag.LoadFlagBuilder builder = LoadFlag.builder();
+        if (tClass.equals(DomainConfigTablesDomain.class)) {
+            builder.loadDomainConfigTablesDomain = true;
+        }
         if (tClass.equals(DomainConfigLineDomain.class)) {
             builder.loadDomainConfigLineDomain = true;
         }
@@ -489,6 +594,12 @@ public class DDDDomain extends BaseAggregateDomain<DDDDomain,DDDService> {
         private Boolean loadAll;
 
         /**
+        * 加載DomainConfigTablesDomain
+        */
+        @ApiModelProperty(value =  "加載DomainConfigTablesDomain")
+        private Boolean loadDomainConfigTablesDomain;
+
+        /**
         * 加載DomainConfigLineDomain
         */
         @ApiModelProperty(value =  "加載DomainConfigLineDomain")
@@ -515,6 +626,12 @@ public class DDDDomain extends BaseAggregateDomain<DDDDomain,DDDService> {
                 return loadFlagSource;
             }
 
+            // 合併DomainConfigTablesDomain
+            if ((null == loadFlag.loadDomainConfigTablesDomain || BooleanUtil.isFalse(loadFlag.loadDomainConfigTablesDomain)) &&
+                    BooleanUtil.isTrue(loadFlagSource.loadDomainConfigTablesDomain)) {
+                loadFlag.loadDomainConfigTablesDomain = true;
+                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFilters(loadFlagSource.getFilters(), DDDDomain.DomainConfigTablesDomain.class), LambdaQueryUtils.getEntityName(DDDDomain.DomainConfigTablesDomain.class));
+            }
             // 合併DomainConfigLineDomain
             if ((null == loadFlag.loadDomainConfigLineDomain || BooleanUtil.isFalse(loadFlag.loadDomainConfigLineDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadDomainConfigLineDomain)) {
