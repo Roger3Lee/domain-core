@@ -141,14 +141,13 @@ domain.loadRelated(FamilyDomain.FamilyMemberDomain.class, query);
 
 - 新增操作：使用`Convert.INSTANCE.convert()`转换Request为Domain，调用`service.insert()`执行插入
 - 查询详情：使用`Domain.load()`加载主实体，然后使用`loadRelated()`加载关联实体
-- 更新操作：先查询原始Domain，转换Request为新Domain，设置LoadFlag，调用`service.update(newDomain, originalDomain, false)`
+- 更新操作：先查询原始Domain，转换Request为新Domain，设置LoadFlag，调用`service.update(newDomain, originalDomain)`
 - 删除操作：使用`service.delete(id)`删除主实体，自动级联删除关联实体
 - 关联实体新增：通过更新主实体方式添加关联实体，设置相应的LoadFlag
 - 关联实体删除：使用`service.deleteRelated()`删除特定的关联实体
 - 分页查询：使用`service.queryPage()`进行分页查询，构建LambdaQuery过滤条件
 - 批量操作：合理使用批量查询和批量更新，避免循环调用数据库
 - 嵌套加载：上一次`loadRelated()`的数据可作为下一次查询的条件，支持多层级关联
-- 更新策略：使用`update(newDomain, originalDomain, false)`避免重新加载数据，提升性能
 - 事务处理：复杂操作确保在同一事务中完成，使用`@Transactional`注解
 - 错误处理：资源不存在时返回404，业务规则验证失败返回400
 
@@ -200,7 +199,7 @@ public Boolean editRegulars(NotarialRegularsEditRequest request) {
             .build());
 
     // 4. 执行更新，false表示不重新从数据库加载数据，直接使用提供的originalDomain进行比较
-    return regularsService.update(newDomain, originalDomain, false);
+    return regularsService.update(newDomain, originalDomain);
 }
 ```
 
@@ -258,7 +257,7 @@ domain.setLoadFlag(loadFlag);
 regularsService.find(domain, loadFlag);
 
 // 更新时，只会处理Person和File两个关联表的变更
-regularsService.update(newDomain, originalDomain, false);
+regularsService.update(newDomain, originalDomain);
 ```
 
 ---

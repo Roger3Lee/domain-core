@@ -123,13 +123,13 @@ public class DomainModelApplicationService {
 
     // 设置LoadFlag，需要更新关联的表和线配置
     newDomain.setLoadFlag(DDDDomain.LoadFlag.builder()
-        .loadDomainConfigTables(true)
-        .loadDomainConfigLine(true)
-        .loadDomainConfigLineConfig(true)
+        .loadDomainConfigTablesDomain(true)
+        .loadDomainConfigLineDomain(true)
+        .loadDomainConfigLineConfigDomain(true)
         .build());
 
     // 执行更新
-    return dddService.update(newDomain, originalDomain, false);
+    return dddService.update(newDomain, originalDomain);
   }
 
   /**

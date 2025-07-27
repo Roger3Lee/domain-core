@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>应用管理 - UI原型</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .main {
+      padding: 24px 0;
+      background: #f4f6fa;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px #23294622;
+      padding: 24px 32px 20px 32px;
+      margin: 24px 32px 20px 32px;
+      margin-top: 0;
+      animation: fadeIn 0.5s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: #232946;
+      letter-spacing: 1px;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar input {
+      padding: 7px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 15px;
+      background: #f9fafb;
+      color: #232946;
+      min-width: 200px;
+      height: 36px;
+      box-sizing: border-box;
+    }
+
+    .filter-bar label {
+      font-weight: 500;
+      color: #232946;
+      margin-right: 4px;
+    }
+
+    .filter-bar .btn-search {
+      background: #232946;
+      color: #fff;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: 0 2px 8px #23294611;
+      transition: background 0.2s, color 0.2s;
+      height: 36px;
+      padding: 0 18px;
+    }
+
+    .filter-bar .btn-search:hover {
+      background: #35377e;
+    }
+
+    .filter-bar .btn-reset {
+      background: #e0e0e0;
+      color: #232946;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: 0 2px 8px #23294611;
+      transition: background 0.2s, color 0.2s;
+      height: 36px;
+      padding: 0 18px;
+    }
+
+    .filter-bar .btn-reset:hover {
+      background: #f4d35e;
+      color: #232946;
+    }
+
+    .table-header-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .btn-add {
+      background: #232946;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 7px 20px;
+      box-shadow: 0 2px 8px #23294611;
+      transition: background 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+    }
+
+    .btn-add svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .btn-add:hover {
+      background: #35377e;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 16px 0;
+      background: #f9fafb;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #e0e0e0;
+      padding: 12px 14px;
+      text-align: left;
+    }
+
+    th {
+      background: #f4d35e;
+      color: #232946;
+      font-weight: 600;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      padding: 4px;
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+    }
+
+    .icon-btn:hover {
+      background: #f4d35e33;
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .tooltip {
+      visibility: hidden;
+      opacity: 0;
+      background: #232946;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px 12px;
+      position: absolute;
+      z-index: 10;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .icon-btn:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(44, 46, 68, 0.18);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px #23294633;
+      padding: 32px 36px 24px 36px;
+      min-width: 340px;
+      max-width: 96vw;
+      min-height: 120px;
+      position: relative;
+      animation: fadeIn 0.2s;
+    }
+
+    .modal-title {
+      font-size: 1.18em;
+      font-weight: bold;
+      color: #232946;
+      margin-bottom: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 500;
+      color: #232946;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 15px;
+      background: #f9fafb;
+      color: #232946;
+      transition: border 0.2s;
+      box-sizing: border-box;
+    }
+
+    .form-input:focus {
+      border-color: #232946;
+      outline: none;
+    }
+
+    .form-actions {
+      margin-top: 30px;
+      text-align: right;
+    }
+
+    .form-actions button {
+      margin-left: 12px;
+      min-width: 80px;
+      height: 36px;
+    }
+
+    .required {
+      color: #e53935;
+      margin-left: 2px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 18px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: #888;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #232946;
+    }
+
+    .btn {
+      padding: 7px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: 0 2px 8px #23294611;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-primary {
+      background: #232946;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #35377e;
+    }
+
+    .btn-danger {
+      background: #e53935;
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #b71c1c;
+    }
+
+    .btn-default {
+      background: #e0e0e0;
+      color: #232946;
+    }
+
+    .btn-default:hover {
+      background: #f4d35e;
+      color: #232946;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        padding: 18px 8px;
+      }
+
+      .filter-bar {
+        gap: 8px;
+      }
+
+      .table-header-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .btn-add {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .main {
+        padding: 0;
+      }
+
+      .container {
+        padding: 8px 2px;
+      }
+
+      table,
+      th,
+      td {
+        font-size: 13px;
+      }
+
+      .btn-add {
+        font-size: 13px;
+        height: 32px;
+      }
+
+      .icon-btn {
+        width: 28px;
+        height: 28px;
+      }
+
+      .icon-btn svg {
+        width: 15px;
+        height: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="main">
+    <div class="container">
+      <h2>应用管理</h2>
+      <div class="filter-bar">
+        <label for="filter-app-name">应用名称</label>
+        <input id="filter-app-name" type="text" placeholder="请输入应用名称">
+        <button class="btn-search" onclick="filterAppTable()" type="button">搜索</button>
+        <button class="btn-reset" onclick="clearAppFilter()" type="button">重置</button>
+      </div>
+      <div class="table-header-bar">
+        <button class="btn-add" onclick="showAppModal()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="16" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+          </svg>
+          新增应用
+        </button>
+      </div>
+      <table id="app-table">
+        <thead>
+          <tr>
+            <th>应用名称</th>
+            <th>领域package</th>
+            <th>Controller package</th>
+            <th>DO package</th>
+            <th>Mapper package</th>
+            <th>创建时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>示例应用</td>
+            <td>com.example.domain</td>
+            <td>com.example.controller</td>
+            <td>com.example.do</td>
+            <td>com.example.mapper</td>
+            <td>2024-05-01 10:00</td>
+            <td class="actions">
+              <button class="icon-btn" onclick="showAppModal(true)" title="编辑">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L9 13zm-6 6v-2.586a2 2 0 01.586-1.414l9-9a2 2 0 012.828 0l2.586 2.586a2 2 0 010 2.828l-9 9A2 2 0 017.414 19H5a2 2 0 01-2-2z" />
+                </svg>
+                <span class="tooltip">编辑</span>
+              </button>
+              <button class="icon-btn" onclick="showDeleteModal()" title="删除">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M6 19a2 2 0 002 2h8a2 2 0 002-2V7H6v12zM19 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2v2m5 4v6m4-6v6" />
+                </svg>
+                <span class="tooltip">删除</span>
+              </button>
+              <button class="icon-btn" onclick="switchToDomainModels('示例应用')" title="领域模型">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <span class="tooltip">领域模型</span>
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>用户管理系统</td>
+            <td>com.user.domain</td>
+            <td>com.user.controller</td>
+            <td>com.user.do</td>
+            <td>com.user.mapper</td>
+            <td>2024-05-02 14:30</td>
+            <td class="actions">
+              <button class="icon-btn" onclick="showAppModal(true)" title="编辑">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L9 13zm-6 6v-2.586a2 2 0 01.586-1.414l9-9a2 2 0 012.828 0l2.586 2.586a2 2 0 010 2.828l-9 9A2 2 0 017.414 19H5a2 2 0 01-2-2z" />
+                </svg>
+                <span class="tooltip">编辑</span>
+              </button>
+              <button class="icon-btn" onclick="showDeleteModal()" title="删除">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M6 19a2 2 0 002 2h8a2 2 0 002-2V7H6v12zM19 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2v2m5 4v6m4-6v6" />
+                </svg>
+                <span class="tooltip">删除</span>
+              </button>
+              <button class="icon-btn" onclick="switchToDomainModels('用户管理系统')" title="领域模型">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <span class="tooltip">领域模型</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 新增/编辑应用弹窗 -->
+    <div class="modal" id="app-modal" style="display:none;">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeAppModal()">×</button>
+        <div class="modal-title" id="app-modal-title">新增应用</div>
+        <form>
+          <div class="form-group">
+            <label class="form-label">应用名称 <span class="required">*</span></label>
+            <input class="form-input" type="text" placeholder="请输入应用名称" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">领域package <span class="required">*</span></label>
+            <input class="form-input" type="text" placeholder="请输入领域package" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Controller package <span class="required">*</span></label>
+            <input class="form-input" type="text" placeholder="请输入Controller package" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">DO package <span class="required">*</span></label>
+            <input class="form-input" type="text" placeholder="请输入DO package" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mapper package <span class="required">*</span></label>
+            <input class="form-input" type="text" placeholder="请输入Mapper package" required>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">保存</button>
+            <button class="btn btn-default" type="button" onclick="closeAppModal()">取消</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 删除应用确认弹窗 -->
+    <div class="modal" id="delete-modal" style="display:none;">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeDeleteModal()">×</button>
+        <div class="modal-title">确认删除</div>
+        <div style="margin-bottom: 24px; color: #e53935;">确定要删除该应用吗？此操作不可恢复。</div>
+        <div class="form-actions">
+          <button class="btn btn-danger" onclick="closeDeleteModal()">确认</button>
+          <button class="btn btn-default" onclick="closeDeleteModal()">取消</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // 应用过滤功能
+    function filterAppTable() {
+      var name = document.getElementById('filter-app-name').value.toLowerCase();
+      var table = document.getElementById('app-table');
+      var trs = table.tBodies[0].rows;
+      for (var i = 0; i < trs.length; i++) {
+        var tds = trs[i].cells;
+        var show = true;
+        if (name && tds[0].innerText.toLowerCase().indexOf(name) === -1) show = false;
+        trs[i].style.display = show ? '' : 'none';
+      }
+    }
+
+    function clearAppFilter() {
+      document.getElementById('filter-app-name').value = '';
+      filterAppTable();
+    }
+
+    // 应用相关弹窗
+    function showAppModal(isEdit) {
+      document.getElementById('app-modal').style.display = '';
+      document.getElementById('app-modal-title').innerText = isEdit ? '编辑应用' : '新增应用';
+    }
+
+    function closeAppModal() {
+      document.getElementById('app-modal').style.display = 'none';
+    }
+
+    function showDeleteModal() {
+      document.getElementById('delete-modal').style.display = '';
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('delete-modal').style.display = 'none';
+    }
+
+    function switchToDomainModels(appName) {
+      console.log('switchToDomainModels called with appName:', appName);
+      var url = '应用领域模型详情-UI原型.html?app=' + encodeURIComponent(appName);
+
+      try {
+        if (window.parent && window.parent !== window) {
+          console.log('In iframe, trying to access parent window');
+          var frame = window.parent.document.getElementById('proto-frame');
+          if (frame) {
+            console.log('Found iframe, setting src to 应用领域模型详情-UI原型.html');
+            frame.src = url;
+            return;
+          }
+        }
+      } catch (e) {
+        console.log('Cross-origin access blocked, falling back to direct navigation');
+      }
+
+      // 如果iframe访问失败或不在iframe中，直接跳转
+      console.log('Redirecting directly to:', url);
+      window.location.href = url;
+    }
+  </script>
+</body>
+
+</html>

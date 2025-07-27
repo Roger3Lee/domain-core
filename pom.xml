@@ -23,10 +23,10 @@
         <module>domain-dependencies</module>
         <module>domain-generator</module>
         <module>domain-sample</module>
-        <module>domain-mysql-support</module>
-        <module>domain-polardb-support</module>
+<!--        <module>domain-mysql-support</module>-->
+<!--        <module>domain-polardb-support</module>-->
         <module>domain-postgresql-support</module>
-        <module>domain-oracle-support</module>
+<!--        <module>domain-oracle-support</module>-->
         <module>domain-web-generator</module>
     </modules>
 

@@ -15,10 +15,10 @@ import lombok.Data;
 public class BasePageRequest {
 
   @ApiModelProperty(value = "页码", example = "1")
-  private Integer pageNum = 1;
+  private Long pageNum = 1L;
 
   @ApiModelProperty(value = "每页大小", example = "10")
-  private Integer pageSize = 10;
+  private Long pageSize = 10L;
 
   @ApiModelProperty(value = "排序字段")
   private String orderField;

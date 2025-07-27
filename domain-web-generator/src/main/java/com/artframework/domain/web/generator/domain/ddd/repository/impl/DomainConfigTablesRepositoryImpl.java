@@ -1,9 +1,9 @@
-package com.artframework.domain.web.domain.ddd.repository.impl;
+package com.artframework.domain.web.generator.domain.ddd.repository.impl;
 
-import com.artframework.domain.web.domain.ddd.convertor.*;
-import com.artframework.domain.web.domain.ddd.lambdaexp.*;
-import com.artframework.domain.web.domain.ddd.domain.*;
-import com.artframework.domain.web.domain.ddd.repository.*;
+import com.artframework.domain.web.generator.domain.ddd.convertor.*;
+import com.artframework.domain.web.generator.domain.ddd.lambdaexp.*;
+import com.artframework.domain.web.generator.domain.ddd.domain.*;
+import com.artframework.domain.web.generator.domain.ddd.repository.*;
 import com.artframework.domain.web.generator.dataobject.*;
 import com.artframework.domain.core.repository.impl.*;
 

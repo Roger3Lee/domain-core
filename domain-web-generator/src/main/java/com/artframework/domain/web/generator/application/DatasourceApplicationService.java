@@ -1,8 +1,8 @@
 package com.artframework.domain.web.generator.application;
 
+import com.artframework.domain.web.generator.convertor.DatasourceConvertor;
 import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain;
 import com.artframework.domain.web.generator.domain.datasource.service.DatasourceService;
-import com.artframework.domain.web.generator.domain.datasource.convertor.DatasourceConvertor;
 import com.artframework.domain.web.generator.dto.*;
 import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.constants.Order;
@@ -27,9 +27,6 @@ public class DatasourceApplicationService {
 
   @Autowired
   private DatasourceService datasourceService;
-
-  @Autowired
-  private DatasourceConvertor datasourceConvertor;
 
   /**
    * 分页查询数据源
@@ -69,7 +66,7 @@ public class DatasourceApplicationService {
 
     // 转换结果
     List<DatasourceResponse> responseList = page.getRecords().stream()
-        .map(datasourceConvertor::toResponse)
+        .map(DatasourceConvertor.INSTANCE::toResponse)
         .collect(Collectors.toList());
 
     return PageResult.of(responseList, page.getTotal(), page.getSize(), page.getCurrent());
@@ -86,7 +83,7 @@ public class DatasourceApplicationService {
     if (domain == null) {
       throw new RuntimeException("数据源不存在");
     }
-    return datasourceConvertor.toResponse(domain);
+    return DatasourceConvertor.INSTANCE.toResponse(domain);
   }
 
   /**
@@ -101,7 +98,7 @@ public class DatasourceApplicationService {
     checkCodeUnique(request.getCode(), null);
 
     // 转换为领域对象
-    DatasourceDomain domain = datasourceConvertor.toDomain(request);
+    DatasourceDomain domain = DatasourceConvertor.INSTANCE.toDomain(request);
 
     // 插入数据
     return datasourceService.insert(domain);
@@ -125,10 +122,10 @@ public class DatasourceApplicationService {
     checkCodeUnique(request.getCode(), request.getId());
 
     // 转换为新的领域对象
-    DatasourceDomain newDomain = datasourceConvertor.toDomain(request);
+    DatasourceDomain newDomain = DatasourceConvertor.INSTANCE.toDomain(request);
 
     // 执行更新
-    return datasourceService.update(newDomain, originalDomain, false);
+    return datasourceService.update(newDomain, originalDomain);
   }
 
   /**

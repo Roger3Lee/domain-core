@@ -5,6 +5,8 @@ import com.artframework.domain.web.generator.dto.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,7 +27,7 @@ public class DDDController {
 
     @PostMapping("/page")
     @ApiOperation("分页查询领域模型")
-    public ApiResponse<PageResult<DomainConfigDTO>> page(@RequestBody @Valid DomainPageRequest request) {
+    public ApiResponse<PageResult<DomainConfigDTO>> page(@RequestBody @Validated DomainPageRequest request) {
         PageResult<DomainConfigDTO> pageResult = applicationService.page(request);
         return ApiResponse.success(pageResult);
     }
@@ -39,14 +41,14 @@ public class DDDController {
 
     @PostMapping("/add")
     @ApiOperation("新增领域模型")
-    public ApiResponse<Integer> add(@RequestBody @Valid DomainConfigDTO request) {
+    public ApiResponse<Integer> add(@RequestBody @Validated DomainConfigDTO request) {
         Integer id = applicationService.add(request);
         return ApiResponse.success(id);
     }
 
     @PutMapping("/edit")
     @ApiOperation("编辑领域模型")
-    public ApiResponse<Boolean> edit(@RequestBody @Valid DomainConfigDTO request) {
+    public ApiResponse<Boolean> edit(@RequestBody @Validated DomainConfigDTO request) {
         Boolean result = applicationService.edit(request);
         return ApiResponse.success(result);
     }
@@ -64,4 +66,11 @@ public class DDDController {
         Boolean result = applicationService.generateCode(id);
         return ApiResponse.success(result);
     }
+
+
+    public static void main(String[] args) {
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        Boolean result = pathMatcher.match("/notarial-dev/system/notarial-regulars/v1/{regularsId}/group/{groupId}", "/notarial-dev/system/notarial-regulars/v1/104/group/batch/R_GROUP_JJLGxjhWM1Vq_GSHDa7bm");
+    }
+
 }

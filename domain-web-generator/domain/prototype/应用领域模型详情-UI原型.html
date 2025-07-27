@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>应用领域模型详情 - UI原型</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+
+
+    .main {
+      flex: 1;
+      background: #f4f6fa;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      width: 100%;
+    }
+
+    .app-header {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px #23294611;
+    }
+
+    .app-header-top {
+      margin-bottom: 16px;
+    }
+
+    .btn-back {
+      background: #f4f4f4;
+      color: #666;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      box-shadow: 0 2px 4px #23294611;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .btn-back:hover {
+      background: #e0e0e0;
+      color: #232946;
+    }
+
+    .btn-back svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .app-title {
+      font-size: 1.3em;
+      font-weight: 600;
+      color: #232946;
+      margin-bottom: 8px;
+    }
+
+    .app-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      color: #666;
+      font-size: 0.95em;
+    }
+
+    .content-layout {
+      display: flex;
+      gap: 24px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .domain-list-panel {
+      width: 320px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #23294611;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .domain-list-header {
+      padding: 20px 24px 16px 24px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .domain-list-title {
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #232946;
+      margin-bottom: 12px;
+    }
+
+    .btn-add-domain {
+      background: #232946;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      box-shadow: 0 2px 8px #23294611;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-add-domain:hover {
+      background: #35377e;
+    }
+
+    .btn-add-domain svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .domain-list-content {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .domain-card {
+      background: #f9fafb;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .domain-card:hover {
+      border-color: #232946;
+      box-shadow: 0 2px 8px #23294622;
+    }
+
+    .domain-card.active {
+      border-color: #232946;
+      background: #232946;
+      color: #fff;
+    }
+
+    .domain-card.active .domain-name {
+      color: #fff;
+    }
+
+    .domain-card.active .domain-desc {
+      color: #b8b8d1;
+    }
+
+    .domain-name {
+      font-size: 1.05em;
+      font-weight: 600;
+      color: #232946;
+      margin-bottom: 6px;
+    }
+
+    .domain-desc {
+      font-size: 0.9em;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .domain-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85em;
+      color: #888;
+    }
+
+    .er-diagram-panel {
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #23294611;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .er-header {
+      padding: 20px 24px 16px 24px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .er-title {
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #232946;
+      margin-bottom: 8px;
+    }
+
+    .er-subtitle {
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    .er-content {
+      flex: 1;
+      padding: 24px;
+      overflow: auto;
+      position: relative;
+    }
+
+    .er-canvas {
+      width: 100%;
+      height: 100%;
+      min-height: 500px;
+      background: #f9fafb;
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 1.1em;
+    }
+
+    .table-node {
+      position: absolute;
+      background: #fff;
+      border: 2px solid #232946;
+      border-radius: 8px;
+      padding: 12px;
+      min-width: 150px;
+      box-shadow: 0 2px 8px #23294622;
+      cursor: move;
+    }
+
+    .table-header {
+      background: #232946;
+      color: #fff;
+      padding: 8px 12px;
+      margin: -12px -12px 8px -12px;
+      border-radius: 6px 6px 0 0;
+      font-weight: 600;
+      font-size: 0.9em;
+    }
+
+    .table-columns {
+      font-size: 0.85em;
+      color: #333;
+    }
+
+    .table-column {
+      padding: 2px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .table-column:last-child {
+      border-bottom: none;
+    }
+
+    .pk {
+      font-weight: 600;
+      color: #e53935;
+    }
+
+    .fk {
+      font-weight: 600;
+      color: #2196f3;
+    }
+
+    .connection-line {
+      position: absolute;
+      background: #232946;
+      height: 2px;
+      transform-origin: left center;
+    }
+
+    .connection-line::after {
+      content: '';
+      position: absolute;
+      right: -6px;
+      top: -4px;
+      width: 0;
+      height: 0;
+      border-left: 8px solid #232946;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #666;
+      padding: 40px 20px;
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      margin-bottom: 8px;
+      color: #232946;
+    }
+
+    @media (max-width: 1200px) {
+      .content-layout {
+        flex-direction: column;
+      }
+
+      .domain-list-panel {
+        width: 100%;
+        max-height: 300px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .main {
+        padding: 16px;
+      }
+
+      .app-header {
+        padding: 16px 20px;
+      }
+
+      .btn-back {
+        font-size: 13px;
+        padding: 6px 12px;
+      }
+
+      .domain-list-header,
+      .er-header {
+        padding: 16px 20px 12px 20px;
+      }
+
+      .domain-list-content,
+      .er-content {
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .main {
+        padding: 8px;
+      }
+
+      .app-header {
+        padding: 12px 16px;
+      }
+
+      .domain-list-header,
+      .er-header {
+        padding: 12px 16px 8px 16px;
+      }
+
+      .domain-list-content,
+      .er-content {
+        padding: 8px;
+      }
+
+      .domain-card {
+        padding: 12px;
+      }
+
+      .table-node {
+        min-width: 120px;
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <main class="main">
+      <div class="app-header">
+        <div class="app-header-top">
+          <button class="btn-back" onclick="goBack()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M15 19l-7-7 7-7" />
+            </svg>
+            返回应用管理
+          </button>
+        </div>
+        <div class="app-title" id="app-title">示例应用</div>
+        <div class="app-info">
+          <span><b>领域package：</b>com.example.domain</span>
+          <span><b>Controller package：</b>com.example.controller</span>
+          <span><b>DO package：</b>com.example.do</span>
+          <span><b>Mapper package：</b>com.example.mapper</span>
+        </div>
+      </div>
+
+      <div class="content-layout">
+        <!-- 左侧领域模型列表 -->
+        <div class="domain-list-panel">
+          <div class="domain-list-header">
+            <div class="domain-list-title">领域模型</div>
+            <button class="btn-add-domain" onclick="showAddDomainModal()">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="16" />
+                <line x1="8" y1="12" x2="16" y2="12" />
+              </svg>
+              新增领域模型
+            </button>
+          </div>
+          <div class="domain-list-content">
+            <div class="domain-card active" onclick="selectDomain('user')">
+              <div class="domain-name">用户领域</div>
+              <div class="domain-desc">用户管理相关领域模型</div>
+              <div class="domain-meta">
+                <span>主表: user_info</span>
+                <span>3个关联表</span>
+              </div>
+            </div>
+            <div class="domain-card" onclick="selectDomain('order')">
+              <div class="domain-name">订单领域</div>
+              <div class="domain-desc">订单管理相关领域模型</div>
+              <div class="domain-meta">
+                <span>主表: order_info</span>
+                <span>5个关联表</span>
+              </div>
+            </div>
+            <div class="domain-card" onclick="selectDomain('product')">
+              <div class="domain-name">商品领域</div>
+              <div class="domain-desc">商品管理相关领域模型</div>
+              <div class="domain-meta">
+                <span>主表: product_info</span>
+                <span>2个关联表</span>
+              </div>
+            </div>
+            <div class="domain-card" onclick="selectDomain('payment')">
+              <div class="domain-name">支付领域</div>
+              <div class="domain-desc">支付管理相关领域模型</div>
+              <div class="domain-meta">
+                <span>主表: payment_info</span>
+                <span>4个关联表</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧ER图展示区域 -->
+        <div class="er-diagram-panel">
+          <div class="er-header">
+            <div class="er-title">用户领域 - ER图</div>
+            <div class="er-subtitle">展示领域模型中的表关联关系</div>
+          </div>
+          <div class="er-content">
+            <div class="er-canvas" id="er-canvas">
+              <!-- 用户信息表 -->
+              <div class="table-node" style="top: 50px; left: 50px;">
+                <div class="table-header">user_info</div>
+                <div class="table-columns">
+                  <div class="table-column pk">id (PK)</div>
+                  <div class="table-column">username</div>
+                  <div class="table-column">email</div>
+                  <div class="table-column">phone</div>
+                  <div class="table-column">status</div>
+                  <div class="table-column">created_time</div>
+                </div>
+              </div>
+
+              <!-- 用户角色表 -->
+              <div class="table-node" style="top: 50px; left: 350px;">
+                <div class="table-header">user_role</div>
+                <div class="table-columns">
+                  <div class="table-column pk">id (PK)</div>
+                  <div class="table-column fk">user_id (FK)</div>
+                  <div class="table-column fk">role_id (FK)</div>
+                  <div class="table-column">created_time</div>
+                </div>
+              </div>
+
+              <!-- 角色信息表 -->
+              <div class="table-node" style="top: 250px; left: 350px;">
+                <div class="table-header">role_info</div>
+                <div class="table-columns">
+                  <div class="table-column pk">id (PK)</div>
+                  <div class="table-column">role_name</div>
+                  <div class="table-column">role_code</div>
+                  <div class="table-column">description</div>
+                  <div class="table-column">status</div>
+                </div>
+              </div>
+
+              <!-- 用户地址表 -->
+              <div class="table-node" style="top: 250px; left: 50px;">
+                <div class="table-header">user_address</div>
+                <div class="table-columns">
+                  <div class="table-column pk">id (PK)</div>
+                  <div class="table-column fk">user_id (FK)</div>
+                  <div class="table-column">address_type</div>
+                  <div class="table-column">province</div>
+                  <div class="table-column">city</div>
+                  <div class="table-column">detail_address</div>
+                  <div class="table-column">is_default</div>
+                </div>
+              </div>
+
+              <!-- 连接线 -->
+              <div class="connection-line" style="top: 120px; left: 200px; width: 150px; transform: rotate(0deg);">
+              </div>
+              <div class="connection-line" style="top: 200px; left: 200px; width: 150px; transform: rotate(90deg);">
+              </div>
+              <div class="connection-line" style="top: 200px; left: 350px; width: 100px; transform: rotate(90deg);">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 新增领域模型弹窗 -->
+  <div class="modal" id="add-domain-modal" style="display:none;">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeAddDomainModal()">×</button>
+      <div class="modal-title">新增领域模型</div>
+      <form>
+        <div class="form-group">
+          <label class="form-label">领域名称 <span class="required">*</span></label>
+          <input class="form-input" type="text" placeholder="请输入领域名称" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">领域描述</label>
+          <input class="form-input" type="text" placeholder="请输入领域描述">
+        </div>
+        <div class="form-group">
+          <label class="form-label">主表 <span class="required">*</span></label>
+          <select class="form-input" required>
+            <option value="">请选择主表</option>
+            <option value="user_info">user_info</option>
+            <option value="order_info">order_info</option>
+            <option value="product_info">product_info</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">目录</label>
+          <input class="form-input" type="text" placeholder="请输入目录路径">
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">保存</button>
+          <button class="btn btn-default" type="button" onclick="closeAddDomainModal()">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(44, 46, 68, 0.18);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px #23294633;
+      padding: 32px 36px 24px 36px;
+      min-width: 400px;
+      max-width: 96vw;
+      position: relative;
+      animation: fadeIn 0.2s;
+    }
+
+    .modal-title {
+      font-size: 1.18em;
+      font-weight: bold;
+      color: #232946;
+      margin-bottom: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 500;
+      color: #232946;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 15px;
+      background: #f9fafb;
+      color: #232946;
+      transition: border 0.2s;
+      box-sizing: border-box;
+    }
+
+    .form-input:focus {
+      border-color: #232946;
+      outline: none;
+    }
+
+    .form-actions {
+      margin-top: 30px;
+      text-align: right;
+    }
+
+    .form-actions button {
+      margin-left: 12px;
+      min-width: 80px;
+      height: 36px;
+    }
+
+    .required {
+      color: #e53935;
+      margin-left: 2px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 18px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: #888;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #232946;
+    }
+
+    .btn {
+      padding: 7px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: 0 2px 8px #23294611;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-primary {
+      background: #232946;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #35377e;
+    }
+
+    .btn-default {
+      background: #e0e0e0;
+      color: #232946;
+    }
+
+    .btn-default:hover {
+      background: #f4d35e;
+      color: #232946;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+
+  <script>
+    // 获取URL参数中的应用名称和领域名称
+    function getAppName() {
+      var params = new URLSearchParams(window.location.search);
+      return params.get('app') || '未知应用';
+    }
+
+    function getDomainName() {
+      var params = new URLSearchParams(window.location.search);
+      return params.get('domain') || '用户领域';
+    }
+
+    // 设置应用标题
+    document.getElementById('app-title').innerText = getAppName();
+
+    // 选择领域模型
+    function selectDomain(domainType) {
+      // 移除所有active类
+      document.querySelectorAll('.domain-card').forEach(card => {
+        card.classList.remove('active');
+      });
+
+      // 为当前选中的卡片添加active类
+      var targetCard = document.querySelector(`[onclick="selectDomain('${domainType}')"]`);
+      if (targetCard) {
+        targetCard.classList.add('active');
+      }
+
+      // 更新ER图标题和内容
+      var domainName = '';
+      var erContent = '';
+
+      switch (domainType) {
+        case 'user':
+          domainName = '用户领域';
+          erContent = `
+            <!-- 用户信息表 -->
+            <div class="table-node" style="top: 50px; left: 50px;">
+              <div class="table-header">user_info</div>
+              <div class="table-columns">
+                <div class="table-column pk">id (PK)</div>
+                <div class="table-column">username</div>
+                <div class="table-column">email</div>
+                <div class="table-column">phone</div>
+                <div class="table-column">status</div>
+                <div class="table-column">created_time</div>
+              </div>
+            </div>
+
+            <!-- 用户角色表 -->
+            <div class="table-node" style="top: 50px; left: 350px;">
+              <div class="table-header">user_role</div>
+              <div class="table-columns">
+                <div class="table-column pk">id (PK)</div>
+                <div class="table-column fk">user_id (FK)</div>
+                <div class="table-column fk">role_id (FK)</div>
+                <div class="table-column">created_time</div>
+              </div>
+            </div>
+
+            <!-- 角色信息表 -->
+            <div class="table-node" style="top: 250px; left: 350px;">
+              <div class="table-header">role_info</div>
+              <div class="table-columns">
+                <div class="table-column pk">id (PK)</div>
+                <div class="table-column">role_name</div>
+                <div class="table-column">role_code</div>
+                <div class="table-column">description</div>
+                <div class="table-column">status</div>
+              </div>
+            </div>
+
+            <!-- 用户地址表 -->
+            <div class="table-node" style="top: 250px; left: 50px;">
+              <div class="table-header">user_address</div>
+              <div class="table-columns">
+                <div class="table-column pk">id (PK)</div>
+                <div class="table-column fk">user_id (FK)</div>
+                <div class="table-column">address_type</div>
+                <div class="table-column">province</div>
+                <div class="table-column">city</div>
+                <div class="table-column">detail_address</div>
+                <div class="table-column">is_default</div>
+              </div>
+            </div>
+
+            <!-- 连接线 -->
+            <div class="connection-line" style="top: 120px; left: 200px; width: 150px; transform: rotate(0deg);"></div>
+            <div class="connection-line" style="top: 200px; left: 200px; width: 150px; transform: rotate(90deg);"></div>
+            <div class="connection-line" style="top: 200px; left: 350px; width: 100px; transform: rotate(90deg);"></div>
+          `;
+          break;
+        case 'order':
+          domainName = '订单领域';
+          erContent = `
+            <!-- 订单信息表 -->
+            <div class="table-node" style="top: 50px; left: 50px;">
+              <div class="table-header">order_info</div>
+              <div class="table-columns">
+                <div class="table-column pk">id (PK)</div>
+                <div class="table-column fk">user_id (FK)</div>
+                <div class="table-column">order_no</div>
+                <div class="table-column">total_amount</div>
+                <div class="table-column">status</div>
+                <div class="table-column">created_time</div>
+              </div>
+            </div>
+
+            <!-- 订单详情表 -->
+            <div class="table-node" style="top: 50px; left: 350px;">
+              <div class="table-header">order_detail</div>
+              <div class="table-columns">
+                <div class="table-column pk">id (PK)</div>
+                <div class="table-column fk">order_id (FK)</div>
+                <div class="table-column fk">product_id (FK)</div>
+                <div class="table-column">quantity</div>
+                <div class="table-column">unit_price</div>
+                <div class="table-column">total_price</div>
+              </div>
+            </div>
+
+            <!-- 商品信息表 -->
+            <div class="table-node" style="top: 250px; left: 350px;">
+              <div class="table-header">product_info</div>
+              <div class="table-columns">
+                <div class="table-column pk">id (PK)</div>
+                <div class="table-column">product_name</div>
+                <div class="table-column">product_code</div>
+                <div class="table-column">price</div>
+                <div class="table-column">stock</div>
+                <div class="table-column">status</div>
+              </div>
+            </div>
+
+            <!-- 订单支付表 -->
+            <div class="table-node" style="top: 250px; left: 50px;">
+              <div class="table-header">order_payment</div>
+              <div class="table-columns">
+                <div class="table-column pk">id (PK)</div>
+                <div class="table-column fk">order_id (FK)</div>
+                <div class="table-column">payment_no</div>
+                <div class="table-column">payment_amount</div>
+                <div class="table-column">payment_method</div>
+                <div class="table-column">payment_status</div>
+              </div>
+            </div>
+
+            <!-- 连接线 -->
+            <div class="connection-line" style="top: 120px; left: 200px; width: 150px; transform: rotate(0deg);"></div>
+            <div class="connection-line" style="top: 200px; left: 200px; width: 150px; transform: rotate(90deg);"></div>
+            <div class="connection-line" style="top: 200px; left: 350px; width: 100px; transform: rotate(90deg);"></div>
+            <div class="connection-line" style="top: 120px; left: 350px; width: 100px; transform: rotate(90deg);"></div>
+          `;
+          break;
+        default:
+          domainName = '未知领域';
+          erContent = '<div class="empty-state"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><h3>暂无ER图数据</h3><p>该领域模型尚未配置ER图</p></div>';
+      }
+
+      document.querySelector('.er-title').innerText = domainName + ' - ER图';
+      document.getElementById('er-canvas').innerHTML = erContent;
+    }
+
+
+
+    // 返回应用管理页面
+    function goBack() {
+      var url = '应用管理-UI原型.html';
+
+      try {
+        if (window.parent && window.parent !== window) {
+          var frame = window.parent.document.getElementById('proto-frame');
+          if (frame) {
+            frame.src = url;
+            return;
+          }
+        }
+      } catch (e) {
+        console.log('Cross-origin access blocked, falling back to direct navigation');
+      }
+
+      // 如果iframe访问失败或不在iframe中，直接跳转
+      window.location.href = url;
+    }
+
+    // 新增领域模型弹窗
+    function showAddDomainModal() {
+      document.getElementById('add-domain-modal').style.display = 'flex';
+    }
+
+    function closeAddDomainModal() {
+      document.getElementById('add-domain-modal').style.display = 'none';
+    }
+
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', function () {
+      // 页面加载时根据URL参数自动选择领域模型
+      var defaultDomain = getDomainName();
+      if (defaultDomain === '用户领域') {
+        selectDomain('user');
+      } else if (defaultDomain === '订单领域') {
+        selectDomain('order');
+      } else if (defaultDomain === '商品领域') {
+        selectDomain('product');
+      } else if (defaultDomain === '支付领域') {
+        selectDomain('payment');
+      } else {
+        // 默认选中用户领域
+        selectDomain('user');
+      }
+    });
+  </script>
+</body>
+
+</html>

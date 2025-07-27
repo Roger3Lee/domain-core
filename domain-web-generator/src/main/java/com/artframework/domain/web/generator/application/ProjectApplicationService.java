@@ -1,8 +1,8 @@
 package com.artframework.domain.web.generator.application;
 
+import com.artframework.domain.web.generator.convertor.ProjectConvertor;
 import com.artframework.domain.web.generator.domain.project.domain.ProjectDomain;
 import com.artframework.domain.web.generator.domain.project.service.ProjectService;
-import com.artframework.domain.web.generator.convertor.ProjectConvertor;
 import com.artframework.domain.web.generator.dto.*;
 import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.constants.Order;
@@ -28,8 +28,6 @@ public class ProjectApplicationService {
   @Autowired
   private ProjectService projectService;
 
-  @Autowired
-  private ProjectConvertor projectConvertor;
 
   /**
    * 分页查询项目
@@ -63,7 +61,7 @@ public class ProjectApplicationService {
 
     // 转换结果
     List<ProjectResponse> responseList = page.getRecords().stream()
-        .map(projectConvertor::toResponse)
+        .map(ProjectConvertor.INSTANCE::toResponse)
         .collect(Collectors.toList());
 
     return PageResult.of(responseList, page.getTotal(), page.getSize(), page.getCurrent());
@@ -80,7 +78,7 @@ public class ProjectApplicationService {
     if (domain == null) {
       throw new RuntimeException("项目不存在");
     }
-    return projectConvertor.toResponse(domain);
+    return ProjectConvertor.INSTANCE.toResponse(domain);
   }
 
   /**
@@ -95,7 +93,7 @@ public class ProjectApplicationService {
     checkNameUnique(request.getName(), null);
 
     // 转换为领域对象
-    ProjectDomain domain = projectConvertor.toDomain(request);
+    ProjectDomain domain = ProjectConvertor.INSTANCE.toDomain(request);
 
     // 插入数据
     return projectService.insert(domain);
@@ -119,10 +117,10 @@ public class ProjectApplicationService {
     checkNameUnique(request.getName(), request.getId());
 
     // 转换为新的领域对象
-    ProjectDomain newDomain = projectConvertor.toDomain(request);
+    ProjectDomain newDomain = ProjectConvertor.INSTANCE.toDomain(request);
 
     // 执行更新
-    return projectService.update(newDomain, originalDomain, false);
+    return projectService.update(newDomain, originalDomain);
   }
 
   /**

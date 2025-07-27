@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>原型入口 - Prototype Index</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #232946;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 8px #0001;
+      z-index: 2;
+    }
+
+    .sidebar-header {
+      font-size: 1.4em;
+      font-weight: bold;
+      padding: 32px 0 24px 0;
+      text-align: center;
+      letter-spacing: 2px;
+      background: #232946;
+      border-bottom: 1px solid #2e335a;
+    }
+
+    .menu {
+      flex: 1;
+      padding: 24px 0;
+    }
+
+    .menu-item {
+      padding: 14px 36px;
+      font-size: 1.08em;
+      color: #b8b8d1;
+      cursor: pointer;
+      border-left: 4px solid transparent;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .menu-item.active,
+    .menu-item:hover {
+      background: #35377e;
+      color: #fff;
+      border-left: 4px solid #f4d35e;
+    }
+
+    .main {
+      flex: 1;
+      background: #f4f6fa;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .iframe-wrap {
+      width: 100%;
+      margin: 40px 40px 40px 90px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px #23294622;
+      overflow: hidden;
+      min-height: 800px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 80vh;
+      border: none;
+      background: #fff;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 60px;
+      }
+
+      .sidebar-header {
+        font-size: 1em;
+        padding: 18px 0;
+      }
+
+      .menu-item {
+        padding: 12px 10px;
+        font-size: 0.98em;
+      }
+
+      .iframe-wrap {
+        margin: 8px 0;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .iframe-wrap {
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-header">原型导航</div>
+      <div class="menu">
+        <div class="menu-item active" id="menu-ds" onclick="switchPage('ds')">数据源管理</div>
+        <div class="menu-item" id="menu-app" onclick="switchPage('app')">应用管理</div>
+      </div>
+    </nav>
+    <main class="main">
+      <div class="iframe-wrap">
+        <iframe id="proto-frame" src="数据源管理-UI原型.html"></iframe>
+      </div>
+    </main>
+  </div>
+  <script>
+    function switchPage(page) {
+      var ds = document.getElementById('menu-ds');
+      var app = document.getElementById('menu-app');
+      var frame = document.getElementById('proto-frame');
+      if (page === 'ds') {
+        ds.classList.add('active');
+        app.classList.remove('active');
+        frame.src = '数据源管理-UI原型.html';
+      } else {
+        app.classList.add('active');
+        ds.classList.remove('active');
+        frame.src = '应用管理-UI原型.html';
+      }
+    }
+  </script>
+</body>
+
+</html>

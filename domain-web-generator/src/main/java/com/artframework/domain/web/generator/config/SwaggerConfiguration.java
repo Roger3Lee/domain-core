@@ -40,7 +40,7 @@ public class SwaggerConfiguration {
                 //RequestHandlerSelectors.any()  所有都暴露
                 //RequestHandlerSelectors.basePackage("com.autumn.*")  指定包位置
                 //设置通过什么方式定位需要自动生成文档的接口，这里定位方法上的@ApiOperation注解
-                .apis(RequestHandlerSelectors.basePackage("com.artframework.sample.controllers"))
+                .apis(RequestHandlerSelectors.any())
 
                 //接口URI路径设置，any是全路径，也可以通过PathSelectors.regex()正则匹配
                 .paths(PathSelectors.any())

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>数据源管理 - UI原型</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .main {
+      padding: 48px 0;
+      background: #f4f6fa;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px #23294622;
+      padding: 24px 32px 20px 32px;
+      margin: 24px 32px 20px 32px;
+      margin-top: 0;
+      animation: fadeIn 0.5s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #232946;
+      letter-spacing: 1px;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 18px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar input,
+    .filter-bar select {
+      padding: 7px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 15px;
+      background: #f9fafb;
+      color: #232946;
+      min-width: 120px;
+      height: 36px;
+      box-sizing: border-box;
+    }
+
+    .filter-bar label {
+      font-weight: 500;
+      color: #232946;
+      margin-right: 4px;
+    }
+
+    .filter-bar .btn {
+      padding: 7px 18px;
+    }
+
+    .filter-bar .btn-search {
+      background: #232946;
+      color: #fff;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: 0 2px 8px #23294611;
+      transition: background 0.2s, color 0.2s;
+      height: 36px;
+      padding: 0 18px;
+    }
+
+    .filter-bar .btn-search:hover {
+      background: #35377e;
+    }
+
+    .filter-bar .btn-reset {
+      background: #e0e0e0;
+      color: #232946;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: 0 2px 8px #23294611;
+      transition: background 0.2s, color 0.2s;
+      height: 36px;
+      padding: 0 18px;
+    }
+
+    .filter-bar .btn-reset:hover {
+      background: #f4d35e;
+      color: #232946;
+    }
+
+    .table-header-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .btn-add {
+      background: #232946;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 7px 20px;
+      box-shadow: 0 2px 8px #23294611;
+      transition: background 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+    }
+
+    .btn-add svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .btn-add:hover {
+      background: #35377e;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 24px 0;
+      background: #f9fafb;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #e0e0e0;
+      padding: 12px 14px;
+      text-align: left;
+    }
+
+    th {
+      background: #f4d35e;
+      color: #232946;
+      font-weight: 600;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      padding: 4px;
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+    }
+
+    .icon-btn:hover {
+      background: #f4d35e33;
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .tooltip {
+      visibility: hidden;
+      opacity: 0;
+      background: #232946;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px 12px;
+      position: absolute;
+      z-index: 10;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .icon-btn:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .btn {
+      padding: 7px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: 0 2px 8px #23294611;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-primary {
+      background: #232946;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #35377e;
+    }
+
+    .btn-danger {
+      background: #e53935;
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #b71c1c;
+    }
+
+    .btn-default {
+      background: #e0e0e0;
+      color: #232946;
+    }
+
+    .btn-default:hover {
+      background: #f4d35e;
+      color: #232946;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 500;
+      color: #232946;
+    }
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 15px;
+      background: #f9fafb;
+      color: #232946;
+      transition: border 0.2s;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      border-color: #232946;
+      outline: none;
+    }
+
+    .form-actions {
+      margin-top: 30px;
+    }
+
+    .form-actions button {
+      margin-right: 16px;
+    }
+
+    .required {
+      color: #e53935;
+      margin-left: 2px;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        padding: 18px 8px;
+      }
+
+      .filter-bar {
+        gap: 8px;
+      }
+
+      .table-header-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .btn-add {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .main {
+        padding: 0;
+      }
+
+      .container {
+        padding: 8px 2px;
+      }
+
+      table,
+      th,
+      td {
+        font-size: 13px;
+      }
+
+      .btn-add {
+        font-size: 13px;
+        height: 32px;
+      }
+
+      .icon-btn {
+        width: 28px;
+        height: 28px;
+      }
+
+      .icon-btn svg {
+        width: 15px;
+        height: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="main">
+    <div class="container" id="list-page">
+      <h2>数据源管理</h2>
+      <div class="filter-bar">
+        <label for="filter-name">名称</label>
+        <input id="filter-name" type="text" placeholder="数据源名称">
+        <label for="filter-code">编码</label>
+        <input id="filter-code" type="text" placeholder="编码">
+        <label for="filter-type">数据库类型</label>
+        <select id="filter-type">
+          <option value="">全部</option>
+          <option>MySQL</option>
+          <option>PostgreSQL</option>
+          <option>PolarDB</option>
+          <option>Oracle</option>
+        </select>
+        <button class="btn-search" onclick="filterTable()" type="button">搜索</button>
+        <button class="btn-reset" onclick="clearFilter()" type="button">重置</button>
+      </div>
+      <div class="table-header-bar">
+        <button class="btn-add" onclick="showForm()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="16" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+          </svg>
+          新增数据源
+        </button>
+      </div>
+      <table id="ds-table">
+        <thead>
+          <tr>
+            <th>数据源名称</th>
+            <th>编码</th>
+            <th>数据库类型</th>
+            <th>连接URL</th>
+            <th>用户名</th>
+            <th>schema</th>
+            <th>创建时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>演示数据源</td>
+            <td>demo_ds</td>
+            <td>MySQL</td>
+            <td>jdbc:mysql://localhost:3306/demo</td>
+            <td>root</td>
+            <td>demo</td>
+            <td>2024-05-01 10:00</td>
+            <td class="actions">
+              <button class="icon-btn" onclick="showForm(true)" title="编辑">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L9 13zm-6 6v-2.586a2 2 0 01.586-1.414l9-9a2 2 0 012.828 0l2.586 2.586a2 2 0 010 2.828l-9 9A2 2 0 017.414 19H5a2 2 0 01-2-2z" />
+                </svg>
+                <span class="tooltip">编辑</span>
+              </button>
+              <button class="icon-btn" title="同步表结构">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="M4 4v5h.582M20 20v-5h-.581M19.418 9A7.974 7.974 0 0012 4a8 8 0 00-7.418 5M4.582 15A7.974 7.974 0 0012 20a8 8 0 007.418-5" />
+                </svg>
+                <span class="tooltip">同步表结构</span>
+              </button>
+              <button class="icon-btn" title="删除">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M6 19a2 2 0 002 2h8a2 2 0 002-2V7H6v12zM19 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2v2m5 4v6m4-6v6" />
+                </svg>
+                <span class="tooltip">删除</span>
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>Postgres数据源</td>
+            <td>pg_ds</td>
+            <td>PostgreSQL</td>
+            <td>jdbc:postgresql://localhost:5432/pgdb</td>
+            <td>pguser</td>
+            <td>public</td>
+            <td>2024-05-02 09:30</td>
+            <td class="actions">
+              <button class="icon-btn" onclick="showForm(true)" title="编辑">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L9 13zm-6 6v-2.586a2 2 0 01.586-1.414l9-9a2 2 0 012.828 0l2.586 2.586a2 2 0 010 2.828l-9 9A2 2 0 017.414 19H5a2 2 0 01-2-2z" />
+                </svg>
+                <span class="tooltip">编辑</span>
+              </button>
+              <button class="icon-btn" title="同步表结构">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="M4 4v5h.582M20 20v-5h-.581M19.418 9A7.974 7.974 0 0012 4a8 8 0 00-7.418 5M4.582 15A7.974 7.974 0 0012 20a8 8 0 007.418-5" />
+                </svg>
+                <span class="tooltip">同步表结构</span>
+              </button>
+              <button class="icon-btn" title="删除">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M6 19a2 2 0 002 2h8a2 2 0 002-2V7H6v12zM19 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2v2m5 4v6m4-6v6" />
+                </svg>
+                <span class="tooltip">删除</span>
+              </button>
+            </td>
+          </tr>
+          <!-- 更多数据源行... -->
+        </tbody>
+      </table>
+    </div>
+    <div class="container" id="form-page" style="display:none;">
+      <h2 id="form-title">新增数据源</h2>
+      <form onsubmit="return validateForm()">
+        <div class="form-group">
+          <label class="form-label">数据源名称 <span class="required">*</span></label>
+          <input class="form-input" id="ds-name" type="text" placeholder="请输入数据源名称" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">编码 <span class="required">*</span></label>
+          <input class="form-input" id="ds-code" type="text" placeholder="请输入编码" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">数据库类型 <span class="required">*</span></label>
+          <select class="form-select" id="ds-type" required onchange="onDbTypeChange()">
+            <option value="">请选择</option>
+            <option>MySQL</option>
+            <option>PostgreSQL</option>
+            <option>PolarDB</option>
+            <option>Oracle</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">连接URL <span class="required">*</span></label>
+          <input class="form-input" id="ds-url" type="text" placeholder="请输入数据库连接URL" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">用户名 <span class="required">*</span></label>
+          <input class="form-input" id="ds-username" type="text" placeholder="请输入用户名" required>
+        </div>
+        <div class="form-group" id="schema-group">
+          <label class="form-label" id="schema-label">schema <span class="required" id="schema-required"
+              style="display:none;">*</span></label>
+          <input class="form-input" id="ds-schema" type="text" placeholder="可选">
+        </div>
+        <div class="form-group">
+          <label class="form-label">密码 <span class="required">*</span></label>
+          <input class="form-input" id="ds-password" type="password" placeholder="请输入密码" required>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">保存</button>
+          <button class="btn btn-default" type="button" onclick="showList()">取消</button>
+        </div>
+      </form>
+    </div>
+  </main>
+  <script>
+    // 过滤功能
+    function filterTable() {
+      var name = document.getElementById('filter-name').value.toLowerCase();
+      var code = document.getElementById('filter-code').value.toLowerCase();
+      var type = document.getElementById('filter-type').value;
+      var table = document.getElementById('ds-table');
+      var trs = table.tBodies[0].rows;
+      for (var i = 0; i < trs.length; i++) {
+        var tds = trs[i].cells;
+        var show = true;
+        if (name && tds[0].innerText.toLowerCase().indexOf(name) === -1) show = false;
+        if (code && tds[1].innerText.toLowerCase().indexOf(code) === -1) show = false;
+        if (type && tds[2].innerText !== type) show = false;
+        trs[i].style.display = show ? '' : 'none';
+      }
+    }
+    function clearFilter() {
+      document.getElementById('filter-name').value = '';
+      document.getElementById('filter-code').value = '';
+      document.getElementById('filter-type').value = '';
+      filterTable();
+    }
+    // 切换页面
+    function showForm(isEdit) {
+      document.getElementById('list-page').style.display = 'none';
+      document.getElementById('form-page').style.display = '';
+      document.getElementById('form-title').innerText = isEdit ? '编辑数据源' : '新增数据源';
+      // 重置表单
+      document.querySelector('#form-page form').reset();
+      onDbTypeChange();
+    }
+    function showList() {
+      document.getElementById('form-page').style.display = 'none';
+      document.getElementById('list-page').style.display = '';
+    }
+    // 数据库类型切换，MySQL时隐藏schema，PostgreSQL时schema为必填，其余为可选
+    function onDbTypeChange() {
+      var type = document.getElementById('ds-type').value;
+      var schemaGroup = document.getElementById('schema-group');
+      var schemaLabel = document.getElementById('schema-label');
+      var schemaRequired = document.getElementById('schema-required');
+      var schemaInput = document.getElementById('ds-schema');
+      if (type === 'MySQL') {
+        schemaGroup.style.display = 'none';
+        schemaInput.required = false;
+      } else if (type === 'PostgreSQL') {
+        schemaGroup.style.display = '';
+        schemaRequired.style.display = '';
+        schemaInput.required = true;
+        schemaInput.placeholder = '请输入schema（必填）';
+      } else if (type) {
+        schemaGroup.style.display = '';
+        schemaRequired.style.display = 'none';
+        schemaInput.required = false;
+        schemaInput.placeholder = '可选';
+      } else {
+        schemaGroup.style.display = '';
+        schemaRequired.style.display = 'none';
+        schemaInput.required = false;
+        schemaInput.placeholder = '可选';
+      }
+    }
+    // 表单校验
+    function validateForm() {
+      var type = document.getElementById('ds-type').value;
+      var schemaInput = document.getElementById('ds-schema');
+      if (type === 'PostgreSQL' && !schemaInput.value.trim()) {
+        alert('PostgreSQL 数据库必须填写 schema');
+        schemaInput.focus();
+        return false;
+      }
+      return true;
+    }
+  </script>
+</body>
+
+</html>
