@@ -1,46 +1,6 @@
-# 综合DDD开发规范指南
-
-本指南整合了项目DDD（领域驱动设计）开发的核心规范，涵盖了从领域模型定义到具体编码实现的关键方面。
-
 ---
-
-## 1. 领域模型结构与XML配置 (`domain-model-structure.mdc`)
-
-- 项目采用DDD分层架构：business/core(领域模型和服务接口)、business/application(应用服务)、present/api(API定义)、present/server(REST控制器)
-- 领域模型XML配置文件位于1-domain目录下，定义聚合根和关联实体结构，不允许修改
-- 自动生成的领域模型类(*Domain.java)和服务接口(*Service.java)位于business/core层，不允许修改
-- `<domain>`节点定义聚合根实体，包含folder、name、description、main-table属性
-- `<related>`节点定义关联实体，包含table、many、fk、redundancy属性
-- `<ref>`节点定义引用关系，包含name、table、many、fk、redundancy属性
-- 外键关系格式为"主表字段:关联表字段"，支持一对一和一对多关系
-- 冗余关系通过redundancy属性定义，用于数据同步
-- 中间表也需要定义相应的`<related>`节点，支持复杂的多对多关系
-- 引用关系支持嵌套，可以在关联实体上定义进一步的引用
-
-### 示例: domain-regulars.xml
-```xml
-<domains>
-    <!-- 定义"常客管理"聚合根 -->
-    <domain folder="regulars" name="notarial_regulars" description="常客管理" main-table="notarial_regulars">
-        
-        <!-- 关联"人员"表，一对多关系 -->
-        <related table="notarial_regulars_person" many="true" fk="id:regulars_id">
-            <!-- 在"人员"实体上定义到"文件"和"文档"的引用 -->
-            <ref name="document" table="notarial_regulars_document" many="true" fk="id:ref_id"/>
-            <ref name="file" table="notarial_regulars_file" many="true" fk="id:ref_id"/>
-        </related>
-        
-        <!-- 关联"文档"表，一对多关系 -->
-        <related table="notarial_regulars_document" many="true" fk="id:regulars_id"/>
-        
-        <!-- 关联"文件"表，一对多关系 -->
-        <related table="notarial_regulars_file" many="true" fk="id:regulars_id"/>
-    </domain>
-</domains>
-```
-
+alwaysApply: true
 ---
-
 ## 2. 领域服务核心方法 (`domain-service-methods.mdc`)
 
 - 使用`Domain.load(id, service)`静态方法通过主键加载聚合根实体
@@ -51,7 +11,7 @@
 - 使用`service.find(request)`根据查询条件查找领域实体，会根据request中的LoadFlag加载关联数据
 - 使用`service.find(domain, loadFlag)`根据领域对象和加载标志查找实体
 - 使用`service.insert(domain)`插入新的领域实体，自动处理关联实体的外键设置
-- 使用`service.update(newDomain, originalDomain, false)`进行标准更新，比较差异只更新变化的字段
+- 使用`service.update(newDomain, originalDomain)`进行标准更新，比较差异只更新变化的字段
 - 使用`service.delete(id)`删除主实体，支持级联软删除
 - 使用`service.deleteRelated(relatedClass, lambdaQuery)`删除符合条件的关联实体
 - 使用`service.queryPage(relatedClass, pageDomain, lambdaQuery)`分页查询关联实体

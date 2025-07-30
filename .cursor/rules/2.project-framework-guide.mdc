@@ -15,7 +15,7 @@ alwaysApply: true
 
 -   `/`:
     -   `domain/`: 存放领域模型 (`*Domain.java`) 和领域服务接口 (`*Service.java`)。
-    -   `application/`: 存放应用服务 (`*AppService.java`)，负责编排领域服务和处理DTO转换，是业务用例的主要实现层。
+    -   `service/`: 存放应用服务 (`*AppService.java`)，负责编排领域服务和处理DTO转换，定义service的inteface，`service/impl`是业务用例的主要实现层
     -   `dataobject/`: 存放Mybatis-Plus数据库对象。
     -   `mapper/`: 数据访问层，包含MyBatis-Plus的Mapper接口及XML文件。
     -   `dto/`: 存放数据传输对象（DTOs）、Request/Response对象。
