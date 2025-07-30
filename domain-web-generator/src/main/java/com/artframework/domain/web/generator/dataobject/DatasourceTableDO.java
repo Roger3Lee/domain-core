@@ -15,14 +15,14 @@ import lombok.ToString;
 @Setter
 @ToString
 @TableName(value="datasource_table", autoResultMap = true)
-@KeySequence("seq_datasource_table_id")
+//@KeySequence("seq_datasource_table_id")
 public class DatasourceTableDO  {
 
 
     /**
     * 主键
     */
-    @TableId(value = "id", type = IdType.INPUT)
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     /**
     * 创建人

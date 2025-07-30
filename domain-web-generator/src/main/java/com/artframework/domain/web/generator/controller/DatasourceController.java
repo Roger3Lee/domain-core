@@ -60,4 +60,11 @@ public class DatasourceController {
     Boolean result = datasourceAppService.syncTableStructure(id);
     return ApiResponse.success(result);
   }
+
+  @PostMapping("/test-connection")
+  @ApiOperation("测试数据库连接")
+  public ApiResponse<Boolean> testConnection(@RequestBody @Valid DatasourceAddRequest request) {
+    Boolean result = datasourceAppService.testConnection(request);
+    return ApiResponse.success(result);
+  }
 }

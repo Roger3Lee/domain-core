@@ -15,14 +15,14 @@ import lombok.ToString;
 @Setter
 @ToString
 @TableName(value="domain_config", autoResultMap = true)
-@KeySequence("seq_domain_config_id")
+//@KeySequence("seq_domain_config_id")
 public class DomainConfigDO  {
 
 
     /**
     * 主键
     */
-    @TableId(value = "id", type = IdType.INPUT)
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     /**
     * 项目ID
@@ -33,6 +33,7 @@ public class DomainConfigDO  {
     * 乐观锁
     */
     @TableField("revision")
+    @Version
     private Integer revision;
     /**
     * 创建人

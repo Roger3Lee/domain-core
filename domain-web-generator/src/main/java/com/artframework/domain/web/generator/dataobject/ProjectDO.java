@@ -15,14 +15,14 @@ import lombok.ToString;
 @Setter
 @ToString
 @TableName(value="project", autoResultMap = true)
-@KeySequence("seq_project_id")
+//@KeySequence("seq_project_id")
 public class ProjectDO  {
 
 
     /**
     * 主键
     */
-    @TableId(value = "id", type = IdType.INPUT)
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     /**
     * 创建人

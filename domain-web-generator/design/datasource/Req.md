@@ -111,4 +111,4 @@ COMMENT ON COLUMN datasource_table_column.key IS '是否是主键';
 
 - 删除数据源
 
-- 加载数据库表结构 ：基于数据源链接加载表结构：使用mybatis plus generator提供的功能实现
+- 加载数据库表结构 ：基于数据源链接加载表结构：使用mybatis plus generator提供的功能实现， 具体生成代码的方法参考 `domain-generator`工程

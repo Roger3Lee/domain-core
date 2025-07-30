@@ -15,19 +15,20 @@ import lombok.ToString;
 @Setter
 @ToString
 @TableName(value="datasource_config", autoResultMap = true)
-@KeySequence("seq_datasource_config_id")
+//@KeySequence("seq_datasource_config_id")
 public class DatasourceConfigDO  {
 
 
     /**
     * 主键
     */
-    @TableId(value = "id", type = IdType.INPUT)
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     /**
     * 乐观锁
     */
     @TableField("revision")
+    @Version
     private Integer revision;
     /**
     * 创建人

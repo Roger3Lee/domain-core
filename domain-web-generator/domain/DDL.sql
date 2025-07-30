@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS datasource_config;
 CREATE TABLE datasource_config(
     id SERIAL NOT NULL,
-    revision INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
     created_by VARCHAR(90),
     created_time TIMESTAMP,
     updated_by VARCHAR(90),
@@ -87,7 +87,7 @@ DROP TABLE IF EXISTS domain_config;
 CREATE TABLE domain_config(
     id SERIAL NOT NULL,
     project_id INTEGER,
-    revision INTEGER NOT NULL,
+    revision INTEGER NOT NULL  DEFAULT 1,
     created_by VARCHAR(90),
     created_time TIMESTAMP,
     updated_by VARCHAR(90),
