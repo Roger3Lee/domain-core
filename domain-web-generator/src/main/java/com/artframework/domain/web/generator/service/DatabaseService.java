@@ -3,11 +3,13 @@ package com.artframework.domain.web.generator.service;
 import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain;
 import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain.DatasourceTableDomain;
 import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain.DatasourceTableColumnDomain;
+import com.artframework.domain.web.generator.service.impl.TableStructureInfo;
 
 import java.util.List;
 
 /**
- * 数据库操作服务
+ * 数据库操作服务 - 领域服务层
+ * 专注于数据库连接、表结构获取等业务逻辑
  */
 public interface DatabaseService {
 
@@ -19,11 +21,18 @@ public interface DatabaseService {
     Boolean testConnection(DatasourceDomain datasource);
 
     /**
-     * 加载数据库表结构
+     * 获取数据库表结构信息（不包含持久化操作）
      * @param datasourceId 数据源ID
-     * @return 是否加载成功
+     * @return 表结构信息列表
      */
-    Boolean loadTableStructure(Integer datasourceId);
+    List<DatasourceTableDomain> getTableStructures(Integer datasourceId);
+
+    /**
+     * 获取完整的表结构信息（包含表和列信息）
+     * @param datasourceId 数据源ID
+     * @return 表结构信息封装对象
+     */
+    TableStructureInfo getTableStructureInfo(Integer datasourceId);
 
     /**
      * 获取数据库表列表
