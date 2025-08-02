@@ -1,4 +1,4 @@
-package com.artframework.domain.web.generator.convertor;
+package com.artframework.domain.web.generator.service.convert;
 
 import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain;
 import com.artframework.domain.web.generator.dto.*;

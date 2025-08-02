@@ -1,16 +1,18 @@
+---
+description: "领域驱动设计(DDD)框架指南 - 领域驱动设计、XML配置和代码生成的综合指南"
+globs:
+alwaysApply: true
+---
 # DDD框架综合指南
 
 本指南提供了关于领域驱动设计（DDD）框架、XML配置系统和代码生成功能的综合信息，
-## 重要要求
-
-基于XML生成的代码不允许修改。
 
 ## 快速参考
 
 ### XML配置结构
 ```xml
 <domains>
-    <domain name="DDD" description="领域模型" main-table="domain_config">
+    <domain name="DDD" description="领域模型配置" main-table="domain_config">
         <related description="表" table="domain_config_tables" many="true" fk="id:domain_id" redundancy="project_id:project_id"/>
         <related description="领域ER关系连线" table="domain_config_line" many="true" fk="id:domain_id" redundancy="project_id:project_id">
             <ref description="连线" name="line"  many="true" table="domain_config_line_config" fk="line_code:line_code"/>
@@ -25,6 +27,7 @@
 - **服务类**: `DDDService`, `DDDRepository`
 - **转换器**: `DDDConvertor`
 - **Lambda表达式**: `DDDLambdaExp`
+- **重要要求**: 所有自动生成的领域模型代码不允许修改
 
 ## 核心概念
 
@@ -51,13 +54,13 @@
 - `redundancy`: 冗余字段映射（"源字段:目标字段"）
 
 
-## 2. 领域服务核心方法
-### 领域模型静态方法
+## 2. 领域聚合根和领域服务核心方法
+### 领域聚合根静态方法
 
 - 使用`Domain.load(id, service)`静态方法通过主键加载聚合根实体
 - 使用`Domain.loadByKey(key, keyLambda, service)`通过业务键加载实体
 
-### 领域模型方法
+### 领域聚合根方法
 
 - 使用`domain.loadRelated(relatedClass)`加载指定类型的所有关联实体
 - 使用`domain.loadRelated(relatedClass, Consumer<LambdaQuery<T>>)`使用Consumer配置查询条件加载关联实体
@@ -69,12 +72,12 @@
 - **一对多关系**: 通过`domain.get{RelatedName}List()`访问关联实体列表
 - **自动设置**: 关联实体会自动设置`_thisDomain`引用，便于级联操作
 
-### 领域服务方法
+### 领域服务方法介绍
 
 #### 查询
 
-- 使用`service.find(request)`根据查询条件查找领域实体，会根据request中的LoadFlag加载关联数据。不建议使用，可使用领域模型的`load`和`loadRelated`替换。
-- 使用`service.find(domain, loadFlag)`根据领域对象和加载标志查找实体。不建议使用，可使用领域模型的`load`和`loadRelated`替换。
+- 使用`service.find(request)`根据查询条件查找领域实体，会根据request中的LoadFlag加载关联数据。不建议使用，可使用领域聚合根的`load`和`loadRelated`替换。
+- 使用`service.find(domain, loadFlag)`根据领域对象和加载标志查找实体。不建议使用，可使用领域聚合根的`load`和`loadRelated`替换。
 - 使用`service.queryPage(relatedClass, pageDomain, lambdaQuery)`分页查询聚合根实体或关联实体的数据
 - 使用`service.queryList(relatedClass, lambdaQuery)`列表查询关联实体，数据量大时慎用
 - 使用`service.findByKey(request, keyLambda)`根据业务键查找聚合根实体
@@ -97,9 +100,9 @@
 - 使用`service.delete(id, loadFlag)`删除聚合根实体，根据LoadFlag决定是否删除关联实体
 - 使用`service.deleteRelated(relatedClass, lambdaQuery)`删除符合条件的关联实体
 
-### 3. 领域模型代码结构
+### 3. 领域聚合根代码结构
 
-#### 领域模型
+#### 领域聚合根
 ```java
 // 聚合根
 public class DDDDomain extends BaseAggregateDomain<DDDDomain, DDDService> {
@@ -325,7 +328,7 @@ LambdaQuery<DDDDomain.DomainConfigLineDomain> query =
 
 ## 参考文件
 
-- **领域模型**: [DDDDomain.java](mdc:domain-web-generator/src/main/java/com/artframework/domain/web/generator/domain/ddd/domain/DDDDomain.java)
+- **领域聚合根**: [DDDDomain.java](mdc:domain-web-generator/src/main/java/com/artframework/domain/web/generator/domain/ddd/domain/DDDDomain.java)
 - **Lambda表达式**: [DDDLambdaExp.java](mdc:domain-web-generator/src/main/java/com/artframework/domain/web/generator/domain/ddd/lambdaexp/DDDLambdaExp.java)
 - **服务接口**: [DDDService.java](mdc:domain-web-generator/src/main/java/com/artframework/domain/web/generator/domain/ddd/service/DDDService.java)
 - **转换器**: [DDDConvertor.java](mdc:domain-web-generator/src/main/java/com/artframework/domain/web/generator/domain/ddd/convertor/DDDConvertor.java)
@@ -343,7 +346,4 @@ LambdaQuery<DDDDomain.DomainConfigLineDomain> query =
 8. **内存查询**: 引用关系使用内存过滤，避免额外数据库查询
 
 通过合理使用XML配置，可以快速构建高质量的DDD应用，提高开发效率和代码质量。
-description: "DDD框架指南 - 领域驱动设计、XML配置和代码生成的综合指南"
-globs:
-alwaysApply: true
----
+

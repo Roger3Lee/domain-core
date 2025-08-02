@@ -5,9 +5,8 @@ import com.artframework.domain.web.generator.domain.datasource.service.Datasourc
 import com.artframework.domain.web.generator.domain.datasource.repository.DatasourceTableRepository;
 import com.artframework.domain.web.generator.domain.datasource.repository.DatasourceTableColumnRepository;
 import com.artframework.domain.web.generator.dto.*;
-import com.artframework.domain.web.generator.convertor.DatasourceAppConvertor;
+import com.artframework.domain.web.generator.service.convert.DatasourceAppConvertor;
 import com.artframework.domain.web.generator.service.DatabaseService;
-import com.artframework.domain.web.generator.service.impl.TableStructureInfo;
 import com.artframework.domain.core.domain.PageDomain;
 import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.constants.Order;
