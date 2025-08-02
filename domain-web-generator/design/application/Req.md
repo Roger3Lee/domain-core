@@ -189,7 +189,7 @@ COMMENT ON COLUMN project.mapper_package IS 'Mapper package';
 
 - 编辑应用： 修改应用的基本信息
 
-- 应用详情: 加载引用的基本信息
+- 应用详情: 加载应用的基本信息
 
 - 应用详情（包含领域模型）：加载应用的基本信息 ，应用关联的数据源的表和表列信息， 以及所有的领域模型的基本信息
 
@@ -202,4 +202,6 @@ COMMENT ON COLUMN project.mapper_package IS 'Mapper package';
 
 - 删除领域模型：
 
-- 生成代码：基于领域模型生成领域代码，DO，mapper和controller， 具体生成代码的方法参考 `domain-generator`工程
+- 查询领域模型: 查询领域模型相关的数据，另需要基于领域对应的应用的数据库连接查询表和表列的数据，用于ER图展示。
+
+- 生成代码：基于领域模型生成领域代码，DO，mapper和domain， 具体生成代码的方法参考 `domain-generator`工程

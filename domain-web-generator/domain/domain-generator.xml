@@ -6,7 +6,7 @@
     <domain name="project" description="项目" main-table="project">
         <related description="领域模型基本配置" table="domain_config" many="true" fk="id:project_id" />
     </domain>
-    <domain name="DDD" description="项目" main-table="domain_config">
+    <domain name="DDD" description="领域模型" main-table="domain_config">
         <related description="表" table="domain_config_tables" many="true" fk="id:domain_id" redundancy="project_id:project_id"/>
         <related description="领域ER关系连线" table="domain_config_line" many="true" fk="id:domain_id" redundancy="project_id:project_id">
             <ref description="连线" name="line"  many="true" table="domain_config_line_config" fk="line_code:line_code"/>

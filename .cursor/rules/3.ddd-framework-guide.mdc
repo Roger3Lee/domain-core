@@ -1,0 +1,346 @@
+# DDD框架综合指南
+
+本指南提供了关于领域驱动设计（DDD）框架、XML配置系统和代码生成功能的综合信息。
+
+## 快速参考
+
+### XML配置结构
+```xml
+<domains>
+    <domain name="DDD" description="领域模型" main-table="domain_config">
+        <related description="表" table="domain_config_tables" many="true" fk="id:domain_id" redundancy="project_id:project_id"/>
+        <related description="领域ER关系连线" table="domain_config_line" many="true" fk="id:domain_id" redundancy="project_id:project_id">
+            <ref description="连线" name="line"  many="true" table="domain_config_line_config" fk="line_code:line_code"/>
+        </related>
+        <related description="领域ER关系连线自定义配置（常量列）" table="domain_config_line_config" many="true" fk="id:domain_id"  redundancy="project_id:project_id"/>
+    </domain>
+</domains>
+```
+
+### 生成的代码结构
+- **领域类**: `DDDDomain`, `DomainConfigTablesDomain`, `DomainConfigLineDomain`, `DomainConfigLineConfigDomain`
+- **服务类**: `DDDService`, `DDDRepository`
+- **转换器**: `DDDConvertor`
+- **Lambda表达式**: `DDDLambdaExp`
+
+## 核心概念
+
+### 1. XML配置元素
+
+#### Domain元素（聚合根）
+- `name`: 领域名称，用于生成类名（如，"DDD" → `DDDDomain`）
+- `description`: 领域描述，用于API文档
+- `main-table`: 主数据库表名
+
+#### Related元素（关联实体）
+- `description`: 关联实体描述
+- `table`: 关联表名
+- `many`: 关系类型（"true"表示一对多，"false"表示一对一）
+- `fk`: 外键关系（"源字段:目标字段"）
+- `redundancy`: 冗余字段映射（"源字段:目标字段"）
+
+#### Ref元素（引用关系）
+- `description`: 引用关系描述
+- `name`: 引用名称，用于生成字段名
+- `many`: 引用类型（"true"表示一对多，"false"表示一对一）
+- `table`: 引用表名
+- `fk`: 引用关系（"源字段:目标字段"）
+- `redundancy`: 冗余字段映射（"源字段:目标字段"）
+
+
+## 2. 领域服务核心方法
+### 领域模型静态方法
+
+- 使用`Domain.load(id, service)`静态方法通过主键加载聚合根实体
+- 使用`Domain.loadByKey(key, keyLambda, service)`通过业务键加载实体
+
+### 领域模型方法
+
+- 使用`domain.loadRelated(relatedClass)`加载指定类型的所有关联实体
+- 使用`domain.loadRelated(relatedClass, Consumer<LambdaQuery<T>>)`使用Consumer配置查询条件加载关联实体
+- 使用`domain.loadRelated(relatedClass, lambdaQuery)`直接传入LambdaQuery加载关联实体
+
+### 关联实体访问方法
+
+- **一对一关系**: 通过`domain.get{RelatedName}()`访问关联实体
+- **一对多关系**: 通过`domain.get{RelatedName}List()`访问关联实体列表
+- **自动设置**: 关联实体会自动设置`_thisDomain`引用，便于级联操作
+
+### 领域服务方法
+
+#### 查询
+
+- 使用`service.find(request)`根据查询条件查找领域实体，会根据request中的LoadFlag加载关联数据。不建议使用，可使用领域模型的`load`和`loadRelated`替换。
+- 使用`service.find(domain, loadFlag)`根据领域对象和加载标志查找实体。不建议使用，可使用领域模型的`load`和`loadRelated`替换。
+- 使用`service.queryPage(relatedClass, pageDomain, lambdaQuery)`分页查询聚合根实体或关联实体的数据
+- 使用`service.queryList(relatedClass, lambdaQuery)`列表查询关联实体，数据量大时慎用
+- 使用`service.findByKey(request, keyLambda)`根据业务键查找聚合根实体
+
+#### 新增
+
+- 使用`service.insert(domain)`插入新的领域实体，自动处理关联实体的外键和冗余字段设置
+- **外键自动设置**: 根据XML中的fk配置自动设置关联实体的外键字段
+- **冗余字段自动设置**: 根据XML中的redundancy配置自动设置冗余字段
+
+#### 更新
+
+- 使用`service.update(newDomain, originalDomain)`进行标准更新，比较差异只更新变化的字段,自动处理关联实体的外键和冗余字段设置
+- **差异比较**: 只更新实际变化的字段，提高性能
+- **级联更新**: 自动更新关联实体的外键和冗余字段
+
+#### 删除
+
+- 使用`service.delete(id)`删除聚合根实体，同时会删除所有的关联实体
+- 使用`service.delete(id, loadFlag)`删除聚合根实体，根据LoadFlag决定是否删除关联实体
+- 使用`service.deleteRelated(relatedClass, lambdaQuery)`删除符合条件的关联实体
+
+### 3. 领域模型代码结构
+
+#### 领域模型
+```java
+// 聚合根
+public class DDDDomain extends BaseAggregateDomain<DDDDomain, DDDService> {
+    // 主表字段
+    private Integer id;
+    private Integer projectId;
+    private String domainName;
+    private String domainXml;
+    private String mainTable;
+    
+    // 关联实体
+    private List<DomainConfigTablesDomain> domainConfigTablesList;
+    private List<DomainConfigLineDomain> domainConfigLineList;
+    private List<DomainConfigLineConfigDomain> domainConfigLineConfigList;
+    
+    // 加载标志
+    private LoadFlag loadFlag;
+}
+```
+
+#### 引用关系
+```java
+// 关联实体中的引用字段
+@JsonIgnore
+private CacheDomain<List<DomainConfigLineConfigDomain>> refLineList;
+
+// 引用访问方法
+public synchronized List<DomainConfigLineConfigDomain> getRefLineList() {
+    if(null == this.refLineList){
+        DDDDomain domain = (DDDDomain)this.get_thisDomain();
+        if(null == domain){
+            return null;
+        }
+
+        // 使用Lambda表达式进行内存过滤
+        Predicate<DomainConfigLineConfigDomain> condition = x -> true;
+        condition = condition.and(x -> 
+            ObjectUtil.equals(
+                DDDLambdaExp.domainConfigLineRefLine_lineCodeSourceLambda.apply(this), 
+                DDDLambdaExp.domainConfigLineRefLine_lineCodeTargetLambda.apply(x)
+            ));
+        
+        // 从已加载的关联实体中过滤
+        if (CollUtil.isNotEmpty(domain.getDomainConfigLineConfigList())) {
+            this.refLineList = new CacheDomain<>(
+                domain.getDomainConfigLineConfigList().stream()
+                    .filter(condition)
+                    .collect(Collectors.toList())
+            );
+        } else {
+            this.refLineList = new CacheDomain<>(ListUtil.empty());
+        }
+    }
+    return this.refLineList.getValue();
+}
+```
+
+### 4. 数据加载策略
+
+#### LoadFlag控制
+```java
+// 设置加载策略
+domain.setLoadFlag(DDDDomain.LoadFlag.builder()
+    .loadDomainConfigTablesDomain(true)      // 加载表信息
+    .loadDomainConfigLineDomain(true)        // 加载连线信息
+    .loadDomainConfigLineConfigDomain(false) // 不加载连线配置
+    .build());
+```
+
+#### 关联数据加载
+```java
+// 加载所有关联实体
+domain.loadRelated(DDDDomain.DomainConfigTablesDomain.class);
+domain.loadRelated(DDDDomain.DomainConfigLineDomain.class);
+
+// 条件加载
+domain.loadRelated(DDDDomain.DomainConfigLineDomain.class, query -> {
+    query.eq(DDDDomain.DomainConfigLineDomain::getLineType, "FK")
+         .orderBy(DDDDomain.DomainConfigLineDomain::getCreateTime, Order.DESC);
+});
+```
+
+#### 引用数据加载
+```java
+// 引用数据通过getter方法自动加载
+List<DomainConfigLineConfigDomain> refLineList = domain.getDomainConfigLineList()
+    .stream()
+    .flatMap(line -> line.getRefLineList().stream())
+    .collect(Collectors.toList());
+
+// 使用内存查询和缓存机制
+// 第一次访问从已加载的关联实体中过滤，后续访问使用缓存
+```
+
+### 5. CRUD操作
+
+#### 创建操作
+```java
+// 应用服务方法
+public Integer addDomainConfig(DomainConfigAddRequest request) {
+    // 1. 使用MapStruct将Request DTO转换为Domain对象
+    DDDDomain domain = DDDConvertor.INSTANCE.toDomain(request);
+    // 2. 调用领域服务insert方法，返回主键ID
+    return dddService.insert(domain);
+}
+```
+
+#### 读取操作（详情查询）
+```java
+// 应用服务方法
+private DDDDomain getDomainConfigDetail(Integer domainId) {
+    // 1. 使用静态load方法加载聚合根实体
+    DDDDomain domain = DDDDomain.load(domainId, dddService);
+
+    // 2. 使用实例方法loadRelated加载关联的表和连线
+    domain.loadRelated(DDDDomain.DomainConfigTablesDomain.class);
+    domain.loadRelated(DDDDomain.DomainConfigLineDomain.class);
+
+    return domain;
+}
+```
+
+#### 更新操作
+```java
+// 应用服务方法
+public Boolean editDomainConfig(DomainConfigEditRequest request) {
+    // 1. 获取更新前的原始数据（包含关联实体）
+    DDDDomain originalDomain = getDomainConfigDetail(request.getId());
+
+    // 2. 将包含更新数据的Request DTO转换为新的Domain对象
+    DDDDomain newDomain = DDDConvertor.INSTANCE.toDomain(request);
+
+    // 3. 设置LoadFlag，指定本次需要更新的关联实体范围
+    newDomain.setLoadFlag(DDDDomain.LoadFlag.builder()
+            .loadDomainConfigTablesDomain(true)      // 更新表信息
+            .loadDomainConfigLineDomain(true)        // 更新连线信息
+            .build());
+
+    // 4. 执行更新，自动处理外键和冗余字段
+    return dddService.update(newDomain, originalDomain);
+}
+```
+
+#### 删除操作
+```java
+// 删除关联实体
+public Boolean delDomainConfigLine(Integer domainId, Integer lineId) {
+    // 删除领域ER关系连线
+    dddService.deleteRelated(DDDDomain.DomainConfigLineDomain.class,
+        LambdaQuery.of(DDDDomain.DomainConfigLineDomain.class)
+            .eq(DDDDomain.DomainConfigLineDomain::getDomainId, domainId)
+            .eq(DDDDomain.DomainConfigLineDomain::getId, lineId));
+
+    return true;
+}
+```
+
+### 6. 查询构建
+
+#### LambdaQuery构建
+```java
+// 场景：分页查询领域ER关系连线，并支持按连线编码模糊查询
+public PageResult<DomainConfigLineResponse> pageDomainConfigLine(Integer domainId, DomainConfigLinePageRequest request) {
+    
+    // 1. 构建基础查询条件
+    LambdaQuery<DDDDomain.DomainConfigLineDomain> query = 
+        LambdaQuery.of(DDDDomain.DomainConfigLineDomain.class)
+            .eq(DDDDomain.DomainConfigLineDomain::getDomainId, domainId);
+
+    // 2. 动态添加模糊查询条件
+    if (StringUtils.isNotEmpty(request.getLineCode())) {
+        query.like(DDDDomain.DomainConfigLineDomain::getLineCode, request.getLineCode());
+    }
+    
+    // 3. 添加排序
+    query.orderBy(DDDDomain.DomainConfigLineDomain::getId, Order.DESC);
+    
+    // 4. 执行分页查询
+    IPage<DDDDomain.DomainConfigLineDomain> page = dddService.queryPage(
+        DDDDomain.DomainConfigLineDomain.class,
+        pageDomain,
+        query
+    );
+    // ...
+}
+```
+
+#### 复杂查询条件（AND/OR组合）
+```java
+// 构建复杂查询：(lineType = 'FK' AND lineCode like 'LINE%') OR (lineType = 'REDUNDANCY')
+LambdaQuery<DDDDomain.DomainConfigLineDomain> query = 
+    LambdaQuery.of(DDDDomain.DomainConfigLineDomain.class)
+        .and(subQuery -> {
+            subQuery.eq(DDDDomain.DomainConfigLineDomain::getLineType, "FK")
+                   .likeRight(DDDDomain.DomainConfigLineDomain::getLineCode, "LINE");
+        })
+        .or(subQuery -> {
+            subQuery.eq(DDDDomain.DomainConfigLineDomain::getLineType, "REDUNDANCY");
+        });
+```
+
+### 7. 最佳实践
+
+#### XML配置原则
+1. **聚合根设计**: 每个聚合根应该代表一个业务概念
+2. **关联关系**: 合理使用一对一和一对多关系
+3. **外键设计**: 外键应该指向聚合根的主键
+4. **冗余设计**: 合理使用冗余字段提高查询性能
+5. **引用关系设计**: 适用于跨实体的复杂关联
+
+#### 性能优化
+1. **LoadFlag使用**: 按需加载关联数据
+2. **查询优化**: 使用LambdaQuery构建高效查询
+3. **缓存策略**: 合理使用缓存减少数据库访问
+4. **引用缓存**: 引用关系使用CacheDomain实现缓存，避免重复查询
+5. **引用过滤**: 合理设计引用关系的过滤条件
+
+#### 代码规范
+1. **命名规范**: 遵循Java命名规范
+2. **注释规范**: 使用Swagger注解提供API文档
+3. **异常处理**: 统一异常处理机制
+4. **事务管理**: 合理使用事务确保数据一致性
+
+## 参考文件
+
+- **领域模型**: [DDDDomain.java](mdc:domain-web-generator/src/main/java/com/artframework/domain/web/generator/domain/ddd/domain/DDDDomain.java)
+- **Lambda表达式**: [DDDLambdaExp.java](mdc:domain-web-generator/src/main/java/com/artframework/domain/web/generator/domain/ddd/lambdaexp/DDDLambdaExp.java)
+- **服务接口**: [DDDService.java](mdc:domain-web-generator/src/main/java/com/artframework/domain/web/generator/domain/ddd/service/DDDService.java)
+- **转换器**: [DDDConvertor.java](mdc:domain-web-generator/src/main/java/com/artframework/domain/web/generator/domain/ddd/convertor/DDDConvertor.java)
+- **仓储**: [DDDRepository.java](mdc:domain-web-generator/src/main/java/com/artframework/domain/web/generator/domain/ddd/repository/DDDRepository.java)
+
+## 核心特性
+
+1. **声明式配置**: 通过XML声明领域模型结构
+2. **自动生成**: 自动生成完整的DDD代码结构
+3. **类型安全**: 生成的代码具有完整的类型安全
+4. **性能优化**: 内置性能优化机制
+5. **维护性**: 统一的代码结构和规范
+6. **引用关系**: 支持复杂的跨实体引用关系
+7. **缓存机制**: 内置缓存机制提高查询性能
+8. **内存查询**: 引用关系使用内存过滤，避免额外数据库查询
+
+通过合理使用XML配置，可以快速构建高质量的DDD应用，提高开发效率和代码质量。
+description: "DDD框架指南 - 领域驱动设计、XML配置和代码生成的综合指南"
+globs:
+alwaysApply: true
+---
