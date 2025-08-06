@@ -1,6 +1,6 @@
 ---
 description: 
-globs: "**/**Controller.java"
+globs: **/**Controller.java
 alwaysApply: false
 ---
 # Java REST API设计原则
@@ -34,13 +34,99 @@ alwaysApply: false
 
 标题：语义化使用HTTP方法
 描述：根据其定义的语义使用HTTP方法，以确保可预测性和符合Web标准。`GET`用于检索，`POST`用于创建，`PUT`用于更新/替换，`PATCH`用于部分更新，`DELETE`用于删除。
+**Good example:**
 
+```java
+// Using Spring MVC annotations for illustration
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    @GetMapping("/{id}") // GET for retrieving a user
+    public ResponseEntity<UserDTO> getUser(@PathVariable String id) {
+        // ... logic to fetch user ...
+        return ResponseEntity.ok(new UserDTO());
+    }
+
+    @PostMapping // POST for creating a new user
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateDTO userCreateDTO) {
+        // ... logic to create user ...
+        UserDTO newUser = new UserDTO(); // Assume it gets an ID after creation
+        return ResponseEntity.created(URI.create("/users/" + newUser.getId())).body(newUser);
+    }
+
+    @PutMapping("/{id}") // PUT for replacing/updating a user
+    public ResponseEntity<UserDTO> updateUser(@PathVariable String id, @RequestBody UserUpdateDTO userUpdateDTO) {
+        // ... logic to update user ...
+        return ResponseEntity.ok(new UserDTO());
+    }
+
+    @DeleteMapping("/{id}") // DELETE for removing a user
+    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
+        // ... logic to delete user ...
+        return ResponseEntity.noContent().build();
+    }
+    
+    @PatchMapping("/{id}") // PATCH for partial updates
+    public ResponseEntity<UserDTO> partiallyUpdateUser(@PathVariable String id, @RequestBody Map<String, Object> updates) {
+        // ... logic to partially update user ...
+        return ResponseEntity.ok(new UserDTO());
+    }
+}
+// Dummy DTO classes
+class UserDTO { private String id; public String getId() { return id; } /* ... other fields, getters, setters ... */ }
+class UserCreateDTO { /* ... fields ... */ }
+class UserUpdateDTO { /* ... fields ... */ }
+```
+
+**Bad Example:**
+
+```java
+@RestController
+@RequestMapping("/api")
+public class BadUserController {
+
+    // Bad: Using GET to perform a state change (e.g., delete)
+    @GetMapping("/deleteUser")
+    public ResponseEntity<String> deleteUserViaGet(@RequestParam String id) {
+        System.out.println("Deleting user: " + id + " (Bad: GET used for delete)");
+        // ... delete logic ...
+        return ResponseEntity.ok("User deleted (but GET was used!)");
+    }
+
+    // Bad: Using POST for all operations, including retrieval
+    @PostMapping("/getUser")
+    public ResponseEntity<UserDTO> getUserViaPost(@RequestBody String idPayload) {
+        System.out.println("Fetching user: " + idPayload + " (Bad: POST used for GET)");
+        // ... fetch logic ...
+        return ResponseEntity.ok(new UserDTO());
+    }
+}
+```
 
 ## 规则 2：设计清晰一致的资源URI
 
 标题：为资源使用名词并保持URI一致性
 描述：设计直观且清楚地表示资源的URI。使用名词（如`/users`、`/orders`）而不是动词。保持URI风格一致（如路径段使用小写、连字符或驼峰命名）。
+**Good example:**
 
+```
+GET /users                           // Get all users
+GET /users/{userId}                  // Get a specific user
+GET /users/{userId}/orders           // Get all orders for a specific user
+GET /users/{userId}/orders/{orderId} // Get a specific order for a user
+POST /users                          // Create a new user
+```
+
+**Bad Example:**
+
+```
+GET /getAllUsers
+GET /fetchUserById?id={userId}
+POST /createNewUser
+GET /userOrders?userId={userId}  // Mixing query params and path styles inconsistently
+POST /processUserOrderCreation   // URI contains verbs and is overly complex
+```
 
 ## 规则 3：适当使用HTTP状态码
 
@@ -55,45 +141,660 @@ alwaysApply: false
 - `404 Not Found`：资源未找到。
 - `500 Internal Server Error`：意外服务器端错误的通用错误消息。
 
+**Good example:**
+
+```java
+// (Inside a Spring @RestController method)
+if (resourceNotFound) {
+    return ResponseEntity.notFound().build(); // 404
+}
+if (!userHasPermission) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied"); // 403
+}
+if (validationFailed) {
+    return ResponseEntity.badRequest().body("Invalid input data"); // 400
+}
+// For creation:
+// return ResponseEntity.created(newResourceUri).body(newResource); // 201
+// For successful deletion:
+// return ResponseEntity.noContent().build(); // 204
+```
+
+**Bad Example:**
+
+```java
+import java.util.Objects;
+
+public ResponseEntity<String> processSomething(String input) {
+    try {
+        if (Objects.isNull(input)) {
+            // Client should receive a 400 Bad Request, not 200 with an error message in body.
+            return ResponseEntity.ok("{\"error\":\"Input cannot be null\"}"); 
+        }
+        // ... process ...
+        return ResponseEntity.ok("{\"data\":\"Success!\"}");
+    } catch (Exception e) {
+        // Client should receive a 500 Internal Server Error, not 200.
+        return ResponseEntity.ok("{\"error\":\"Something went wrong on the server\"}");
+    }
+}
+```
+
 ## 规则 4：实现有效的请求和响应API（DTO）
 
 标题：为API使用数据传输对象（DTO）并保持精简
 描述：为请求和响应体使用专用的DTO类，而不是直接暴露内部领域/实体对象。这将您的API契约与内部数据模型解耦。保持DTO专注于特定API操作所需的数据。使用一致的命名约定（如JSON使用驼峰命名键）。
+**Good example:**
 
+```java
+// Domain Entity (internal)
+class User {
+    private Long id;
+    private String username;
+    private String passwordHash; // Internal field, should not be in API responses
+    private String email;
+    private java.time.LocalDateTime createdAt;
+    // getters, setters
+}
+
+// DTO for API responses (exposes only necessary fields)
+class UserResponseDTO {
+    private Long id;
+    private String username;
+    private String email;
+    // getters, setters
+}
+
+// DTO for creating a user
+class UserCreateRequestDTO {
+    private String username;
+    private String password; // Received in request, then hashed internally
+    private String email;
+    // getters, setters
+}
+
+// In controller:
+// public ResponseEntity<UserResponseDTO> getUser(@PathVariable Long id) { ... }
+// public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserCreateRequestDTO createDto) { ... }
+```
+
+**Bad Example:**
+
+```java
+// Bad: Exposing internal User entity directly in API, including sensitive fields like passwordHash.
+@RestController
+public class AnotherUserController {
+    @GetMapping("/rawusers/{id}")
+    public ResponseEntity<User> getRawUser(@PathVariable String id) {
+        // Assume User class has passwordHash and other internal fields
+        User internalUser = findUserById(id); // Method that returns the internal User entity
+        return ResponseEntity.ok(internalUser); // Exposes passwordHash, createdAt, etc.
+    }
+    private User findUserById(String id) { return new User(); /* ... */}
+}
+```
 
 ## 规则 5：为您的API版本化
 
 标题：实施清晰的API版本控制策略
 描述：从一开始就引入API版本控制，以在不破坏现有客户端的情况下管理变更和演进。常见策略包括URI版本控制（如`/v1/users`）、自定义请求头版本控制（如`X-API-Version: 1`）或媒体类型版本控制（如`Accept: application/vnd.example.v1+json`）。选择一种策略并一致地应用。
+*Good example (URI Versioning):**
+
+```java
+@RestController
+@RequestMapping("/api/v1/products") // Version in URI
+public class ProductControllerV1 {
+    // ... v1 endpoints ...
+}
+
+@RestController
+@RequestMapping("/api/v2/products") // New version in URI
+public class ProductControllerV2 {
+    // ... v2 endpoints with potential breaking changes or new features ...
+}
+```
+
+**Bad Example (No Versioning):**
+
+```java
+@RestController
+@RequestMapping("/products") // No version information
+public class UnversionedProductController {
+    // If a breaking change is made here (e.g., field removed from response),
+    // all existing clients might break.
+    @GetMapping("/{id}")
+    public ProductDTO getProduct(@PathVariable String id) {
+        // ... logic ...
+        return new ProductDTO();
+    }
+}
+class ProductDTO {}
+```
 
 ## 规则 6：优雅地处理错误
 
 标题：提供清晰一致的错误响应
 描述：当错误发生时，返回标准化的、机器可读的错误响应格式（如JSON）。包括唯一的错误代码或类型、人类可读的消息，以及可选的关于引起验证错误的特定字段的详细信息。不要在生产环境的错误响应中暴露敏感的内部详细信息，如堆栈跟踪。
+**Good example (Error DTO and @ControllerAdvice for Spring):**
+
+```java
+// Error Response DTO
+class ErrorResponse {
+    private String errorCode;
+    private String message;
+    private List<String> details; // Optional: for field-specific validation errors
+    // Constructor, getters
+    public ErrorResponse(String errorCode, String message) { this.errorCode = errorCode; this.message = message; }
+    public ErrorResponse(String errorCode, String message, List<String> details) { /* ... */ }
+}
+
+@ControllerAdvice
+class GlobalExceptionHandler {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleResourceNotFound(ResourceNotFoundException ex) {
+        return new ErrorResponse("RESOURCE_NOT_FOUND", ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class) // Example for bean validation errors
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationErrors(MethodArgumentNotValidException ex) {
+        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
+                                .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+                                .collect(Collectors.toList());
+        return new ErrorResponse("VALIDATION_ERROR", "Input validation failed", errors);
+    }
+    
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleGenericError(Exception ex) {
+        // Log the full exception internally
+        // logger.error("Unhandled exception:", ex);
+        return new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred.");
+    }
+}
+// Custom exception
+class ResourceNotFoundException extends RuntimeException { public ResourceNotFoundException(String msg){ super(msg);}}
+```
+
+**Bad Example:**
+
+```java
+@RestController
+public class BadErrorHandlingController {
+    @GetMapping("/items/{id}")
+    public ResponseEntity<String> getItem(@PathVariable String id) {
+        if (id.equals("unknown")) {
+            // Bad: Returning plain text error, or HTML, or inconsistent format.
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found!"); 
+        }
+        try {
+            // ... some logic that might throw an exception ...
+            if(id.equals("fail")) throw new NullPointerException("Simulated internal error");
+            return ResponseEntity.ok("Item data");
+        } catch (Exception e) {
+            // Bad: Exposing stack trace to the client in production.
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.toString());
+        }
+    }
+}
+```
 
 ## 规则 7：保护您的API
 
 标题：实施强大的安全措施
 描述：保护您的API免受常见威胁。对所有通信使用HTTPS。实施适当的身份验证（如OAuth 2.0、JWT）和授权（如基于角色的访问控制）。验证所有输入数据以防止注入攻击（SQLi、XSS）。应用速率限制和节流来防止滥用。
+```java
+// In a Spring Security configuration:
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .csrf().disable() // Consider CSRF protection needs
+            .authorizeRequests()
+                .antMatchers("/public/**").permitAll()
+                .antMatchers("/admin/**").hasRole("ADMIN") // Role-based authorization
+                .anyRequest().authenticated()       // All other requests need authentication
+            .and()
+            .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt); // Example: JWT authentication
+            // .httpBasic(); // Or basic auth for simplicity in some cases
+    }
+    // ... user details service, password encoder, etc. ...
+}
 
+// In a controller method:
+// @PreAuthorize("hasAuthority('SCOPE_read:users')") // Example: OAuth2 scope-based authorization
+// @GetMapping("/users/{id}")
+// public UserDTO getUser(@PathVariable String id) { ... }
+```
+
+**Bad Example:**
+
+```java
+@RestController
+public class InsecureController {
+    // Bad: No authentication or authorization for sensitive operations.
+    @PostMapping("/admin/deleteAllData")
+    public String deleteAllData() {
+        System.out.println("All data deleted! (INSECURE - NO AUTH)");
+        return "All data wiped.";
+    }
+
+    // Bad: Trusting user input directly in a query (conceptual SQLi vulnerability).
+    @GetMapping("/products")
+    public List<ProductDTO> searchProducts(@RequestParam String category) {
+        // String query = "SELECT * FROM products WHERE category = '" + category + "'"; // SQL Injection risk!
+        // Use PreparedStatement or an ORM to prevent SQLi.
+        System.out.println("Searching for category (raw input): " + category);
+        return List.of();
+    }
+}
+```
 
 ## 规则 8：记录您的API
 
 标题：提供清晰全面的API文档
 描述：为您的API维护最新的文档。可以使用Swagger/OpenAPI等工具从代码注解生成交互式文档。文档应涵盖资源URI、HTTP方法、请求/响应格式（包括DTO模式）、预期状态码、身份验证方法和错误响应。
 
+**Good example (Using Springdoc OpenAPI / Swagger annotations):**
+
+```java
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+// Assume other necessary imports like Spring MVC, DTOs etc.
+
+@RestController
+@RequestMapping("/api/v1/widgets")
+@Tag(name = "Widget API", description = "APIs for managing widgets")
+public class WidgetController {
+
+    @Operation(summary = "Get a widget by its ID",
+               description = "Returns a single widget based on the provided ID.",
+               responses = {
+                   @ApiResponse(responseCode = "200", description = "Successfully retrieved widget",
+                                content = @Content(mediaType = "application/json", schema = @Schema(implementation = WidgetDTO.class))),
+                   @ApiResponse(responseCode = "404", description = "Widget not found",
+                                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+               })
+    @GetMapping("/{widgetId}")
+    public ResponseEntity<WidgetDTO> getWidgetById(
+            @Parameter(description = "ID of the widget to retrieve", required = true) 
+            @PathVariable String widgetId) {
+        // ... logic ...
+        // return ResponseEntity.ok(new WidgetDTO(widgetId, "Sample Widget"));
+        // For example, if not found:
+        if ("unknown".equals(widgetId)) { 
+            throw new ResourceNotFoundException("Widget with ID " + widgetId + " not found.");
+        }
+        return ResponseEntity.ok(new WidgetDTO()); // Placeholder
+    }
+}
+class WidgetDTO { /* fields, getters, setters */ }
+// ErrorResponse and ResourceNotFoundException as defined in Rule 6
+```
+
+**Bad Example (No Documentation or Incomplete):**
+
+```java
+// No API documentation tool usage, comments are sparse or missing.
+@RestController
+@RequestMapping("/legacy/things")
+public class LegacyThingController {
+    // What does this do? What are parameters? What are responses?
+    @GetMapping("/{id}")
+    public Object getAThing(@PathVariable String id, @RequestParam(required = false) String type) {
+        // ... complex logic ...
+        return new Object(); // Unclear what this object structure is.
+    }
+}
+// Clients have to guess or read source code to understand how to use the API.
+```
+
 ## 规则 9：使用Controller Advice进行全局异常处理
 
 标题：使用@ControllerAdvice实现集中式异常处理
 描述：使用`@ControllerAdvice`创建集中式异常处理机制，可以捕获和处理所有控制器中的已检查`Exception`和未检查`RuntimeException`。使用Spring Boot内置的`ProblemDetail`类来获得遵循RFC 7807的一致、标准化的错误响应。这种方法促进DRY原则，确保一致的错误响应，并将错误处理逻辑与业务逻辑分离。
+```java
+@ControllerAdvice
+public class GlobalExceptionHandler {
+    
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ProblemDetail> handleIllegalArgument(
+            IllegalArgumentException ex, HttpServletRequest request) {
+        logger.warn("Invalid argument: {}", ex.getMessage());
+        
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, ex.getMessage()
+        );
+        problemDetail.setType(URI.create("https://example.com/problems/invalid-argument"));
+        problemDetail.setTitle("Invalid Argument");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        problemDetail.setProperty("timestamp", Instant.now());
+        
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleEntityNotFound(
+            EntityNotFoundException ex, HttpServletRequest request) {
+        logger.warn("Entity not found: {}", ex.getMessage());
+        
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.NOT_FOUND, ex.getMessage()
+        );
+        problemDetail.setType(URI.create("https://example.com/problems/entity-not-found"));
+        problemDetail.setTitle("Entity Not Found");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        problemDetail.setProperty("timestamp", Instant.now());
+        
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ProblemDetail> handleRuntimeException(
+            RuntimeException ex, HttpServletRequest request) {
+        String errorId = UUID.randomUUID().toString();
+        logger.error("Unexpected runtime exception with ID: {}", errorId, ex);
+        
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.INTERNAL_SERVER_ERROR, 
+            "An unexpected error occurred while processing the request"
+        );
+        problemDetail.setType(URI.create("https://example.com/problems/internal-error"));
+        problemDetail.setTitle("Internal Server Error");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("errorId", errorId);
+        
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ProblemDetail> handleGenericException(
+            Exception ex, HttpServletRequest request) {
+        String errorId = UUID.randomUUID().toString();
+        logger.error("Unexpected exception with ID: {}", errorId, ex);
+        
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.INTERNAL_SERVER_ERROR, 
+            "An unexpected error occurred while processing the request"
+        );
+        problemDetail.setType(URI.create("https://example.com/problems/internal-error"));
+        problemDetail.setTitle("Internal Server Error");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("errorId", errorId);
+        
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ProblemDetail> handleValidationException(
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
+        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
+            .map(error -> error.getField() + ": " + error.getDefaultMessage())
+            .collect(Collectors.toList());
+        
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, "Validation failed for the provided input"
+        );
+        problemDetail.setType(URI.create("https://example.com/problems/validation-error"));
+        problemDetail.setTitle("Validation Error");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("violations", errors);
+        
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+}
+
+// Custom exceptions
+class EntityNotFoundException extends RuntimeException {
+    public EntityNotFoundException(String message) { super(message); }
+}
+```
+
+**Bad Example:**
+
+```java
+@RestController
+public class BadUserController {
+    
+    // Bad: Exception handling scattered across multiple controllers
+    @GetMapping("/users/{id}")
+    public ResponseEntity<?> getUser(@PathVariable String id) {
+        try {
+            if (id.equals("invalid")) {
+                throw new IllegalArgumentException("Invalid user ID");
+            }
+            if (id.equals("notfound")) {
+                throw new EntityNotFoundException("User not found");
+            }
+            // ... business logic ...
+            return ResponseEntity.ok(new UserDTO());
+        } catch (IllegalArgumentException e) {
+            // Bad: Inconsistent error format, not using ProblemDetail
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        } catch (EntityNotFoundException e) {
+            // Bad: Different error format, no error details
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            // Bad: Exposing stack trace and inconsistent format
+            return ResponseEntity.status(500).body("Server error: " + e.toString());
+        }
+    }
+
+    // Bad: Different controller with different exception handling approach
+    @PostMapping("/users")
+    public ResponseEntity<?> createUser(@RequestBody UserCreateDTO user) {
+        try {
+            // ... business logic ...
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            // Bad: Yet another inconsistent error format, not using ProblemDetail
+            Map<String, String> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+
+    // Bad: Using custom error response instead of standard ProblemDetail
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable String id) {
+        try {
+            // ... business logic ...
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            // Bad: Custom error format instead of ProblemDetail
+            CustomErrorResponse error = new CustomErrorResponse(
+                "DELETE_ERROR", e.getMessage(), new Date()
+            );
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+}
+
+// Bad: Custom error response class instead of using ProblemDetail
+class CustomErrorResponse {
+    private String code;
+    private String message;
+    private Date timestamp;
+    // constructors, getters, setters...
+}
+```
 
 ## 规则 10：为错误响应实现问题详情
 
 标题：为HTTP API使用RFC 7807问题详情
 描述：使用RFC 7807问题详情格式为HTTP 500（内部服务器错误）和其他错误响应实现标准化错误响应。这提供了机器可读的错误信息，包括类型、标题、状态、详情和实例，帮助客户端一致地理解和处理错误。
+**Good example:**
+
+```java
+@ControllerAdvice
+public class ProblemDetailsExceptionHandler {
+    
+    private static final Logger logger = LoggerFactory.getLogger(ProblemDetailsExceptionHandler.class);
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ProblemDetail> handleRuntimeException(
+            RuntimeException ex, HttpServletRequest request) {
+        
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.INTERNAL_SERVER_ERROR, 
+            "An unexpected error occurred while processing the request"
+        );
+        
+        problemDetail.setType(URI.create("https://example.com/problems/internal-error"));
+        problemDetail.setTitle("Internal Server Error");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("errorId", UUID.randomUUID().toString());
+        
+        // Log the actual exception for debugging (don't expose to client)
+        logger.error("Internal server error with ID: {}", 
+            problemDetail.getProperties().get("errorId"), ex);
+        
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleEntityNotFound(
+            EntityNotFoundException ex, HttpServletRequest request) {
+        
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.NOT_FOUND, ex.getMessage()
+        );
+        
+        problemDetail.setType(URI.create("https://example.com/problems/entity-not-found"));
+        problemDetail.setTitle("Entity Not Found");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        problemDetail.setProperty("timestamp", Instant.now());
+        
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ProblemDetail> handleValidation(
+            ValidationException ex, HttpServletRequest request) {
+        
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, "Validation failed for the provided input"
+        );
+        
+        problemDetail.setType(URI.create("https://example.com/problems/validation-error"));
+        problemDetail.setTitle("Validation Error");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("violations", ex.getViolations());
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
+    }
+}
+
+// Custom validation exception
+class ValidationException extends RuntimeException {
+    private final List<String> violations;
+    
+    public ValidationException(String message, List<String> violations) {
+        super(message);
+        this.violations = violations;
+    }
+    
+    public List<String> getViolations() { return violations; }
+}
+```
+
+**Bad Example:**
+
+```java
+@ControllerAdvice
+public class BadExceptionHandler {
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, Object> handleRuntimeException(RuntimeException ex) {
+        // Bad: Non-standard error format, inconsistent fields
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", true);
+        error.put("msg", "Something went wrong");
+        error.put("exception_type", ex.getClass().getSimpleName());
+        error.put("time", new Date());
+        
+        // Bad: Exposing sensitive stack trace information
+        error.put("stack_trace", Arrays.toString(ex.getStackTrace()));
+        
+        return error;
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handleNotFound(EntityNotFoundException ex) {
+        // Bad: Inconsistent response format (string vs JSON vs problem details)
+        return ResponseEntity.status(404).body("Not found: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Object> handleValidation(ValidationException ex) {
+        // Bad: Yet another inconsistent format
+        return ResponseEntity.badRequest().body(
+            Map.of("validationErrors", ex.getViolations())
+        );
+    }
+
+    // Bad: Missing proper error ID, timestamps, and structured format
+    // Bad: No type URIs or standard problem details structure
+    // Bad: Inconsistent error formats across different exception types
+}
+```
 
 ## 规则 11：实现统一的响应数据格式
 
 标题：为正确响应提供全局的数据处理，保持和全局异常处理数据结构一致
 描述：使用`@RestControllerAdvice`结合`ResponseBodyAdvice`接口实现全局响应数据包装，确保所有成功响应都具有统一的数据结构。这与全局异常处理保持一致，为客户端提供可预测的响应格式，便于前端统一处理API响应。
+```java
+// 全局响应包装器
+@RestControllerAdvice
+public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
+    
+    @Override
+    public boolean supports(MethodParameter returnType, 
+                          Class<? extends HttpMessageConverter<?>> converterType) {
+        return returnType.getContainingClass().isAnnotationPresent(RestController.class);
+    }
+    
+    @Override
+    public Object beforeBodyWrite(Object body, 
+                                MethodParameter returnType, 
+                                MediaType selectedContentType,
+                                Class<? extends HttpMessageConverter<?>> selectedConverterType, 
+                                ServerHttpRequest request, 
+                                ServerHttpResponse response) {
+        
+        // 如果已经是ApiResponse类型，直接返回
+        if (body instanceof ResponseEntity) {
+            return body;
+        }
+        
+        // 包装为统一响应格式
+        return ResponseEntity.ok(body);
+    }
+}
+
+// Controller使用示例
+@RestController
+@RequestMapping("/api/v1/users")
+public class UserController {
+    
+    @GetMapping("/list")
+    public List<UserResponse> getUserList() {
+        // 通过全局响应包装器自动包装
+        return userService.getAllUsers();
+    }
+}
+```

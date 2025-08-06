@@ -14,7 +14,7 @@ alwaysApply: true
 项目基于**领域驱动设计（DDD）** 的思想，采用经典的分层架构，各模块职责清晰：
 
 -   `/`:
-    -   `domain/`: 存放领域模型 (`*Domain.java`) 和领域服务接口 (`*Service.java`)。
+    -   `domain/`: 存放领域模型 (`*Domain.java`) 和领域服务接口 (`*Service.java`)，由代码生成工具生成， 禁止修改。
     -   `service/`: 存放应用服务 (`*AppService.java`)，负责编排领域服务和处理DTO转换，定义service的inteface.
     -   `service/impl`: 存放应用服务的具体实现，文件名规则`*AppServiceImpl.java`
     -   `service/convert`: 存放基于MapStruct实现的转换类，文件名规则`*AppConvertor.java`，用于处理请求体到领域实体的双向转换

@@ -65,6 +65,7 @@ globs: "**/*.java", "src/**/*.java", "tests/**/*.java"
 - 编写单元测试、集成测试和端到端测试
 
 ## 安全
+- 遵循 OWASP 安全最佳实践（如输入验证、SQL注入防护）
 - 使用 `PreparedStatement` 防止 SQL 注入
 - 验证和清理所有用户输入
 - 避免在日志中记录敏感信息
@@ -79,5 +80,4 @@ globs: "**/*.java", "src/**/*.java", "tests/**/*.java"
 
 ## 文档
 - 为所有公共 API 编写 Javadoc
-- 保持 `README.md` 文件的更新
 - 在复杂的代码段中添加必要的内联注释
