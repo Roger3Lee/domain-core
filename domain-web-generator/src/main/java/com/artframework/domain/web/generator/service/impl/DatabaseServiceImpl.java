@@ -1,42 +1,25 @@
 package com.artframework.domain.web.generator.service.impl;
 
 import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain;
-import com.artframework.domain.web.generator.domain.datasource.service.DatasourceService;
+import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain.DatasourceTableDomain;
+import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain.DatasourceTableColumnDomain;
 import com.artframework.domain.web.generator.service.DatabaseService;
-import com.artframework.domain.web.generator.domain.datasource.repository.DatasourceTableRepository;
-import com.artframework.domain.web.generator.domain.datasource.repository.DatasourceTableColumnRepository;
-import com.artframework.domain.core.lambda.query.LambdaQuery;
-import com.artframework.domain.customize.CustomPostgreSqlQuery;
-import com.artframework.domain.customize.MyPostgreSqlQuery;
-import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
-import com.baomidou.mybatisplus.generator.config.po.TableInfo;
-import com.baomidou.mybatisplus.generator.config.po.TableField;
-import com.baomidou.mybatisplus.generator.keywords.MySqlKeyWordsHandler;
-import com.baomidou.mybatisplus.generator.keywords.PostgreSqlKeyWordsHandler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 数据库操作服务实现 - 领域服务层
- * 专注于数据库连接、表结构获取等业务逻辑，不处理数据持久化
+ * 数据库操作服务实现类
+ * 
+ * @author auto
+ * @version v1.0
  */
 @Slf4j
 @Service
 public class DatabaseServiceImpl implements DatabaseService {
-
-    @Autowired
-    private DatasourceService datasourceService;
-
-    @Autowired
-    private DatasourceTableRepository datasourceTableRepository;
-
-    @Autowired
-    private DatasourceTableColumnRepository datasourceTableColumnRepository;
 
     @Override
     public Boolean testConnection(DatasourceDomain datasource) {
@@ -49,172 +32,60 @@ public class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public List<DatasourceDomain.DatasourceTableDomain> getTableStructures(Integer datasourceId) {
-        try {
-            // 1. 获取数据源配置
-            DatasourceDomain datasource = DatasourceDomain.load(datasourceId, datasourceService);
-            if (datasource == null) {
-                log.error("数据源不存在: {}", datasourceId);
-                return new ArrayList<>();
-            }
-
-            // 2. 测试连接
-            if (!testConnection(datasource)) {
-                log.error("数据库连接失败: {}", datasourceId);
-                return new ArrayList<>();
-            }
-
-            // 3. 使用MyBatis Plus Generator获取表结构
-            List<TableInfo> tableInfos = getTableInfosFromDatabase(datasource);
-
-            // 4. 转换为领域对象（不进行持久化）
-            List<DatasourceDomain.DatasourceTableDomain> tableDomains = new ArrayList<>();
-            for (TableInfo tableInfo : tableInfos) {
-                // 创建表信息领域对象
-                DatasourceDomain.DatasourceTableDomain table = new DatasourceDomain.DatasourceTableDomain();
-                table.setDsId(datasourceId);
-                table.setName(tableInfo.getName());
-                table.setComment(tableInfo.getComment());
-                tableDomains.add(table);
-            }
-
-            log.info("获取表结构成功，数据源ID: {}, 表数量: {}", datasourceId, tableDomains.size());
-            return tableDomains;
-
-        } catch (Exception e) {
-            log.error("获取表结构失败，数据源ID: {}", datasourceId, e);
-            return new ArrayList<>();
-        }
+    public List<DatasourceTableDomain> getTableStructures(Integer datasourceId) {
+        // TODO: 实现从数据库获取表结构的逻辑
+        log.info("获取表结构，数据源ID: {}", datasourceId);
+        return new ArrayList<>();
     }
 
     @Override
     public TableStructureInfo getTableStructureInfo(Integer datasourceId) {
-        try {
-            // 1. 获取数据源配置
-            DatasourceDomain datasource = DatasourceDomain.load(datasourceId, datasourceService);
-            if (datasource == null) {
-                log.error("数据源不存在: {}", datasourceId);
-                return new TableStructureInfo();
-            }
-
-            // 2. 测试连接
-            if (!testConnection(datasource)) {
-                log.error("数据库连接失败: {}", datasourceId);
-                return new TableStructureInfo();
-            }
-
-            // 3. 使用MyBatis Plus Generator获取表结构
-            List<TableInfo> tableInfos = getTableInfosFromDatabase(datasource);
-
-            // 4. 转换为领域对象（不进行持久化）
-            List<DatasourceDomain.DatasourceTableDomain> tableDomains = new ArrayList<>();
-            List<DatasourceDomain.DatasourceTableColumnDomain> columnDomains = new ArrayList<>();
-            
-            for (TableInfo tableInfo : tableInfos) {
-                // 创建表信息领域对象
-                DatasourceDomain.DatasourceTableDomain table = new DatasourceDomain.DatasourceTableDomain();
-                table.setDsId(datasourceId);
-                table.setName(tableInfo.getName());
-                table.setComment(tableInfo.getComment());
-                tableDomains.add(table);
-
-                // 处理列信息
-                if (tableInfo.getFields() != null && !tableInfo.getFields().isEmpty()) {
-                    for (TableField tableField : tableInfo.getFields()) {
-                        DatasourceDomain.DatasourceTableColumnDomain column = new DatasourceDomain.DatasourceTableColumnDomain();
-                        column.setDsId(datasourceId);
-                        column.setTableName(tableInfo.getName());
-                        column.setName(tableField.getColumnName());
-                        column.setType(tableField.getColumnType().getType());
-                        column.setComment(tableField.getComment());
-                        column.setKey(tableField.isKeyFlag() ? "Y" : "N");
-                        columnDomains.add(column);
-                    }
-                }
-            }
-
-            log.info("获取表结构信息成功，数据源ID: {}, 表数量: {}, 列数量: {}", 
-                    datasourceId, tableDomains.size(), columnDomains.size());
-            
-            return new TableStructureInfo(tableDomains, columnDomains);
-
-        } catch (Exception e) {
-            log.error("获取表结构信息失败，数据源ID: {}", datasourceId, e);
-            return new TableStructureInfo();
-        }
+        // TODO: 实现从数据库获取完整表结构信息的逻辑
+        log.info("获取完整表结构信息，数据源ID: {}", datasourceId);
+        return new TableStructureInfo();
     }
 
     @Override
-    public List<DatasourceDomain.DatasourceTableDomain> getTableList(Integer datasourceId) {
-        // 从本地数据库获取表列表
-        return datasourceTableRepository.queryList(
-                LambdaQuery.of(DatasourceDomain.DatasourceTableDomain.class)
-                        .eq(DatasourceDomain.DatasourceTableDomain::getDsId, datasourceId));
+    public List<DatasourceTableDomain> getTableList(Integer datasourceId) {
+        // TODO: 实现从数据库获取表列表的逻辑
+        log.info("获取表列表，数据源ID: {}", datasourceId);
+        return new ArrayList<>();
     }
 
     @Override
-    public List<DatasourceDomain.DatasourceTableColumnDomain> getColumnList(Integer datasourceId, String tableName) {
-        // 从本地数据库获取列列表
-        return datasourceTableColumnRepository.queryList(
-                LambdaQuery.of(DatasourceDomain.DatasourceTableColumnDomain.class)
-                        .eq(DatasourceDomain.DatasourceTableColumnDomain::getDsId, datasourceId)
-                        .eq(DatasourceDomain.DatasourceTableColumnDomain::getTableName, tableName));
+    public List<DatasourceTableColumnDomain> getColumnList(Integer datasourceId, String tableName) {
+        // TODO: 实现从数据库获取列列表的逻辑
+        log.info("获取列列表，数据源ID: {}, 表名: {}", datasourceId, tableName);
+        return new ArrayList<>();
     }
 
     /**
      * 获取数据库连接
      */
     private Connection getConnection(DatasourceDomain datasource) throws SQLException {
-        return DriverManager.getConnection(
-                datasource.getUrl(),
-                datasource.getUserName(),
-                datasource.getPassword());
+        String url = buildJdbcUrl(datasource);
+        return DriverManager.getConnection(url, datasource.getUserName(), datasource.getPassword());
     }
 
     /**
-     * 使用MyBatis Plus Generator获取表结构信息
+     * 构建JDBC URL
      */
-    private List<TableInfo> getTableInfosFromDatabase(DatasourceDomain datasource) {
-        try {
-            // 构建DataSourceConfig
-            DataSourceConfig.Builder builder = new DataSourceConfig.Builder(
-                    datasource.getUrl(),
-                    datasource.getUserName(),
-                    datasource.getPassword());
-
-            // 根据数据库类型配置
-            switch (datasource.getDbType().toLowerCase()) {
-                case "mysql":
-                    builder.dbQuery(new com.baomidou.mybatisplus.generator.config.querys.MySqlQuery())
-                            .keyWordsHandler(new MySqlKeyWordsHandler());
-                    break;
-                case "polardb":
-                case "postgresql":
-                    builder.dbQuery(new CustomPostgreSqlQuery())
-                            .keyWordsHandler(new PostgreSqlKeyWordsHandler());
-                    if (datasource.getSchema() != null && !datasource.getSchema().isEmpty()) {
-                        builder.schema(datasource.getSchema())
-                                .addConnectionProperty("currentSchema", datasource.getSchema());
-                    }
-                    break;
-                default:
-                    throw new UnsupportedOperationException("不支持的数据库类型: " + datasource.getDbType());
-            }
-
-            // 添加通用连接属性
-            builder.addConnectionProperty("useUnicode", "true")
-                    .addConnectionProperty("characterEncoding", "UTF-8");
-
-            DataSourceConfig dataSourceConfig = builder.build();
-
-            // 使用TableQuery获取表信息
-            com.artframework.domain.datasource.TableQuery tableQuery = new com.artframework.domain.datasource.TableQuery(
-                    dataSourceConfig);
-            return tableQuery.queryTables();
-
-        } catch (Exception e) {
-            log.error("获取表结构信息失败: {}", e.getMessage(), e);
-            return new ArrayList<>();
+    private String buildJdbcUrl(DatasourceDomain datasource) {
+        // 如果已经有完整的URL，直接使用
+        if (datasource.getUrl() != null && !datasource.getUrl().trim().isEmpty()) {
+            return datasource.getUrl();
         }
+        
+        // 否则根据数据库类型构建URL
+        String dbType = datasource.getDbType();
+        String url = datasource.getUrl();
+        
+        // 这里简化处理，实际应该解析URL中的host、port、database
+        // 由于DatasourceDomain只有url字段，我们直接使用url
+        if (url != null && !url.trim().isEmpty()) {
+            return url;
+        }
+        
+        throw new IllegalArgumentException("数据源URL不能为空");
     }
 }

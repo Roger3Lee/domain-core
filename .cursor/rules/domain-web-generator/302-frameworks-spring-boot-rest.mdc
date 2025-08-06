@@ -20,15 +20,14 @@ alwaysApply: false
 
 - 规则1：正确使用HTTP方法
 - 规则2：设计清晰一致的资源URI
-- 规则3：适当使用HTTP状态码
-- 规则4：实现有效的请求和响应API（DTO）
-- 规则5：对API进行版本控制
-- 规则6：优雅处理错误
-- 规则7：保护您的API
-- 规则8：记录您的API
-- 规则9：使用Controller Advice进行全局异常处理
-- 规则10：为错误响应实现问题详情
-- 规则11：实现统一的响应数据格式
+- 规则3：实现有效的请求和响应API（DTO）
+- 规则4：对API进行版本控制
+- 规则5：优雅处理错误
+- 规则6：保护您的API
+- 规则7：记录您的API
+- 规则8：使用Controller Advice进行全局异常处理
+- 规则9：为错误响应实现问题详情
+- 规则10：实现统一的响应数据格式
 
 ## 规则1：正确使用HTTP方法
 
@@ -128,59 +127,7 @@ GET /userOrders?userId={userId}  // Mixing query params and path styles inconsis
 POST /processUserOrderCreation   // URI contains verbs and is overly complex
 ```
 
-## 规则 3：适当使用HTTP状态码
-
-标题：返回有意义的HTTP状态码
-描述：使用标准HTTP状态码来准确反映API请求的结果。这有助于客户端理解结果，而无需解析响应体来获取基本的成功/失败信息。
-- `200 OK`：一般成功。
-- `201 Created`：资源成功创建（通常带有指向新资源的`Location`头）。
-- `204 No Content`：成功，但没有内容返回（如成功`DELETE`后）。
-- `400 Bad Request`：客户端错误（如无效语法、缺少参数）。
-- `401 Unauthorized`：需要身份验证且失败或尚未提供。
-- `403 Forbidden`：已认证的客户端没有访问资源的权限。
-- `404 Not Found`：资源未找到。
-- `500 Internal Server Error`：意外服务器端错误的通用错误消息。
-
-**Good example:**
-
-```java
-// (Inside a Spring @RestController method)
-if (resourceNotFound) {
-    return ResponseEntity.notFound().build(); // 404
-}
-if (!userHasPermission) {
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied"); // 403
-}
-if (validationFailed) {
-    return ResponseEntity.badRequest().body("Invalid input data"); // 400
-}
-// For creation:
-// return ResponseEntity.created(newResourceUri).body(newResource); // 201
-// For successful deletion:
-// return ResponseEntity.noContent().build(); // 204
-```
-
-**Bad Example:**
-
-```java
-import java.util.Objects;
-
-public ResponseEntity<String> processSomething(String input) {
-    try {
-        if (Objects.isNull(input)) {
-            // Client should receive a 400 Bad Request, not 200 with an error message in body.
-            return ResponseEntity.ok("{\"error\":\"Input cannot be null\"}"); 
-        }
-        // ... process ...
-        return ResponseEntity.ok("{\"data\":\"Success!\"}");
-    } catch (Exception e) {
-        // Client should receive a 500 Internal Server Error, not 200.
-        return ResponseEntity.ok("{\"error\":\"Something went wrong on the server\"}");
-    }
-}
-```
-
-## 规则 4：实现有效的请求和响应API（DTO）
+## 规则 3：实现有效的请求和响应API（DTO）
 
 标题：为API使用数据传输对象（DTO）并保持精简
 描述：为请求和响应体使用专用的DTO类，而不是直接暴露内部领域/实体对象。这将您的API契约与内部数据模型解耦。保持DTO专注于特定API操作所需的数据。使用一致的命名约定（如JSON使用驼峰命名键）。
@@ -234,7 +181,7 @@ public class AnotherUserController {
 }
 ```
 
-## 规则 5：为您的API版本化
+## 规则 4：为您的API版本化
 
 标题：实施清晰的API版本控制策略
 描述：从一开始就引入API版本控制，以在不破坏现有客户端的情况下管理变更和演进。常见策略包括URI版本控制（如`/v1/users`）、自定义请求头版本控制（如`X-API-Version: 1`）或媒体类型版本控制（如`Accept: application/vnd.example.v1+json`）。选择一种策略并一致地应用。
@@ -271,7 +218,7 @@ public class UnversionedProductController {
 class ProductDTO {}
 ```
 
-## 规则 6：优雅地处理错误
+## 规则 5：优雅地处理错误
 
 标题：提供清晰一致的错误响应
 描述：当错误发生时，返回标准化的、机器可读的错误响应格式（如JSON）。包括唯一的错误代码或类型、人类可读的消息，以及可选的关于引起验证错误的特定字段的详细信息。不要在生产环境的错误响应中暴露敏感的内部详细信息，如堆栈跟踪。
@@ -340,7 +287,7 @@ public class BadErrorHandlingController {
 }
 ```
 
-## 规则 7：保护您的API
+## 规则 6：保护您的API
 
 标题：实施强大的安全措施
 描述：保护您的API免受常见威胁。对所有通信使用HTTPS。实施适当的身份验证（如OAuth 2.0、JWT）和授权（如基于角色的访问控制）。验证所有输入数据以防止注入攻击（SQLi、XSS）。应用速率限制和节流来防止滥用。
@@ -393,7 +340,7 @@ public class InsecureController {
 }
 ```
 
-## 规则 8：记录您的API
+## 规则 7：记录您的API
 
 标题：提供清晰全面的API文档
 描述：为您的API维护最新的文档。可以使用Swagger/OpenAPI等工具从代码注解生成交互式文档。文档应涵盖资源URI、HTTP方法、请求/响应格式（包括DTO模式）、预期状态码、身份验证方法和错误响应。
@@ -456,7 +403,7 @@ public class LegacyThingController {
 // Clients have to guess or read source code to understand how to use the API.
 ```
 
-## 规则 9：使用Controller Advice进行全局异常处理
+## 规则 8：使用Controller Advice进行全局异常处理
 
 标题：使用@ControllerAdvice实现集中式异常处理
 描述：使用`@ControllerAdvice`创建集中式异常处理机制，可以捕获和处理所有控制器中的已检查`Exception`和未检查`RuntimeException`。使用Spring Boot内置的`ProblemDetail`类来获得遵循RFC 7807的一致、标准化的错误响应。这种方法促进DRY原则，确保一致的错误响应，并将错误处理逻辑与业务逻辑分离。
@@ -630,7 +577,7 @@ class CustomErrorResponse {
 }
 ```
 
-## 规则 10：为错误响应实现问题详情
+## 规则 9：为错误响应实现问题详情
 
 标题：为HTTP API使用RFC 7807问题详情
 描述：使用RFC 7807问题详情格式为HTTP 500（内部服务器错误）和其他错误响应实现标准化错误响应。这提供了机器可读的错误信息，包括类型、标题、状态、详情和实例，帮助客户端一致地理解和处理错误。

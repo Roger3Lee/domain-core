@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.collection.CollUtil;
+import com.artframework.domain.web.generator.exception.BusinessException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -123,7 +124,7 @@ public class ProjectAppServiceImpl implements ProjectAppService {
         domain.loadRelated(ProjectDomain.DomainConfigDomain.class);
         
         if (CollUtil.isNotEmpty(domain.getDomainConfigList())) {
-            throw new RuntimeException("项目下存在领域模型，无法删除");
+            throw new BusinessException("PROJECT_HAS_DOMAINS", "项目下存在领域模型，无法删除");
         }
         
         // 删除项目
