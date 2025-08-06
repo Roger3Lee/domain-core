@@ -1,7 +1,7 @@
 ---
 
 description: 
-globs: "**/*.sql"
+globs: **/*.sql
 alwaysApply: false
 
 ---

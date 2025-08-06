@@ -1,0 +1,309 @@
+# DTO对象映射规则（MapStruct）
+
+## 角色
+
+您是一位在Java软件开发方面拥有丰富经验的高级软件工程师
+
+## 目标
+
+本规则旨在确保项目中DTO与领域模型之间的对象映射遵循统一的标准和最佳实践。通过强制使用MapStruct进行对象映射，我们能够：
+
+- **提高开发效率**：自动生成类型安全的映射代码，减少手写映射的工作量
+- **保证数据一致性**：避免手动映射过程中的遗漏和错误
+- **提升代码质量**：统一的映射规范确保代码的可读性和可维护性
+- **支持类型安全**：编译时检查映射的正确性，减少运行时错误
+- **便于重构**：当模型结构变化时，MapStruct能够自动检测并提示需要更新的映射
+- **性能优化**：MapStruct生成的代码性能优于反射-based的映射工具
+
+通过遵循这些规则，团队能够建立一致的对象映射模式，提高整体开发效率和代码质量。
+
+## 核心原则
+
+- **强制使用MapStruct** 进行DTO与领域模型（Domain）之间的双向转换，禁止手写Bean拷贝或使用其他映射工具
+- **每个聚合根/实体** 必须有对应的`*Convertor`接口，放在`convertor/`包下，命名规范为`XxxConvertor.java`
+- **所有映射方法** 必须显式声明，禁止使用`@Mapping(target = "...", ignore = true)`忽略核心字段
+- **支持Spring Bean**，加`@Mapper(componentModel = "spring")`
+- **复杂字段映射**（如嵌套对象、集合、枚举等）必须通过`@Mapping`注解或自定义方法处理，禁止直接忽略
+- **禁止**在Convertor中写业务逻辑，仅做字段映射
+
+## 基本映射规则
+
+### 1. 简单字段映射
+```java
+// DTO
+@Data
+public class UserDTO {
+    private Long id;
+    private String username;
+    private String email;
+    private String status;
+}
+
+// 领域模型
+@Data
+public class UserDomain {
+    private Long id;
+    private String username;
+    private String email;
+    private UserStatus status; // 枚举类型
+}
+
+// Convertor
+@Mapper(componentModel = "spring")
+public interface UserConvertor {
+    @Mapping(target = "status", source = "status", qualifiedByName = "stringToEnum")
+    UserDomain toDomain(UserDTO dto);
+
+    @Mapping(target = "status", source = "status", qualifiedByName = "enumToString")
+    UserDTO toDTO(UserDomain domain);
+
+    @Named("stringToEnum")
+    default UserStatus stringToEnum(String status) {
+        return UserStatus.valueOf(status);
+    }
+
+    @Named("enumToString")
+    default String enumToString(UserStatus status) {
+        return status.name();
+    }
+}
+```
+
+### 2. 集合映射
+```java
+// 自动支持集合映射，无需手写循环
+@Mapper(componentModel = "spring")
+public interface UserConvertor {
+    // 自动映射 List<UserDTO> -> List<UserDomain>
+    List<UserDomain> toDomainList(List<UserDTO> dtoList);
+    
+    // 自动映射 List<UserDomain> -> List<UserDTO>
+    List<UserDTO> toDTOList(List<UserDomain> domainList);
+}
+```
+
+### 3. 嵌套对象映射
+```java
+// 嵌套DTO
+@Data
+public class OrderDTO {
+    private Long id;
+    private String orderNo;
+    private UserDTO user; // 嵌套对象
+    private List<OrderItemDTO> items; // 嵌套集合
+}
+
+// 嵌套领域模型
+@Data
+public class OrderDomain {
+    private Long id;
+    private String orderNo;
+    private UserDomain user; // 嵌套对象
+    private List<OrderItemDomain> items; // 嵌套集合
+}
+
+// Convertor
+@Mapper(componentModel = "spring", uses = {UserConvertor.class, OrderItemConvertor.class})
+public interface OrderConvertor {
+    OrderDomain toDomain(OrderDTO dto);
+    OrderDTO toDTO(OrderDomain domain);
+}
+```
+
+### 4. 字段名不一致映射
+```java
+// DTO字段名与Domain不同
+@Data
+public class ProductDTO {
+    private Long productId; // 字段名不同
+    private String productName; // 字段名不同
+    private BigDecimal price;
+}
+
+@Data
+public class ProductDomain {
+    private Long id; // 对应productId
+    private String name; // 对应productName
+    private BigDecimal price;
+}
+
+// Convertor
+@Mapper(componentModel = "spring")
+public interface ProductConvertor {
+    @Mapping(target = "id", source = "productId")
+    @Mapping(target = "name", source = "productName")
+    ProductDomain toDomain(ProductDTO dto);
+
+    @Mapping(target = "productId", source = "id")
+    @Mapping(target = "productName", source = "name")
+    ProductDTO toDTO(ProductDomain domain);
+}
+```
+
+### 5. 条件映射
+```java
+// 根据条件进行不同映射
+@Mapper(componentModel = "spring")
+public interface UserConvertor {
+    @Mapping(target = "status", source = "status", qualifiedByName = "stringToEnum")
+    @Mapping(target = "createTime", expression = "java(java.time.LocalDateTime.now())")
+    UserDomain toDomain(UserDTO dto);
+
+    @Named("stringToEnum")
+    default UserStatus stringToEnum(String status) {
+        if (status == null) {
+            return UserStatus.INACTIVE;
+        }
+        try {
+            return UserStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return UserStatus.INACTIVE;
+        }
+    }
+}
+```
+
+## 错误示例
+
+### 错误1：手动Bean拷贝
+```java
+// 禁止：手动Bean拷贝
+public UserDomain toDomain(UserDTO dto) {
+    UserDomain domain = new UserDomain();
+    BeanUtils.copyProperties(dto, domain); // 禁止使用BeanUtils
+    return domain;
+}
+```
+
+### 错误2：忽略核心字段
+```java
+// 禁止：忽略核心业务字段
+@Mapper(componentModel = "spring")
+public interface UserConvertor {
+    @Mapping(target = "status", ignore = true) // 错误，核心字段不能忽略
+    @Mapping(target = "email", ignore = true)  // 错误，核心字段不能忽略
+    UserDomain toDomain(UserDTO dto);
+}
+```
+
+### 错误3：在Convertor中写业务逻辑
+```java
+// 禁止：在Convertor中写业务逻辑
+@Mapper(componentModel = "spring")
+public interface UserConvertor {
+    default UserDomain toDomain(UserDTO dto) {
+        UserDomain domain = new UserDomain();
+        domain.setId(dto.getId());
+        domain.setUsername(dto.getUsername());
+        
+        // 业务逻辑：不允许
+        if ("admin".equals(dto.getUsername())) {
+            domain.setStatus(UserStatus.ADMIN);
+        } else {
+            domain.setStatus(UserStatus.NORMAL);
+        }
+        
+        // 业务逻辑：不允许
+        if (dto.getEmail() != null && dto.getEmail().contains("@company.com")) {
+            domain.setEmail(dto.getEmail().toLowerCase());
+        }
+        
+        return domain;
+    }
+}
+```
+
+### 错误4：使用其他映射工具
+```java
+// 禁止：使用其他映射工具
+@Mapper(componentModel = "spring")
+public interface UserConvertor {
+    default UserDomain toDomain(UserDTO dto) {
+        // 禁止使用ModelMapper
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(dto, UserDomain.class);
+    }
+}
+```
+
+### 错误5：不处理类型转换
+```java
+// 禁止：不处理类型转换导致编译错误
+@Mapper(componentModel = "spring")
+public interface UserConvertor {
+    // 错误：String和UserStatus类型不匹配，会导致编译错误
+    UserDomain toDomain(UserDTO dto);
+    UserDTO toDTO(UserDomain domain);
+}
+```
+
+## 最佳实践
+
+### 1. 命名规范
+```java
+// 正确的命名
+public interface UserConvertor {           // 聚合根转换器
+```
+
+### 2. 方法命名规范
+```java
+@Mapper(componentModel = "spring")
+public interface UserConvertor {
+    // 单个对象转换
+    UserDomain toDomain(UserDTO dto);
+    UserDTO toDTO(UserDomain domain);
+    
+    // 集合转换
+    List<UserDomain> toDomainList(List<UserDTO> dtoList);
+    List<UserDTO> toDTOList(List<UserDomain> domainList);
+    
+    // 分页结果转换
+    PageResult<UserDTO> toDTOPage(PageResult<UserDomain> domainPage);
+}
+```
+
+### 3. 复杂映射处理
+```java
+// 处理复杂的业务映射逻辑
+@Mapper(componentModel = "spring")
+public interface OrderConvertor {
+    @Mapping(target = "totalAmount", expression = "java(calculateTotalAmount(dto.getItems()))")
+    @Mapping(target = "status", source = "status", qualifiedByName = "stringToEnum")
+    OrderDomain toDomain(OrderDTO dto);
+    
+    @Named("calculateTotalAmount")
+    default BigDecimal calculateTotalAmount(List<OrderItemDTO> items) {
+        if (items == null || items.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return items.stream()
+                .map(item -> item.getPrice().multiply(new BigDecimal(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+}
+```
+
+### 4. 空值处理
+```java
+@Mapper(componentModel = "spring")
+public interface UserConvertor {
+    @Mapping(target = "status", source = "status", qualifiedByName = "stringToEnum")
+    @Mapping(target = "createTime", defaultExpression = "java(java.time.LocalDateTime.now())")
+    UserDomain toDomain(UserDTO dto);
+    
+    @Named("stringToEnum")
+    default UserStatus stringToEnum(String status) {
+        return status != null ? UserStatus.valueOf(status) : UserStatus.INACTIVE;
+    }
+}
+```
+
+## 约束
+
+**强制使用MapStruct**，禁止其他映射工具
+**只做字段映射**，禁止业务逻辑
+**处理类型转换**，使用`@Mapping`和自定义方法
+**不忽略核心字段**，必须显式映射
+**遵循命名规范**，保持代码一致性
+**支持Spring Bean**，使用`@Mapper(componentModel = "spring")`
+**处理空值情况**，提供默认值或安全转换

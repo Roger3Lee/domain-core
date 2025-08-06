@@ -53,7 +53,6 @@ alwaysApply: false
 - **测试框架**: JUnit 4, Mockito 2
 ---
 
-
 ## 约束
-- 采用 分层架构设计，确保职责分离
-- 把任务分解成最小的单元，并以循序渐进的方式解决任何任务。
+ **遵循** API的调用链路为： `*Controller-> *AppService-> *Service-> *Repository -> *Mapper`
+ **遵循** 使用MapStruct进行对象映射，完成`*DTO`到领域模型`*Domain`的转换,参考 `@403-dto-conventions.mdc`
