@@ -1,0 +1,262 @@
+---
+description: 
+globs: globs: "**/**Service.java", "**/**ServiceImpl.java"
+alwaysApply: false
+---
+# Spring Boot 服务层设计原则
+
+本指南提供了使用Spring Boot设计健壮、可维护和可测试服务层的基本原则。这些规则确保您的服务层遵循业务逻辑封装、事务管理和依赖注入的最佳实践。
+
+**重要架构原则**：服务层必须通过Repository接口访问数据库，不能直接注入和调用MyBatis Plus的Mapper接口。这确保了清晰的分层架构和良好的解耦。
+
+## 实施这些原则
+
+这些指南建立在以下核心原则之上：
+
+- **单一职责**：每个服务类应该专注于特定的业务领域
+- **分层架构**：服务层必须通过仓储层(Repository)访问数据库，不能直接调用Mapper
+- **事务一致性**：合理使用事务注解确保数据一致性
+- **依赖解耦**：通过接口和依赖注入实现松耦合
+- **异常处理**：提供清晰的业务异常和错误信息
+
+## 目录
+
+- 规则1：使用@Service注解标识服务类
+- 规则2：实现服务接口以支持多实现和测试
+- 规则3：合理使用@Transactional管理事务
+- 规则4：正确处理业务异常
+- 规则5：使用依赖注入而非静态方法
+- 规则6：实现输入验证和业务规则检查
+- 规则7：分离查询和命令操作
+- 规则8：使用DTO进行数据传输
+
+## 规则1：使用@Service注解标识服务类并遵循分层架构
+
+标题：正确标识和管理服务组件，遵循分层架构原则
+描述：使用`@Service`注解标识服务层组件，让Spring容器管理Bean的生命周期。**重要：服务层必须通过Repository接口访问数据库，不能直接注入和调用Mapper。** 避免在服务类中进行复杂的Bean配置，保持服务类的纯净性。
+
+**好示例：**
+
+```java
+@Service
+@Slf4j
+public class UserService {
+    
+    // 正确：注入Repository接口，不是Mapper
+    private final UserRepository userRepository;
+    private final EmailService emailService;
+    
+    // 构造函数注入（推荐）
+    public UserService(UserRepository userRepository, EmailService emailService) {
+        this.userRepository = userRepository;
+        this.emailService = emailService;
+    }
+    
+    public UserDTO createUser(CreateUserRequest request) {
+        log.info("创建用户: {}", request.getEmail());
+        // 业务逻辑实现
+        return userDTO;
+    }
+}
+```
+
+**坏示例：**
+
+```java
+// 错误：直接注入Mapper，违反分层架构原则
+@Service
+public class BadUserService {
+    
+    @Autowired  // 错误：服务层不应该直接注入Mapper
+    private UserMapper userMapper;
+    
+    @Autowired
+    private EmailService emailService;
+    
+    // 缺少日志记录
+    public UserDTO createUser(CreateUserRequest request) {
+        // 错误：直接调用Mapper方法
+        return userMapper.insert(request);
+    }
+}
+```
+
+## 规则2：实现服务接口以支持多实现和测试
+
+标题：定义清晰的服务契约
+描述：为服务层定义接口，提供清晰的业务契约。这样便于单元测试、支持多种实现，并且符合依赖倒置原则。
+
+**好示例：**
+
+```java
+// 服务接口
+public interface UserService {
+    UserDTO createUser(CreateUserRequest request);
+    UserDTO getUserById(Long id);
+    PageResult<UserDTO> getUsers(UserQueryRequest request);
+    UserDTO updateUser(Long id, UpdateUserRequest request);
+    void deleteUser(Long id);
+}
+
+// 服务实现
+@Service
+@Transactional(readOnly = true)  // 默认只读事务
+public class UserServiceImpl implements UserService {
+    
+    // 正确：注入Repository接口，而不是Mapper
+    private final UserRepository userRepository;
+    private final UserConverter userConverter;
+    
+    public UserServiceImpl(UserRepository userRepository, UserConverter userConverter) {
+        this.userRepository = userRepository;
+        this.userConverter = userConverter;
+    }
+    
+    @Override
+    @Transactional  // 写操作需要读写事务
+    public UserDTO createUser(CreateUserRequest request) {
+        // 验证业务规则
+        validateCreateUserRequest(request);
+        
+        // 转换并保存
+        User user = userConverter.toEntity(request);
+        User savedUser = userRepository.save(user);
+        
+        return userConverter.toDTO(savedUser);
+    }
+    
+    @Override
+    public UserDTO getUserById(Long id) {
+        User user = userRepository.findById(id);
+        if (user == null) {
+            throw new UserNotFoundException("用户不存在: " + id);
+        }
+        return userConverter.toDTO(user);
+    }
+    
+    private void validateCreateUserRequest(CreateUserRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateEmailException("邮箱已存在: " + request.getEmail());
+        }
+    }
+}
+```
+
+## 规则3：合理使用@Transactional管理事务
+
+标题：确保数据一致性和性能优化
+描述：在类级别使用`@Transactional(readOnly = true)`设置默认只读事务，在需要写操作的方法上覆盖为读写事务。合理设置事务传播行为和隔离级别。
+
+**好示例：**
+
+```java
+@Service
+@Transactional(readOnly = true)  // 类级别默认只读
+@Slf4j
+public class OrderService {
+    
+    private final OrderRepository orderRepository;
+    private final InventoryService inventoryService;
+    private final PaymentService paymentService;
+    private final AuditLogRepository auditLogRepository;
+    
+    @Transactional  // 需要写操作，覆盖为读写事务
+    @Retryable(value = {OptimisticLockingFailureException.class}, maxAttempts = 3)
+    public OrderDTO createOrder(CreateOrderRequest request) {
+        // 多个操作需要在同一事务中
+        Order order = buildOrder(request);
+        inventoryService.reserveItems(request.getItems());
+        Order savedOrder = orderRepository.save(order);
+        
+        // 发送异步事件，不影响事务
+        applicationEventPublisher.publishEvent(new OrderCreatedEvent(savedOrder.getId()));
+        
+        return orderConverter.toDTO(savedOrder);
+    }
+    
+    @Transactional(propagation = Propagation.REQUIRES_NEW)  // 新事务
+    public void logOrderOperation(Long orderId, String operation) {
+        // 审计日志需要独立事务，即使主事务回滚也要记录
+        AuditLog auditLog = new AuditLog(orderId, operation);
+        auditLogRepository.save(auditLog);
+    }
+    
+    // 只读操作，使用默认只读事务
+    public OrderDTO getOrderById(Long id) {
+        Order order = orderRepository.findById(id);
+        if (order == null) {
+            throw new OrderNotFoundException("订单不存在: " + id);
+        }
+        return orderConverter.toDTO(order);
+    }
+}
+```
+
+**坏示例：**
+
+```java
+@Service
+public class BadOrderService {
+    
+    // 没有事务管理
+    public OrderDTO createOrder(CreateOrderRequest request) {
+        // 多个数据库操作没有事务保护
+        Order order = buildOrder(request);
+        orderRepository.save(order);  // 可能失败导致数据不一致
+        inventoryService.updateInventory(request.getItems());  // 可能失败导致数据不一致
+        paymentService.processPayment(request.getPayment());   // 可能失败导致数据不一致
+        return orderConverter.toDTO(order);
+    }
+    
+    // 读操作也用了写事务，影响性能
+    @Transactional
+    public List<OrderDTO> getAllOrders() {
+        return orderRepository.findAll().stream()
+            .map(orderConverter::toDTO)
+            .collect(Collectors.toList());
+    }
+}
+```
+
+## 规则4：正确处理业务异常
+
+标题：提供清晰的错误信息和异常层次
+描述：定义业务异常层次结构，提供清晰的错误信息。使用运行时异常避免强制异常处理，让全局异常处理器统一处理。
+
+**好示例：**
+
+```java
+// 业务异常基类
+public abstract class BusinessException extends RuntimeException {
+    private final String errorCode;
+    
+    protected BusinessException(String errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+    
+    public String getErrorCode() {
+        return errorCode;
+    }
+}
+
+// 具体业务异常
+public class UserNotFoundException extends BusinessException {
+    public UserNotFoundException(String message) {
+        super("USER_NOT_FOUND", message);
+    }
+}
+
+// 服务中的异常处理
+@Service
+public class UserService {
+    
+    public UserDTO getUserById(Long id) {
+        User user = userRepository.findById(id);
+        if (user == null) {
+            throw new UserNotFoundException("用户不存在，ID: " + id);
+        }
+        return userConverter.toDTO(user);
+    }
+}
+```

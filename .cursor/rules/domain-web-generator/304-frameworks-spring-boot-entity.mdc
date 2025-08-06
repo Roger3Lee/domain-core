@@ -1,0 +1,587 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Spring Boot MyBatis Plus 实体层设计原则
+
+本指南提供了使用Spring Boot和MyBatis Plus设计高效、可维护的实体层的基本原则。这些规则确保您的实体层遵循领域驱动设计和MyBatis Plus最佳实践，提供清晰的领域模型和优化的持久化性能。
+
+## 实施这些原则
+
+这些指南建立在以下核心原则之上：
+
+- **领域建模**：实体应该反映真实的业务领域概念
+- **数据完整性**：使用约束和验证确保数据一致性
+- **性能优化**：合理配置关联关系和查询策略
+- **可维护性**：清晰的实体结构和命名约定
+
+## 目录
+
+- 规则1：使用@TableName和@TableField正确映射实体
+- 规则2：合理设计主键策略和@TableId
+- 规则3：使用@TableLogic实现软删除
+- 规则4：使用Bean Validation进行数据验证
+- 规则5：实现审计字段和自动填充
+- 规则6：使用@EnumValue处理枚举类型
+- 规则7：优化实体的equals和hashCode
+- 规则8：使用@Version实现乐观锁
+- 规则9：合理配置字段填充策略
+- 规则10：实现类型处理器
+
+## 规则1：使用@TableName和@TableField正确映射实体
+
+标题：建立正确的对象关系映射
+描述：使用`@TableName`指定表映射，使用`@TableField`配置字段映射。遵循命名约定，合理配置字段属性和索引。
+
+**好示例：**
+
+```java
+@TableName("users")
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class User {
+    
+    @TableId(type = IdType.AUTO)
+    private Long id;
+    
+    @TableField("email")
+    @NotBlank(message = "邮箱不能为空")
+    @Email(message = "邮箱格式不正确")
+    private String email;
+    
+    @TableField("username")
+    @NotBlank(message = "用户名不能为空")
+    @Size(min = 2, max = 50, message = "用户名长度必须在2-50字符之间")
+    private String username;
+    
+    @TableField("password_hash")
+    @NotBlank(message = "密码不能为空")
+    private String passwordHash;
+    
+    @TableField("status")
+    private UserStatus status;
+    
+    @TableField(value = "created_date", fill = FieldFill.INSERT)
+    private LocalDateTime createdDate;
+    
+    @TableField(value = "updated_date", fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updatedDate;
+    
+    @Version
+    @TableField("version")
+    private Integer version;
+    
+    @TableLogic
+    @TableField("deleted")
+    private Integer deleted;
+    
+    // 构造函数
+    public User() {
+        // MyBatis Plus默认构造函数
+    }
+    
+    public User(String email, String username, String passwordHash) {
+        this.email = Objects.requireNonNull(email, "Email不能为空");
+        this.username = Objects.requireNonNull(username, "用户名不能为空");
+        this.passwordHash = Objects.requireNonNull(passwordHash, "密码哈希不能为空");
+        this.status = UserStatus.INACTIVE;
+        this.deleted = 0;  // 默认未删除
+    }
+    
+    // 业务方法
+    public void activate() {
+        if (this.status == UserStatus.ACTIVE) {
+            throw new IllegalStateException("用户已经是激活状态");
+        }
+        this.status = UserStatus.ACTIVE;
+    }
+    
+    public void deactivate() {
+        if (this.status == UserStatus.INACTIVE) {
+            throw new IllegalStateException("用户已经是非激活状态");
+        }
+        this.status = UserStatus.INACTIVE;
+    }
+    
+    public boolean isActive() {
+        return this.status == UserStatus.ACTIVE;
+    }
+    
+    public boolean isDeleted() {
+        return this.deleted != null && this.deleted == 1;
+    }
+    
+    // equals和hashCode基于业务键
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return Objects.equals(email, user.email);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(email);
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("User{id=%d, email='%s', username='%s', status=%s}", 
+                           id, email, username, status);
+    }
+}
+
+// 用户状态枚举
+public enum UserStatus {
+    ACTIVE("1", "激活"),
+    INACTIVE("0", "未激活"),
+    SUSPENDED("2", "暂停");
+    
+    @EnumValue  // MyBatis Plus枚举处理
+    private final String code;
+    private final String description;
+    
+    UserStatus(String code, String description) {
+        this.code = code;
+        this.description = description;
+    }
+    
+    public String getCode() {
+        return code;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+}
+```
+
+**坏示例：**
+
+```java
+// 没有合适的注解和配置
+public class BadUser {
+    
+    // 没有@TableId注解和主键策略
+    private Long id;
+    
+    // 没有@TableField注解，没有验证
+    private String email;
+    private String username;
+    private String password;  // 直接存储明文密码
+    
+    // 使用整数表示状态，不如枚举清晰
+    private Integer status;
+    
+    // 没有审计字段和自动填充
+    private Date createdDate;
+    
+    // 公共字段，破坏封装
+    public String email;
+    public String username;
+    
+    // 没有业务方法，只是数据容器
+    
+    // 没有proper的equals和hashCode
+    
+    // 没有有意义的toString
+    
+    // 没有软删除支持
+}
+```
+
+## 规则2：合理设计主键策略和@TableId
+
+标题：选择合适的主键生成策略
+描述：根据数据库类型和业务需求选择合适的主键策略。MyBatis Plus提供多种主键策略，考虑性能、分布式环境和业务语义。
+
+**好示例：**
+
+```java
+// 自增主键（适用于单数据库实例）
+@TableName("orders")
+@Data
+public class Order {
+    @TableId(type = IdType.AUTO)
+    private Long id;
+    
+    // 业务标识符
+    @TableField("order_number")
+    private String orderNumber;
+    
+    @TableField("user_id")
+    private Long userId;
+    
+    @TableField("total_amount")
+    private BigDecimal totalAmount;
+    
+    @TableField("status")
+    private OrderStatus status;
+    
+    @TableField(value = "created_date", fill = FieldFill.INSERT)
+    private LocalDateTime createdDate;
+    
+    public Order() {
+        // 生成业务编号
+        this.orderNumber = generateOrderNumber();
+    }
+    
+    private String generateOrderNumber() {
+        // 生成有业务意义的订单号
+        return "ORD" + System.currentTimeMillis() + RandomStringUtils.randomNumeric(4);
+    }
+}
+
+// 雪花算法主键（适用于分布式环境）
+@TableName("documents")
+@Data
+public class Document {
+    @TableId(type = IdType.ASSIGN_ID)  // 雪花算法
+    private Long id;
+    
+    @TableField("title")
+    private String title;
+    
+    @TableField("content")
+    private String content;
+    
+    @TableField("file_path")
+    private String filePath;
+}
+
+// UUID主键
+@TableName("files")
+@Data
+public class FileInfo {
+    @TableId(type = IdType.ASSIGN_UUID)  // UUID
+    private String id;
+    
+    @TableField("original_name")
+    private String originalName;
+    
+    @TableField("file_size")
+    private Long fileSize;
+    
+    @TableField("content_type")
+    private String contentType;
+}
+
+// 自定义主键策略
+@TableName("custom_entities")
+@Data
+public class CustomEntity {
+    @TableId(type = IdType.INPUT)  // 手动输入
+    private String id;
+    
+    @TableField("name")
+    private String name;
+    
+    public CustomEntity() {}
+    
+    public CustomEntity(String name) {
+        this.id = generateCustomId();  // 自定义ID生成逻辑
+        this.name = name;
+    }
+    
+    private String generateCustomId() {
+        // 自定义ID生成逻辑，如：前缀 + 时间戳 + 随机数
+        return "CUSTOM_" + System.currentTimeMillis() + "_" + RandomStringUtils.randomAlphanumeric(6);
+    }
+}
+
+// 复合主键（使用自定义注解）
+@TableName("order_items")
+@Data
+public class OrderItem {
+    @TableId(type = IdType.INPUT)
+    private String id;  // 复合主键可以用一个字段表示
+    
+    @TableField("order_id")
+    private Long orderId;
+    
+    @TableField("product_id")
+    private Long productId;
+    
+    @TableField("quantity")
+    private Integer quantity;
+    
+    @TableField("price")
+    private BigDecimal price;
+    
+    public OrderItem() {}
+    
+    public OrderItem(Long orderId, Long productId, Integer quantity, BigDecimal price) {
+        this.id = generateCompositeId(orderId, productId);
+        this.orderId = orderId;
+        this.productId = productId;
+        this.quantity = quantity;
+        this.price = price;
+    }
+    
+    private String generateCompositeId(Long orderId, Long productId) {
+        return orderId + "_" + productId;
+    }
+    
+    public BigDecimal getSubtotal() {
+        return price.multiply(BigDecimal.valueOf(quantity));
+    }
+}
+```
+
+## 规则3：使用@TableLogic实现软删除
+
+标题：实现软删除机制保留历史数据
+描述：使用MyBatis Plus的`@TableLogic`注解实现软删除功能，保留历史数据的同时逻辑上删除记录。配置全局的逻辑删除值。
+
+**好示例：**
+
+```java
+// 基本软删除配置
+@TableName("products")
+@Data
+public class Product {
+    
+    @TableId(type = IdType.AUTO)
+    private Long id;
+    
+    @TableField("name")
+    private String name;
+    
+    @TableField("price")
+    private BigDecimal price;
+    
+    @TableField("status")
+    private ProductStatus status;
+    
+    @TableField(value = "created_date", fill = FieldFill.INSERT)
+    private LocalDateTime createdDate;
+    
+    @TableField(value = "updated_date", fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updatedDate;
+    
+    // 软删除字段
+    @TableLogic
+    @TableField("deleted")
+    private Integer deleted;  // 0-未删除 1-已删除
+    
+    @TableField(value = "deleted_time", fill = FieldFill.UPDATE)
+    private LocalDateTime deletedTime;  // 删除时间
+    
+    // 业务方法
+    public boolean isDeleted() {
+        return deleted != null && deleted == 1;
+    }
+}
+
+// 全局配置类
+@Configuration
+public class MybatisPlusConfig {
+    
+    @Bean
+    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        
+        // 分页插件
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+        
+        // 乐观锁插件
+        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
+        
+        return interceptor;
+    }
+    
+    // 全局配置逻辑删除
+    @Bean
+    public GlobalConfig globalConfig() {
+        GlobalConfig globalConfig = new GlobalConfig();
+        globalConfig.setDbConfig(new GlobalConfig.DbConfig()
+            .setLogicDeleteValue("1")      // 逻辑已删除值
+            .setLogicNotDeleteValue("0"));  // 逻辑未删除值
+        return globalConfig;
+    }
+    
+    // 自动填充配置
+    @Bean
+    public MetaObjectHandler metaObjectHandler() {
+        return new MyMetaObjectHandler();
+    }
+}
+
+// 自动填充处理器
+@Component
+public class MyMetaObjectHandler implements MetaObjectHandler {
+    
+    @Override
+    public void insertFill(MetaObject metaObject) {
+        this.strictInsertFill(metaObject, "createdDate", LocalDateTime.class, LocalDateTime.now());
+        this.strictInsertFill(metaObject, "updatedDate", LocalDateTime.class, LocalDateTime.now());
+        this.strictInsertFill(metaObject, "deleted", Integer.class, 0);
+    }
+    
+    @Override
+    public void updateFill(MetaObject metaObject) {
+        this.strictUpdateFill(metaObject, "updatedDate", LocalDateTime.class, LocalDateTime.now());
+        
+        // 如果是软删除操作，填充删除时间
+        if (metaObject.hasSetter("deleted") && 
+            metaObject.getValue("deleted") != null && 
+            metaObject.getValue("deleted").equals(1)) {
+            this.strictUpdateFill(metaObject, "deletedTime", LocalDateTime.class, LocalDateTime.now());
+        }
+    }
+}
+
+// Service层使用软删除
+@Service
+@Transactional(readOnly = true)
+public class ProductService extends ServiceImpl<ProductMapper, Product> {
+    
+    // 软删除（MyBatis Plus自动处理）
+    @Transactional
+    public boolean deleteProduct(Long id) {
+        // removeById会自动使用软删除
+        return removeById(id);
+    }
+    
+    // 批量软删除
+    @Transactional
+    public boolean batchDeleteProducts(List<Long> ids) {
+        return removeByIds(ids);
+    }
+    
+    // 物理删除（慎用）
+    @Transactional
+    public boolean physicalDelete(Long id) {
+        // 使用原生SQL进行物理删除
+        return baseMapper.delete(
+            new LambdaQueryWrapper<Product>()
+                .eq(Product::getId, id)
+                .eq(Product::getDeleted, 1)  // 只删除已软删除的记录
+        ) > 0;
+    }
+    
+    // 恢复软删除的记录
+    @Transactional
+    public boolean restoreProduct(Long id) {
+        Product product = new Product();
+        product.setId(id);
+        product.setDeleted(0);
+        product.setDeletedTime(null);
+        
+        // 需要临时禁用逻辑删除才能更新已删除的记录
+        return baseMapper.update(product, 
+            new LambdaUpdateWrapper<Product>()
+                .eq(Product::getId, id)
+                .eq(Product::getDeleted, 1)
+                .set(Product::getDeleted, 0)
+                .set(Product::getDeletedTime, null)
+        ) > 0;
+    }
+    
+    // 查询包含软删除的记录
+    public List<Product> getAllProductsIncludeDeleted() {
+        // 需要在Mapper中使用原生SQL或者临时禁用逻辑删除
+        return baseMapper.selectAllIncludeDeleted();
+    }
+}
+```
+
+## 规则4：使用Bean Validation进行数据验证
+
+标题：实现数据完整性验证
+描述：使用Bean Validation注解进行数据验证，确保数据完整性。在实体层进行基础验证，在服务层进行业务规则验证。
+
+**好示例：**
+
+```java
+@TableName("products")
+@Data
+public class Product {
+    
+    @TableId(type = IdType.AUTO)
+    private Long id;
+    
+    @NotBlank(message = "产品名称不能为空")
+    @Size(min = 2, max = 100, message = "产品名称长度必须在2-100字符之间")
+    @TableField("name")
+    private String name;
+    
+    @NotBlank(message = "SKU代码不能为空")
+    @Pattern(regexp = "^[A-Z0-9]{6,20}$", message = "SKU代码格式不正确")
+    @TableField("sku_code")
+    private String skuCode;
+    
+    @NotNull(message = "价格不能为空")
+    @DecimalMin(value = "0.01", message = "价格必须大于0")
+    @Digits(integer = 8, fraction = 2, message = "价格格式不正确")
+    @TableField("price")
+    private BigDecimal price;
+    
+    @NotNull(message = "库存数量不能为空")
+    @Min(value = 0, message = "库存数量不能为负数")
+    @TableField("stock_quantity")
+    private Integer stockQuantity;
+    
+    @Size(max = 500, message = "描述长度不能超过500字符")
+    @TableField("description")
+    private String description;
+    
+    @NotNull(message = "分类不能为空")
+    @TableField("category_id")
+    private Long categoryId;
+    
+    @TableField("status")
+    private ProductStatus status;
+    
+    @TableField(value = "created_date", fill = FieldFill.INSERT)
+    private LocalDateTime createdDate;
+    
+    @TableLogic
+    @TableField("deleted")
+    private Integer deleted;
+    
+    // 自定义验证方法
+    @AssertTrue(message = "特价商品的价格不能超过原价")
+    private boolean isPriceValid() {
+        if (this.discountPrice != null) {
+            return this.discountPrice.compareTo(this.price) <= 0;
+        }
+        return true;
+    }
+    
+    @TableField("discount_price")
+    private BigDecimal discountPrice;
+}
+```
+
+## 规则5：实现审计字段和自动填充
+
+标题：自动管理实体的创建和修改信息
+描述：使用MyBatis Plus的自动填充功能管理审计字段，如创建时间、修改时间、创建人、修改人等。
+
+## 规则6：使用@EnumValue处理枚举类型
+
+标题：正确处理枚举字段的数据库映射
+描述：使用`@EnumValue`注解指定枚举类型在数据库中的存储值，提供类型安全的枚举处理。
+
+## 规则7：优化实体的equals和hashCode
+
+标题：正确实现对象比较
+描述：基于业务键实现equals和hashCode方法，确保实体在集合中的正确行为。避免使用可变字段或自增ID。
+
+## 规则8：使用@Version实现乐观锁
+
+标题：防止并发更新冲突
+描述：使用`@Version`注解实现乐观锁机制，防止并发更新时的数据冲突。
+
+## 规则9：合理配置字段填充策略
+
+标题：自动化字段值管理
+描述：使用`FieldFill`枚举配置字段的自动填充策略，如插入时填充、更新时填充等。
+
+## 规则10：实现类型处理器
+
+标题：处理复杂数据类型
+描述：实现自定义的TypeHandler处理复杂数据类型，如JSON字段、数组字段等。

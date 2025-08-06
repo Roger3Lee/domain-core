@@ -1,0 +1,583 @@
+---
+description: 
+globs: "**/**Repository.java","**/**RepositoryImpl.java"
+alwaysApply: false
+---
+# Spring Boot MyBatis Plus 数据访问层设计原则
+
+本指南提供了使用Spring Boot和MyBatis Plus设计高效、可维护的数据访问层的基本原则。这些规则确保您的数据访问层遵循MyBatis Plus的最佳实践，提供清晰的数据访问接口和优化的查询性能。
+
+## 实施这些原则
+
+这些指南建立在以下核心原则之上：
+
+- **单一职责**：每个Mapper专注于特定实体的数据访问
+- **查询优化**：合理使用索引、分页和条件构造器避免性能问题
+- **类型安全**：使用LambdaQueryWrapper避免硬编码字段名
+- **事务边界**：Mapper层不管理事务，由Service层控制
+
+## 目录
+
+- 规则1：使用@Mapper注解和继承BaseMapper
+- 规则2：使用QueryWrapper和LambdaQueryWrapper构建查询
+- 规则3：使用@Select/@Update/@Insert/@Delete编写自定义SQL
+- 规则4：实现分页查询功能
+- 规则5：使用条件构造器进行动态查询
+- 规则6：正确处理关联查询和结果映射
+- 规则7：使用IService接口简化业务操作
+- 规则8：实现自定义Mapper方法
+
+## 规则1：使用@Mapper注解和继承BaseMapper
+
+标题：建立标准的数据访问接口
+描述：使用`@Mapper`注解标识数据访问层组件，继承`BaseMapper<T>`获得标准CRUD操作。避免在Mapper中实现业务逻辑。
+
+**好示例：**
+
+```java
+@Mapper
+public interface UserMapper extends BaseMapper<User> {
+    
+    // 基础CRUD操作由BaseMapper提供
+    // insert(), selectById(), selectList(), updateById(), deleteById() 等
+    
+    // 使用条件构造器的查询会在Service层构建
+    // 这里只定义复杂的自定义查询
+    
+    // 自定义查询方法
+    @Select("SELECT * FROM users WHERE email = #{email}")
+    User selectByEmail(@Param("email") String email);
+    
+    @Select("SELECT COUNT(*) FROM users WHERE status = #{status} AND created_date > #{date}")
+    Long countActiveUsersAfterDate(@Param("status") String status, @Param("date") LocalDateTime date);
+    
+    // 复杂的连接查询
+    @Select("SELECT u.*, p.name as profile_name FROM users u " +
+            "LEFT JOIN user_profiles p ON u.id = p.user_id " +
+            "WHERE u.id = #{userId}")
+    @Results({
+        @Result(property = "id", column = "id"),
+        @Result(property = "email", column = "email"),
+        @Result(property = "profileName", column = "profile_name")
+    })
+    UserWithProfileDTO selectUserWithProfile(@Param("userId") Long userId);
+    
+    // 批量操作
+    @Update("<script>" +
+            "UPDATE users SET status = #{status} WHERE id IN " +
+            "<foreach collection='ids' item='id' open='(' close=')' separator=','>" +
+            "#{id}" +
+            "</foreach>" +
+            "</script>")
+    int updateStatusByIds(@Param("ids") List<Long> ids, @Param("status") String status);
+}
+
+// 实体类
+@TableName("users")
+public class User {
+    
+    @TableId(type = IdType.AUTO)
+    private Long id;
+    
+    @TableField("email")
+    private String email;
+    
+    @TableField("username")
+    private String username;
+    
+    @TableField("status")
+    private UserStatus status;
+    
+    @TableField(value = "created_date", fill = FieldFill.INSERT)
+    private LocalDateTime createdDate;
+    
+    @TableField(value = "updated_date", fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updatedDate;
+    
+    @Version
+    private Integer version;
+    
+    @TableLogic
+    private Integer deleted;
+    
+    // getters, setters, constructors
+}
+
+// 用户状态枚举
+public enum UserStatus {
+    ACTIVE("1", "激活"),
+    INACTIVE("0", "未激活"),
+    SUSPENDED("2", "暂停");
+    
+    @EnumValue  // MyBatis Plus枚举处理
+    private final String code;
+    private final String description;
+    
+    UserStatus(String code, String description) {
+        this.code = code;
+        this.description = description;
+    }
+    
+    // getters...
+}
+```
+
+**坏示例：**
+
+```java
+// 没有@Mapper注解，没有继承BaseMapper
+public interface BadUserMapper {
+    
+    // 需要手动实现所有基础方法
+    int insert(User user);
+    User selectById(Long id);
+    List<User> selectAll();
+    int updateById(User user);
+    int deleteById(Long id);
+    
+    // 业务逻辑不应该在Mapper中
+    User registerUser(User user, String password);
+    void sendWelcomeEmail(User user);
+}
+
+// 或者使用原始的XML方式而不利用MyBatis Plus功能
+@Mapper
+public interface BadUserMapperWithXml {
+    
+    // 所有方法都需要在XML中手动编写SQL
+    User selectById(Long id);
+    List<User> selectByStatus(String status);
+    int insertUser(User user);
+    int updateUser(User user);
+    int deleteUser(Long id);
+}
+```
+
+## 规则2：使用QueryWrapper和LambdaQueryWrapper构建查询
+
+标题：利用MyBatis Plus的条件构造器
+描述：在Service层使用QueryWrapper和LambdaQueryWrapper构建查询条件，提供类型安全和灵活的查询接口。优先使用LambdaQueryWrapper避免硬编码字段名。
+
+**好示例：**
+
+```java
+@Service
+@Transactional(readOnly = true)
+public class UserQueryService {
+    
+    private final UserMapper userMapper;
+    
+    public UserQueryService(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
+    
+    // 基本查询
+    public User getUserByEmail(String email) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getEmail, email);
+        return userMapper.selectOne(queryWrapper);
+    }
+    
+    // 复合查询条件
+    public List<User> getActiveUsersCreatedAfter(LocalDateTime date) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getStatus, UserStatus.ACTIVE)
+                   .gt(User::getCreatedDate, date)
+                   .orderByDesc(User::getCreatedDate);
+        return userMapper.selectList(queryWrapper);
+    }
+    
+    // 模糊查询
+    public List<User> searchUsersByKeyword(String keyword) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(User::getUsername, keyword)
+                   .or()
+                   .like(User::getEmail, keyword);
+        return userMapper.selectList(queryWrapper);
+    }
+    
+    // 范围查询
+    public List<User> getUsersByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.between(User::getCreatedDate, startDate, endDate);
+        return userMapper.selectList(queryWrapper);
+    }
+    
+    // 存在性检查
+    public boolean existsByEmail(String email) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getEmail, email);
+        return userMapper.selectCount(queryWrapper) > 0;
+    }
+    
+    // 计数查询
+    public Long countByStatus(UserStatus status) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getStatus, status);
+        return userMapper.selectCount(queryWrapper);
+    }
+    
+    // 动态查询
+    public List<User> searchUsers(UserSearchCriteria criteria) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        
+        // 动态添加条件
+        if (StringUtils.hasText(criteria.getEmail())) {
+            queryWrapper.eq(User::getEmail, criteria.getEmail());
+        }
+        
+        if (criteria.getStatus() != null) {
+            queryWrapper.eq(User::getStatus, criteria.getStatus());
+        }
+        
+        if (StringUtils.hasText(criteria.getKeyword())) {
+            queryWrapper.and(wrapper -> 
+                wrapper.like(User::getUsername, criteria.getKeyword())
+                       .or()
+                       .like(User::getEmail, criteria.getKeyword())
+            );
+        }
+        
+        if (criteria.getCreatedAfter() != null) {
+            queryWrapper.gt(User::getCreatedDate, criteria.getCreatedAfter());
+        }
+        
+        // 排序
+        if (StringUtils.hasText(criteria.getSortBy())) {
+            if ("desc".equalsIgnoreCase(criteria.getSortDirection())) {
+                queryWrapper.orderByDesc(criteria.getSortBy());
+            } else {
+                queryWrapper.orderByAsc(criteria.getSortBy());
+            }
+        }
+        
+        return userMapper.selectList(queryWrapper);
+    }
+}
+
+// 查询条件类
+@Data
+public class UserSearchCriteria {
+    private String email;
+    private UserStatus status;
+    private String keyword;
+    private LocalDateTime createdAfter;
+    private String sortBy;
+    private String sortDirection;
+}
+```
+
+**坏示例：**
+
+```java
+@Service
+public class BadUserQueryService {
+    
+    private final UserMapper userMapper;
+    
+    // 使用硬编码字段名，容易出错
+    public User getUserByEmail(String email) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("email", email);  // 硬编码字段名
+        return userMapper.selectOne(queryWrapper);
+    }
+    
+    // 复杂查询写在一起，可读性差
+    public List<User> getActiveUsersWithComplexCondition(String keyword, UserStatus status) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("status", status)
+                   .and(wrapper -> wrapper.like("username", keyword).or().like("email", keyword))
+                   .gt("created_date", LocalDateTime.now().minusDays(30))
+                   .orderByDesc("created_date");
+        return userMapper.selectList(queryWrapper);
+    }
+    
+    // 没有处理空值，可能导致错误
+    public List<User> searchUsers(String email, UserStatus status) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("email", email)  // email可能为null
+                   .eq("status", status);  // status可能为null
+        return userMapper.selectList(queryWrapper);
+    }
+}
+```
+
+## 规则3：使用@Select/@Update/@Insert/@Delete编写自定义SQL
+
+标题：实现复杂查询和操作
+描述：对于MyBatis Plus无法表达的复杂查询，使用注解SQL或XML配置。注意SQL注入防护和参数绑定。
+
+**好示例：**
+
+```java
+@Mapper
+public interface OrderMapper extends BaseMapper<Order> {
+    
+    // 复杂的统计查询
+    @Select("SELECT DATE(created_date) as order_date, " +
+            "COUNT(*) as order_count, " +
+            "SUM(total_amount) as total_amount " +
+            "FROM orders " +
+            "WHERE created_date BETWEEN #{startDate} AND #{endDate} " +
+            "AND status = #{status} " +
+            "GROUP BY DATE(created_date) " +
+            "ORDER BY order_date DESC")
+    List<OrderStatisticsDTO> getOrderStatistics(@Param("startDate") LocalDateTime startDate,
+                                               @Param("endDate") LocalDateTime endDate,
+                                               @Param("status") String status);
+    
+    // 连接查询
+    @Select("SELECT o.id, o.order_number, o.total_amount, o.status, " +
+            "u.username, u.email " +
+            "FROM orders o " +
+            "INNER JOIN users u ON o.user_id = u.id " +
+            "WHERE o.status = #{status} " +
+            "ORDER BY o.created_date DESC " +
+            "LIMIT #{limit}")
+    @Results({
+        @Result(property = "id", column = "id"),
+        @Result(property = "orderNumber", column = "order_number"),
+        @Result(property = "totalAmount", column = "total_amount"),
+        @Result(property = "status", column = "status"),
+        @Result(property = "username", column = "username"),
+        @Result(property = "email", column = "email")
+    })
+    List<OrderWithUserDTO> getOrdersWithUser(@Param("status") String status, 
+                                            @Param("limit") int limit);
+    
+    // 批量更新
+    @Update("<script>" +
+            "UPDATE orders SET status = #{newStatus} " +
+            "WHERE id IN " +
+            "<foreach collection='orderIds' item='id' open='(' close=')' separator=','>" +
+            "#{id}" +
+            "</foreach>" +
+            "</script>")
+    int batchUpdateStatus(@Param("orderIds") List<Long> orderIds, 
+                         @Param("newStatus") String newStatus);
+    
+    // 存在性检查
+    @Select("SELECT COUNT(1) FROM orders WHERE user_id = #{userId} AND status = #{status}")
+    int countUserOrdersByStatus(@Param("userId") Long userId, @Param("status") String status);
+    
+    // 软删除相关操作
+    @Update("UPDATE orders SET deleted = 1, deleted_time = NOW() WHERE id = #{id}")
+    int softDeleteById(@Param("id") Long id);
+    
+    @Select("SELECT * FROM orders WHERE deleted = 0 AND user_id = #{userId} ORDER BY created_date DESC")
+    List<Order> selectActiveOrdersByUserId(@Param("userId") Long userId);
+}
+
+// 结果DTO
+@Data
+public class OrderStatisticsDTO {
+    private LocalDate orderDate;
+    private Long orderCount;
+    private BigDecimal totalAmount;
+}
+
+@Data
+public class OrderWithUserDTO {
+    private Long id;
+    private String orderNumber;
+    private BigDecimal totalAmount;
+    private String status;
+    private String username;
+    private String email;
+}
+```
+
+## 规则4：实现分页查询功能
+
+标题：优化大数据集查询性能
+描述：使用MyBatis Plus的分页插件处理大数据集。合理设置页大小，配置分页插件参数。
+
+**好示例：**
+
+```java
+// 分页插件配置
+@Configuration
+public class MybatisPlusConfig {
+    
+    @Bean
+    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        
+        // 分页插件
+        PaginationInnerInterceptor paginationInterceptor = new PaginationInnerInterceptor(DbType.MYSQL);
+        paginationInterceptor.setMaxLimit(500L);  // 限制最大查询数量
+        paginationInterceptor.setOverflow(false); // 超过最大页数时不查询
+        interceptor.addInnerInterceptor(paginationInterceptor);
+        
+        // 乐观锁插件
+        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
+        
+        return interceptor;
+    }
+}
+
+// Service层分页查询
+@Service
+@Transactional(readOnly = true)
+public class ProductQueryService {
+    
+    private final ProductMapper productMapper;
+    
+    public IPage<ProductDTO> searchProducts(ProductSearchRequest request) {
+        // 构建分页参数
+        Page<Product> page = new Page<>(request.getPage(), request.getSize());
+        
+        // 构建查询条件
+        LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+        
+        if (StringUtils.hasText(request.getName())) {
+            queryWrapper.like(Product::getName, request.getName());
+        }
+        
+        if (request.getCategoryId() != null) {
+            queryWrapper.eq(Product::getCategoryId, request.getCategoryId());
+        }
+        
+        if (request.getMinPrice() != null) {
+            queryWrapper.ge(Product::getPrice, request.getMinPrice());
+        }
+        
+        if (request.getMaxPrice() != null) {
+            queryWrapper.le(Product::getPrice, request.getMaxPrice());
+        }
+        
+        // 排序
+        if (StringUtils.hasText(request.getSortBy())) {
+            if ("desc".equalsIgnoreCase(request.getSortDirection())) {
+                queryWrapper.orderByDesc(request.getSortBy());
+            } else {
+                queryWrapper.orderByAsc(request.getSortBy());
+            }
+        } else {
+            queryWrapper.orderByDesc(Product::getCreatedDate);
+        }
+        
+        // 执行分页查询
+        IPage<Product> productPage = productMapper.selectPage(page, queryWrapper);
+        
+        // 转换为DTO
+        return productPage.convert(productConverter::toDTO);
+    }
+    
+    // 自定义分页查询
+    public IPage<ProductSummaryDTO> getProductSummaries(Page<ProductSummaryDTO> page, 
+                                                       Long categoryId) {
+        return productMapper.selectProductSummaries(page, categoryId);
+    }
+    
+    // 避免深度分页，使用游标分页
+    public List<ProductDTO> getProductsAfterCursor(Long lastId, int limit) {
+        LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.gt(Product::getId, lastId)
+                   .orderByAsc(Product::getId)
+                   .last("LIMIT " + Math.min(limit, 100));  // 限制最大数量
+        
+        List<Product> products = productMapper.selectList(queryWrapper);
+        return products.stream()
+                      .map(productConverter::toDTO)
+                      .collect(Collectors.toList());
+    }
+}
+
+// Mapper中的自定义分页查询
+@Mapper
+public interface ProductMapper extends BaseMapper<Product> {
+    
+    @Select("SELECT p.id, p.name, p.price, c.name as category_name " +
+            "FROM products p " +
+            "LEFT JOIN categories c ON p.category_id = c.id " +
+            "WHERE p.category_id = #{categoryId} " +
+            "ORDER BY p.created_date DESC")
+    IPage<ProductSummaryDTO> selectProductSummaries(Page<ProductSummaryDTO> page, 
+                                                   @Param("categoryId") Long categoryId);
+}
+```
+
+## 规则5：使用条件构造器进行动态查询
+
+标题：实现灵活的动态查询构建
+描述：使用QueryWrapper和LambdaQueryWrapper构建复杂的动态查询条件，提供类型安全的查询构建器。
+
+## 规则6：正确处理关联查询和结果映射
+
+标题：优化关联查询性能
+描述：合理设计关联查询，使用@Results注解或XML映射处理复杂的结果映射。避免N+1查询问题。
+
+## 规则7：使用IService接口简化业务操作
+
+标题：利用MyBatis Plus的Service层抽象
+描述：继承IService接口获得常用的业务操作方法，减少样板代码。
+
+**好示例：**
+
+```java
+// Service接口
+public interface UserService extends IService<User> {
+    // IService已提供大量常用方法：
+    // save(), saveBatch(), saveOrUpdate(), removeById(), 
+    // getById(), list(), page(), count() 等
+    
+    // 添加业务特定方法
+    UserDTO getUserWithProfile(Long userId);
+    boolean activateUser(Long userId);
+    List<UserDTO> searchActiveUsers(String keyword);
+}
+
+// Service实现
+@Service
+@Transactional(readOnly = true)
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+    
+    private final UserMapper userMapper;
+    private final UserConverter userConverter;
+    
+    public UserServiceImpl(UserMapper userMapper, UserConverter userConverter) {
+        this.userMapper = userMapper;
+        this.userConverter = userConverter;
+    }
+    
+    @Override
+    public UserDTO getUserWithProfile(Long userId) {
+        UserWithProfileDTO userWithProfile = userMapper.selectUserWithProfile(userId);
+        return userConverter.toDTO(userWithProfile);
+    }
+    
+    @Override
+    @Transactional
+    public boolean activateUser(Long userId) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new UserNotFoundException("用户不存在: " + userId);
+        }
+        
+        user.setStatus(UserStatus.ACTIVE);
+        return updateById(user);
+    }
+    
+    @Override
+    public List<UserDTO> searchActiveUsers(String keyword) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getStatus, UserStatus.ACTIVE)
+                   .and(wrapper -> 
+                       wrapper.like(User::getUsername, keyword)
+                              .or()
+                              .like(User::getEmail, keyword)
+                   );
+        
+        List<User> users = list(queryWrapper);
+        return users.stream()
+                   .map(userConverter::toDTO)
+                   .collect(Collectors.toList());
+    }
+}
+```
+
+## 规则8：实现自定义Mapper方法
+
+标题：扩展Mapper功能
+描述：通过XML配置或注解SQL实现复杂的数据访问逻辑，处理MyBatis Plus无法覆盖的场景。

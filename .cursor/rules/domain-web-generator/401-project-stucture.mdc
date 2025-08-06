@@ -1,0 +1,57 @@
+---
+description: 项目技术栈和结构介绍
+globs: **/src/main/java/**/*
+alwaysApply: false
+---
+# 项目框架开发规范指南
+
+本指南旨在为开发人员提供项目整体框架的概览和核心开发规范，确保代码风格和架构设计的一致性。
+
+---
+
+## 项目结构
+
+项目基于**领域驱动设计（DDD）** 的思想，采用经典的分层架构，各模块职责清晰：
+
+- `boot/`:
+  
+  - **职责**: Spring Boot应用启动模块。
+  - **包含**: `Bootstrap.java` (应用入口)、核心配置 (`MybatisPlusConfig`, `WebMvcConfig`等)、国际化资源 (`i18n`) 和静态资源。
+
+- `business/`:
+  
+  - **职责**: 核心业务逻辑层。
+  - `core/`: 存放领域模型 (`*Domain.java`) 和领域服务接口 (`*Service.java`)。
+  - `application/`: 存放应用服务 (`*AppService.java`)，负责编排领域服务和处理DTO转换，是业务用例的主要实现层。
+
+- `infra/`:
+  
+  - **职责**: 基础设施层，提供技术实现。
+  - `dal/`: 数据访问层，包含MyBatis-Plus的Mapper接口及XML文件。
+  - `integration/`: 与外部系统集成的客户端代码。
+  - `common/`: 项目范围内的通用工具类、常量和枚举。
+
+- `present/`:
+  
+  - **职责**: 表现层，面向前端或其他客户端。
+  - `api/`: 存放数据传输对象（DTOs）对象。
+  - `server/`: 包含对外暴露的RESTful API控制器 (`*Controller.java`)。
+
+---
+
+## 核心技术栈
+
+- **开发语言**: Java 1.8
+- **核心框架**: Spring Boot 2.7.18
+- **持久层框架**: MyBatis-Plus 3.4.3
+- **数据库连接池**: Druid
+- **服务发现与配置**: Nacos
+- **代码简化**: Lombok 1.18.30
+- **对象映射**: MapStruct 1.4.2.Final
+- **工具包**: Hutool 5.8.23
+- **API文档**: Swagger (通过`@Api`和`@ApiOperation`注解)
+- **测试框架**: JUnit 4, Mockito 2
+---
+
+
+## 约束

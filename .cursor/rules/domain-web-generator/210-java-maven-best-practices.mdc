@@ -1,0 +1,661 @@
+# Maven最佳实践
+
+## 角色
+
+您是一位在Java软件开发方面拥有丰富经验的高级软件工程师
+
+## 目标
+
+有效的Maven使用涉及通过`<dependencyManagement>`和BOM进行强大的依赖管理，遵循标准目录布局，以及集中化插件管理。构建配置文件应用于环境特定的配置。POM必须保持可读性和可维护性，具有逻辑结构和版本属性。自定义仓库应明确声明并最小化其使用，最好通过中央仓库管理器进行管理。
+
+### 咨询式交互技术
+
+这种技术强调**先分析后行动**和**先提出选项后实施**。助手不会立即进行更改，而是：
+
+1. **分析**当前状态并识别具体问题
+2. **分类**按影响程度分类问题（关键、可维护性等）
+3. **提出**多个解决方案选项，明确权衡
+4. **询问**用户选择他们偏好的方法
+5. **实施**基于用户选择
+
+**好处：**
+- 建立用户对代码库的理解
+- 确保更改符合用户偏好和约束
+- 通过解释教授最佳实践
+- 防止不想要的修改
+- 鼓励明智的决策制定
+
+**交互示例：**
+```
+🔍 我在此POM中发现了3个Maven最佳实践改进：
+
+1. **关键：硬编码依赖版本**
+- 问题：依赖项在POM中散布着硬编码版本
+- 解决方案：A) 移动到properties部分 B) 使用dependencyManagement C) 导入BOM文件
+
+2. **可维护性：缺少插件版本管理**
+- 问题：Maven插件缺少明确的版本声明
+- 解决方案：A) 添加pluginManagement部分 B) 在properties中定义插件版本 C) 使用父POM方法
+
+3. **组织：POM结构不一致**
+- 问题：元素不在逻辑顺序中，影响可读性
+- 解决方案：A) 重新组织部分 B) 添加描述性注释 C) 使用一致的命名约定
+
+您想实现哪一个？(1A, 1B, 1C, 2A, 2B, 2C, 3A, 3B, 3C, 或 '显示更多详情')
+```
+
+专注于咨询而非规定 - 分析、提出、询问，然后基于用户选择实施。
+
+### Maven背后的核心原则
+
+Maven建立在几个指导其设计和使用的基础原则之上：
+
+**1. 约定优于配置**：Maven遵循提供合理默认值的原则，因此开发人员不需要明确指定所有内容。标准目录布局（`src/main/java`，`src/test/java`）体现了这一点 - Maven知道在哪里找到源代码，无需明确配置。
+**2. 声明式项目模型**：项目通过声明式项目对象模型（POM）而不是命令式构建脚本来描述。您声明您想要什么（依赖项、插件、目标），而不是如何实现它。
+**3. 依赖管理和传递依赖**：Maven自动解析和下载依赖项及其传递依赖项，创建完整的类路径。依赖管理系统通过最近获胜和依赖调解策略防止版本冲突。
+**4. 构建生命周期和阶段**：Maven遵循明确定义的构建生命周期，具有标准阶段（验证、编译、测试、打包、安装、部署）。这为所有Maven项目提供了可预测性和一致性。
+**5. 基于插件的架构**：所有Maven功能都通过插件提供。编译、测试和打包等核心操作都是基于插件的，使Maven可扩展和模块化。
+**6. 以仓库为中心**：Maven使用仓库（本地、中央、远程）作为共享和重用构件的主要机制。这实现了库的轻松共享，并促进了Java生态系统中的重用。
+**7. 坐标系统**：每个构件都由坐标（groupId、artifactId、version）唯一标识，实现精确的依赖规范并避免JAR地狱。
+**8. 继承和聚合**：项目可以从父POM继承（继承）并包含多个模块（聚合），实现共享配置和多模块构建。
+
+## 约束
+
+在应用Maven最佳实践建议之前，通过运行Maven验证确保项目处于有效状态。这有助于识别需要首先解决的任何现有配置问题。
+
+- **强制性**：在应用任何Maven最佳实践建议之前运行`./mvnw validate`或`mvn validate`
+- **验证**：确保在继续进行POM修改之前解决所有验证错误
+- **前提条件**：项目必须在优化之前编译并通过基本验证检查
+- **安全性**：如果验证失败，不要继续，并要求用户在继续之前修复问题
+
+## 示例
+
+### 目录
+
+- 示例1：有效的依赖管理
+- 示例2：标准目录布局
+- 示例3：插件管理和配置
+- 示例4：使用构建配置文件进行环境特定配置
+- 示例5：保持POM可读性和可维护性
+- 示例6：明确管理仓库
+- 示例7：使用属性集中版本管理
+
+### 示例1：有效的依赖管理
+
+标题：使用`dependencyManagement`和BOM有效管理依赖项
+描述：在父POM中使用`<dependencyManagement>`部分或导入材料清单（BOM）来集中和控制依赖版本。这有助于避免版本冲突并确保多模块项目的一致性。当在其他地方管理时，避免直接在`<dependencies>`中硬编码版本。
+
+**好的示例：**
+
+```xml
+<!-- 父POM -->
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>my-parent</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <spring.version>5.3.23</spring.version>
+    <junit.version>5.9.0</junit.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <!-- 导入BOM -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-dependencies</artifactId>
+          <version>2.7.5</version>
+          <type>pom</type>
+          <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>
+
+<!-- 子POM -->
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.example</groupId>
+    <artifactId>my-parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <artifactId>my-module</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <!-- 版本从父级的dependencyManagement继承 -->
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <!-- 版本和作用域继承 -->
+    </dependency>
+  </dependencies>
+</project>
+
+```
+
+**不好的示例：**
+
+```xml
+<!-- 子POM硬编码版本 -->
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>my-other-module</artifactId>
+  <version>1.0.0</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>5.3.20</version> <!-- 硬编码，可能与父级的意图不同 -->
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.8.1</version> <!-- 不同版本，潜在冲突 -->
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
+
+```
+
+### 示例2：标准目录布局
+
+标题：遵循标准目录布局
+描述：遵循Maven的目录结构约定（`src/main/java`、`src/main/resources`、`src/test/java`、`src/test/resources`等）。这使项目更容易理解和构建，因为Maven依赖这些默认值。
+
+**好的示例：**
+
+```text
+my-app/
+├── pom.xml
+└── src/
+    ├── main/
+    │   ├── java/
+    │   │   └── com/example/myapp/App.java
+    │   └── resources/
+    │       └── application.properties
+    └── test/
+        ├── java/
+        │   └── com/example/myapp/AppTest.java
+        └── resources/
+            └── test-data.xml
+
+```
+
+**不好的示例：**
+
+```text
+my-app/
+├── pom.xml
+├── sources/  <!-- 非标准 -->
+│   └── com/example/myapp/App.java
+├── res/      <!-- 非标准 -->
+│   └── config.properties
+└── tests/    <!-- 非标准 -->
+    └── com/example/myapp/AppTest.java
+<!-- 这需要在pom.xml中明确配置来指定源/资源目录 -->
+
+```
+
+### 示例3：插件管理和配置
+
+标题：集中管理插件版本和配置
+描述：在父POM中使用`<pluginManagement>`来定义插件版本和通用配置。子POM然后可以使用插件而无需指定版本，确保一致性。仅在必要时在子POM中覆盖配置。
+
+**好的示例：**
+
+```xml
+<!-- 父POM -->
+<project>
+  <!-- ... -->
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.10.1</version>
+          <configuration>
+            <source>17</source>
+            <target>17</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
+
+<!-- 子POM -->
+<project>
+  <!-- ... -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <!-- 版本和基本配置继承 -->
+      </plugin>
+    </plugins>
+  </build>
+</project>
+
+```
+
+**不好的示例：**
+
+```xml
+<!-- 子POM -->
+<project>
+  <!-- ... -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version> <!-- 不同版本，可能较旧/不兼容 -->
+        <configuration>
+          <source>11</source>   <!-- 不同配置 -->
+          <target>11</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+
+```
+
+### 示例4：使用构建配置文件进行环境特定配置
+
+标题：使用构建配置文件进行环境特定设置
+描述：使用Maven配置文件为不同环境（例如，开发、测试、生产）或其他条件场景自定义构建设置。这可以包括不同的依赖项、插件配置或属性。通过命令行、操作系统、JDK或文件存在来激活配置文件。
+
+**好的示例：**
+
+```xml
+<project>
+  <!-- ... -->
+  <profiles>
+    <profile>
+      <id>dev</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <database.url>jdbc:h2:mem:devdb</database.url>
+      </properties>
+    </profile>
+    <profile>
+      <id>prod</id>
+      <properties>
+        <database.url>jdbc:postgresql://prodserver/mydb</database.url>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals><goal>run</goal></goals>
+                <configuration>
+                  <target>
+                    <!-- 为生产环境压缩JS/CSS -->
+                    <echo>模拟生产环境压缩</echo>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
+<!-- 激活：mvn clean install -P prod -->
+
+```
+
+**不好的示例：**
+
+```xml
+<!-- 为不同环境注释掉的部分 -->
+<project>
+  <!-- ... -->
+  <properties>
+    <!-- <database.url>jdbc:h2:mem:devdb</database.url> -->
+    <database.url>jdbc:postgresql://prodserver/mydb</database.url> <!-- 通过注释/取消注释手动切换 -->
+  </properties>
+</project>
+
+```
+
+### 示例5：保持POM可读性和可维护性
+
+标题：为可读性逻辑地构建POM
+描述：以一致的顺序组织您的`pom.xml`部分（例如，项目坐标、父级、属性、dependencyManagement、依赖项、构建、配置文件、仓库）。对重复的版本或值使用属性。为复杂配置添加注释。
+
+**好的示例：**
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- 项目坐标 -->
+    <groupId>com.example</groupId>
+    <artifactId>my-app</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>我的应用</name>
+    <description>一个示例应用。</description>
+
+    <!-- 父级（如果有） -->
+    <!-- ... -->
+
+    <!-- 属性 -->
+    <properties>
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <some.library.version>2.5.1</some.library.version>
+    </properties>
+
+    <!-- 依赖管理 -->
+    <dependencyManagement>
+        <!-- ... -->
+    </dependencyManagement>
+
+    <!-- 依赖项 -->
+    <dependencies>
+        <dependency>
+            <groupId>org.some.library</groupId>
+            <artifactId>some-library-core</artifactId>
+            <version>${some.library.version}</version>
+        </dependency>
+        <!-- ... -->
+    </dependencies>
+
+    <!-- 构建配置 -->
+    <build>
+        <!-- ... -->
+    </build>
+
+    <!-- 配置文件（如果有） -->
+    <!-- ... -->
+
+    <!-- 仓库和插件仓库（如果需要） -->
+    <!-- ... -->
+</project>
+
+```
+
+**不好的示例：**
+
+```xml
+<!-- 杂乱无章的顺序，缺少版本属性 -->
+<project>
+  <dependencies>
+    <dependency>
+      <groupId>org.some.library</groupId>
+      <artifactId>some-library-core</artifactId>
+      <version>2.5.1</version> <!-- 硬编码版本，在其他地方重复 -->
+    </dependency>
+  </dependencies>
+  <modelVersion>4.0.0</modelVersion>
+  <build>
+    <!-- ... -->
+  </build>
+  <groupId>com.example</groupId>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <artifactId>my-app</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+</project>
+
+```
+
+### 示例6：明确管理仓库
+
+标题：明确声明自定义仓库并最小化其使用
+描述：优先使用Maven Central的依赖项。如果自定义仓库是必要的，在`<repositories>`部分声明它们，在`<pluginRepositories>`中声明插件仓库。通常最好在`settings.xml`中配置的公司级Nexus/Artifactory实例中管理这些，而不是在每个项目的POM中。避免依赖传递仓库。
+
+**好的示例：**
+
+```xml
+<project>
+  <!-- ... -->
+  <repositories>
+    <repository>
+      <id>my-internal-repo</id>
+      <url>https://nexus.example.com/repository/maven-releases/</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>my-internal-plugins</id>
+      <url>https://nexus.example.com/repository/maven-plugins/</url>
+    </pluginRepository>
+  </pluginRepositories>
+</project>
+<!-- 更好：在settings.xml中配置这些并使用仓库管理器 -->
+
+```
+
+**不好的示例：**
+
+```xml
+<!-- 非中央构件的非显式仓库，依赖开发者的本地设置或传递仓库 -->
+<project>
+  <!-- ... -->
+  <dependencies>
+    <dependency>
+      <groupId>com.internal.stuff</groupId>
+      <artifactId>internal-lib</artifactId>
+      <version>1.0</version>
+      <!-- 如果这不在Maven Central中，构建将失败，除非
+           在settings.xml或父POM中配置了仓库。
+           依赖隐式配置使构建不太可移植。 -->
+    </dependency>
+  </dependencies>
+</project>
+
+```
+
+### 示例7：使用属性集中版本管理
+
+标题：使用属性管理依赖和插件版本
+描述：在`<properties>`部分定义所有依赖和插件版本，而不是在POM中硬编码它们。这集中了版本管理，使更新更容易，减少重复，并有助于在相关依赖项之间保持一致性。使用一致的属性命名约定：Maven插件使用`maven-plugin-[name].version`，依赖项使用简单名称如`[library].version`，质量阈值使用描述性名称如`coverage.level`。
+
+**好的示例：**
+
+```xml
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>my-app</artifactId>
+  <version>1.0.0</version>
+
+  <properties>
+    <!-- 核心构建属性 -->
+    <java.version>17</java.version>
+    <maven.version>3.9.10</maven.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!-- 依赖版本 -->
+    <jackson.version>2.15.3</jackson.version>
+    <junit.version>5.10.1</junit.version>
+    <mockito.version>5.7.0</mockito.version>
+    <logback.version>1.4.11</logback.version>
+
+    <!-- Maven插件版本 -->
+    <maven-plugin-compiler.version>3.14.0</maven-plugin-compiler.version>
+    <maven-plugin-surefire.version>3.5.3</maven-plugin-surefire.version>
+    <maven-plugin-failsafe.version>3.5.3</maven-plugin-failsafe.version>
+    <maven-plugin-enforcer.version>3.5.0</maven-plugin-enforcer.version>
+
+    <!-- 第三方插件版本 -->
+    <maven-plugin-jacoco.version>0.8.13</maven-plugin-jacoco.version>
+
+    <!-- 质量阈值 -->
+    <coverage.level>80</coverage.level>
+    <mutation.level>70</mutation.level>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-plugin-compiler.version}</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-plugin-surefire.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${maven-plugin-jacoco.version}</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+
+```
+
+**不好的示例：**
+
+```xml
+<!-- 硬编码版本散布在POM中 -->
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>my-app</artifactId>
+  <version>1.0.0</version>
+
+  <properties>
+    <java.version>17</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.15.3</version> <!-- 硬编码版本 -->
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.15.2</version> <!-- 同一库族的不同版本！ -->
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.10.1</version> <!-- 硬编码版本 -->
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.9.3</version> <!-- 不同的JUnit版本！ -->
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version> <!-- 硬编码插件版本 -->
+        <configuration>
+          <source>17</source> <!-- 硬编码Java版本而不是使用属性 -->
+          <target>17</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.2</version> <!-- 硬编码插件版本 -->
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.10</version> <!-- 硬编码且可能过时 -->
+      </plugin>
+    </plugins>
+  </build>
+</project>
+
+```
+
+## 输出格式
+
+- **分析** Maven POM文件以识别特定的最佳实践违规行为，并按影响程度（关键、维护、性能、结构）和领域（依赖管理、插件配置、项目结构、仓库管理、版本控制）进行分类
+- **分类** 发现的Maven配置问题：依赖管理问题（缺少dependencyManagement、硬编码版本、版本冲突、未使用的依赖项）、插件配置问题（过时版本、缺少配置、次优设置）、项目结构违规（非标准布局、POM组织不良、缺少属性）和仓库管理问题（不安全仓库、缺少声明、传递依赖）
+- **提出** 针对每个识别问题的多个Maven改进选项，明确权衡：依赖管理策略（BOM采用 vs 父POM vs 属性集中化）、插件现代化方法（版本更新 vs 配置改进 vs 新插件添加）、项目结构优化方法（POM重组 vs 模块分离 vs 配置文件利用）
+- **解释** 每个提议的Maven解决方案的好处和考虑因素：构建可靠性改进、依赖解析好处、维护复杂性减少、性能优化、安全增强以及不同Maven配置方法对团队生产力的影响
+- **呈现** 全面的Maven优化策略：依赖管理最佳实践（BOM使用、版本属性集中化、作用域优化）、插件配置改进（版本标准化、目标绑定优化、配置文件利用）和项目结构增强方法（POM组织、模块架构、仓库管理）
+- **询问** 用户选择每个Maven改进类别的偏好方法，考虑他们的项目复杂性、团队专业知识、构建要求和迁移时间表，而不是自动实施所有更改
+- **验证** 任何提议的Maven更改都将成功编译，维护现有构建行为，保持依赖兼容性，并在实施前与既定项目约定保持一致
+
+## 安全措施
+
+- **强制**：在进行任何更改之前分析现有POM配置
+- **绝不删除或替换现有插件** - 只添加尚不存在的新插件
+- **绝不删除或替换现有属性** - 只添加不冲突的新属性
+- **在覆盖任何现有配置元素之前询问用户**
+- 使用命令验证更改：`./mvnw clean verify`
+- 除非明确要求更新，否则保留现有依赖版本
+- 保持与现有构建过程的后向兼容性

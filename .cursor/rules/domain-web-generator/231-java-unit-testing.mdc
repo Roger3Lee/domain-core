@@ -1,0 +1,574 @@
+# Java单元测试指南
+
+## 角色
+
+您是一名在Java软件开发方面具有丰富经验的高级软件工程师
+
+## 目标
+
+有效的Java单元测试需要使用JUnit 5注解和AssertJ进行流畅断言。测试应该遵循Given-When-Then（给定-执行-断言）结构，并使用描述性命名以确保清晰度。每个测试必须具有单一职责，保持独立性，并利用参数化测试处理数据变体。使用Mockito等框架模拟依赖项对于隔离被测试单元至关重要。虽然代码覆盖率是有用的指导，但重点应该放在对关键逻辑和边界情况进行有意义的测试上。测试类和方法通常应该是包私有的。代码分割策略包括小的测试方法和辅助函数。应该避免测试实现细节、硬编码值和忽略失败等反模式。正确的状态管理涉及隔离状态和不可变对象，错误处理应该包括测试预期的异常及其消息。
+
+### 咨询式交互技术
+
+该技术强调**在行动之前先分析**和**在实施之前先提出选项**。助手不会立即进行更改，而是：
+
+1. **分析**当前状态并识别具体问题
+2. **分类**按影响程度（关键、可维护性等）分类问题
+3. **提出**多个解决方案选项，说明清晰的权衡
+4. **询问**用户选择他们偏好的方法
+5. **实施**基于用户选择的解决方案
+
+**优势：**
+
+- 建立用户对代码库的理解
+- 确保更改符合用户偏好和约束
+- 通过解释教授最佳实践
+- 防止不必要的修改
+- 鼓励明智的决策
+
+### 实施这些原则
+
+这些指南基于以下核心原则：
+
+1. **清晰性和可读性**：测试应该容易理解。通过描述性命名（或`@DisplayName`）、清晰的Given-When-Then结构和专注的断言来实现。可读的测试作为被测试代码的活文档。
+2. **隔离和独立性**：每个测试必须是自包含的，不依赖其他测试的状态或结果。依赖项应该被模拟以确保被测试单元在隔离状态下得到验证。这导致可靠和稳定的测试套件。
+3. **全面验证**：测试应该彻底验证单元的行为，包括对有效输入、边界情况、边界条件和错误场景的响应。这不仅涉及正面路径，还包括代码如何处理失败和异常。
+4. **现代工具和实践**：利用现代测试框架（JUnit 5）、流畅断言库（AssertJ）和模拟工具（Mockito）编写表达性强、可维护且功能强大的测试。利用参数化测试等功能减少样板代码并改善数据变体的覆盖。
+5. **可维护性和专注性**：测试应该易于维护。这意味着避免过于复杂的测试、测试实现细节或具有多重职责的测试。编写良好的测试清楚地表明正在测试什么以及为什么，简化调试和重构工作。
+
+## 约束
+
+在应用任何建议之前，通过运行Maven编译来确保项目处于有效状态。编译失败是阻止任何进一步处理的**阻塞条件**。
+
+- **强制性**：在应用任何更改之前运行`./mvnw compile`或`mvn compile`
+- **先决条件**：项目必须成功编译并通过基本验证检查，才能进行任何优化
+- **关键安全**：如果编译失败，**立即停止**，不要继续任何建议
+- **阻塞条件**：编译错误必须由用户解决，才能继续进行任何面向对象设计改进
+- **无例外**：在任何情况下都不应将设计建议应用于无法编译的项目
+
+## 示例
+
+### 目录
+
+- 示例1：使用JUnit 5注解
+- 示例2：使用AssertJ进行断言
+- 示例3：使用Given-When-Then结构化测试
+- 示例4：使用描述性测试名称
+- 示例5：测试的单一职责
+- 示例6：确保测试独立性
+- 示例7：使用参数化测试处理数据变体
+- 示例8：利用模拟处理依赖（Mockito）
+- 示例9：考虑测试覆盖率，但不要过分追求
+- 示例10：测试作用域
+- 示例11：代码分割策略
+- 示例12：反模式和代码异味
+- 示例13：状态管理
+- 示例14：错误处理
+
+### 示例1：使用JUnit 5注解
+
+标题：优先使用JUnit 5注解而不是JUnit 4
+描述：使用来自`org.junit.jupiter.api`包的注解（例如`@Test`、`@BeforeEach`、`@AfterEach`、`@DisplayName`、`@Nested`、`@Disabled`）而不是JUnit 4的对应注解（`@org.junit.Test`、`@Before`、`@After`、`@Ignore`）。这确保了一致性并允许利用JUnit 5的全部功能。
+
+**好的例子：**
+
+```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DisplayName("我的服务测试")
+class MyServiceTest {
+
+    private MyService service;
+
+    @BeforeEach
+    void setUp() {
+        service = new MyService(); // 在每个测试之前执行的设置
+    }
+
+    @Test
+    @DisplayName("应该正确处理数据")
+    void processData() {
+        // Given
+        String input = "test";
+
+        // When
+        String result = service.process(input);
+
+        // Then
+        assertThat(result).isEqualTo("PROCESSED:test");
+    }
+}
+```
+
+**坏的例子：**
+
+```java
+import org.junit.Before; // JUnit 4
+import org.junit.Test;   // JUnit 4
+import static org.junit.Assert.assertEquals; // JUnit 4 Assert
+
+public class MyServiceTest {
+
+    private MyService service;
+
+    @Before // JUnit 4
+    public void setup() {
+        service = new MyService();
+    }
+
+    @Test // JUnit 4
+    public void processData() {
+        String input = "test";
+        String result = service.process(input);
+        assertEquals("PROCESSED:test", result); // JUnit 4 Assert
+    }
+}
+```
+
+### 示例2：使用AssertJ进行断言
+
+标题：优先使用AssertJ进行断言
+描述：使用AssertJ的流畅API（`org.assertj.core.api.Assertions.assertThat`）来获得比JUnit Jupiter的`Assertions`类或Hamcrest匹配器更可读、表达性更强且更可维护的断言。
+
+**好的例子：**
+
+```java
+import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+class AssertJExampleTest {
+
+    @Test
+    void checkValue() {
+        String result = "hello";
+        assertThat(result)
+            .isEqualTo("hello")
+            .startsWith("hell")
+            .endsWith("o")
+            .hasSize(5); // 流畅地链式多个断言
+    }
+
+    @Test
+    void checkException() {
+        MyService service = new MyService();
+        assertThatThrownBy(() -> service.divide(1, 0)) // 测试异常的首选方式
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("zero");
+    }
+}
+```
+
+**坏的例子：**
+
+```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*; // JUnit Jupiter Assertions
+
+class JUnitAssertionsExampleTest {
+
+    @Test
+    void checkValue() {
+        String result = "hello";
+        assertEquals("hello", result); // 不够流畅
+        assertTrue(result.startsWith("hell")); // 每个属性单独断言
+        assertTrue(result.endsWith("o"));
+        assertEquals(5, result.length());
+    }
+
+    @Test
+    void checkException() {
+        MyService service = new MyService();
+        // 更冗长的异常测试
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> service.divide(1, 0)
+        );
+        assertTrue(exception.getMessage().contains("zero")); // 消息的单独断言
+    }
+}
+```
+
+### 示例3：使用Given-When-Then结构化测试
+
+标题：使用Given-When-Then模式结构化测试方法
+描述：将测试方法中的逻辑组织成三个明确的、清楚分离的阶段：**Given**（设置前置条件）、**When**（执行被测试的代码）和**Then**（验证结果）。使用注释或空行在视觉上分离这些阶段，增强测试目的的可读性和理解性。
+
+**好的例子：**
+
+```java
+import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class GivenWhenThenTest {
+
+    @Test
+    void shouldCalculateSumCorrectly() {
+        // Given
+        Calculator calculator = new Calculator();
+        int num1 = 5;
+        int num2 = 10;
+        int expectedSum = 15;
+
+        // When
+        int actualSum = calculator.add(num1, num2);
+
+        // Then
+        assertThat(actualSum).isEqualTo(expectedSum);
+    }
+}
+```
+
+**坏的例子：**
+
+```java
+import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class UnstructuredTest {
+
+    @Test
+    void testAddition() {
+        // 缺乏清晰的分离使测试流程难以跟踪
+        Calculator calculator = new Calculator();
+        assertThat(calculator.add(5, 10)).isEqualTo(15); // 结合了动作和验证
+        // 设置可能在其他地方与动作或验证混合
+    }
+}
+```
+
+### 示例4：使用描述性测试名称
+
+标题：编写描述性测试方法名或使用@DisplayName
+描述：测试名称应该清楚地传达正在测试的场景和预期结果。使用描述性方法名（例如，遵循`should_ExpectedBehavior_when_StateUnderTest`模式）或JUnit 5的`@DisplayName`注解进行更自然的语言描述。这使测试报告更易于理解。
+
+**好的例子：**
+
+```java
+@Test
+void should_throwException_when_divisorIsZero() {
+    // Given
+    Calculator calculator = new Calculator();
+
+    // When & Then
+    assertThatThrownBy(() -> calculator.divide(1, 0))
+        .isInstanceOf(ArithmeticException.class);
+}
+
+@Test
+@DisplayName("应该为正数返回正确的和")
+void additionWithPositives() {
+     // Given
+     Calculator calculator = new Calculator();
+     int num1 = 5;
+     int num2 = 10;
+
+     // When
+     int actualSum = calculator.add(num1, num2);
+
+     // Then
+     assertThat(actualSum).isEqualTo(15);
+}
+```
+
+**坏的例子：**
+
+```java
+@Test
+void testDivide() { // 名称过于通用，没有解释场景
+    // ... 测试逻辑 ...
+}
+
+@Test
+void test1() { // 无信息的名称
+    // ... 测试逻辑 ...
+}
+```
+
+### 示例5：测试的单一职责
+
+标题：每个测试方法应该验证一个逻辑概念
+描述：避免在单个测试方法中测试多个不相关的事物。每个测试应该专注于单元行为的一个特定方面或一个特定场景。这使测试更易于理解、调试和维护。如果测试失败，其特定的关注点使定位原因变得简单。
+
+**好的例子：**
+
+```java
+// 为不同验证方面分离测试
+@Test
+void should_reject_when_emailIsNull() {
+    // ... 空邮箱的测试逻辑 ...
+}
+
+@Test
+void should_reject_when_emailFormatIsInvalid() {
+    // ... 无效邮箱格式的测试逻辑 ...
+}
+```
+
+**坏的例子：**
+
+```java
+@Test
+void testUserValidation() { // 一次测试多个条件
+    // Given用户具有空邮箱
+    // ... 空邮箱的断言 ...
+
+    // Given用户具有无效邮箱格式
+    // ... 无效格式的断言 ...
+
+    // Given用户具有有效邮箱
+    // ... 有效邮箱的断言 ...
+}
+```
+
+### 示例6：确保测试独立性
+
+标题：测试必须独立并可以任意顺序运行
+描述：避免创建依赖于先前执行测试留下状态的测试。每个测试应该设置自己所需的前置条件（使用`@BeforeEach`或在测试方法内部），不应依赖执行顺序。这确保测试套件的稳定性和可靠性，防止不稳定的测试。
+
+**好的例子：**
+
+```java
+class IndependentTests {
+    private MyRepository repository = new InMemoryRepository(); // 或使用@BeforeEach
+
+    @Test
+    void should_findItem_when_itemExists() {
+        // Given
+        Item item = new Item("testId", "TestData");
+        repository.save(item); // 该测试特定的设置
+
+        // When
+        Optional<Item> found = repository.findById("testId");
+
+        // Then
+        assertThat(found).isPresent();
+    }
+
+    @Test
+    void should_returnEmpty_when_itemDoesNotExist() {
+        // Given - Repository是干净的（或通过@BeforeEach重新初始化）
+
+        // When
+        Optional<Item> found = repository.findById("nonExistentId");
+
+        // Then
+        assertThat(found).isNotPresent();
+    }
+}
+```
+
+**坏的例子：**
+
+```java
+class DependentTests {
+    private static MyRepository repository = new InMemoryRepository(); // 共享状态
+    private static Item savedItem;
+
+    @Test // 测试1（可能首先运行）
+    void testSave() {
+        savedItem = new Item("testId", "Data");
+        repository.save(savedItem);
+        // ... 断言 ...
+    }
+
+    @Test // 测试2（依赖于测试1已运行）
+    void testFind() {
+        // 如果testSave()没有运行或运行顺序改变，此测试失败
+        Optional<Item> found = repository.findById("testId");
+        assertThat(found).isPresent();
+    }
+}
+```
+
+### 示例7：使用参数化测试处理数据变体
+
+标题：使用@ParameterizedTest测试不同输入的相同逻辑
+描述：当测试方法在各种输入值或边界条件下的行为时，利用JUnit 5的参数化测试（`@ParameterizedTest`与诸如`@ValueSource`、`@CsvSource`、`@MethodSource`等源）。这避免了代码重复并清楚地将测试逻辑与测试数据分离。
+
+**好的例子：**
+
+```java
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class ParameterizedCalculatorTest {
+
+    private final Calculator calculator = new Calculator();
+
+    @ParameterizedTest(name = "{index} {0} + {1} = {2}") // 每个用例的清晰命名
+    @CsvSource({
+        "1,  2,  3",
+        "0,  0,  0",
+        "-5, 5,  0",
+        "10, -3, 7"
+    })
+    void additionTest(int a, int b, int expectedResult) {
+        // Given输入a, b（来自@CsvSource）
+
+        // When
+        int actualResult = calculator.add(a, b);
+
+        // Then
+        assertThat(actualResult).isEqualTo(expectedResult);
+    }
+}
+```
+
+**坏的例子：**
+
+```java
+import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class RepetitiveCalculatorTest {
+
+    private final Calculator calculator = new Calculator();
+
+    // 相同逻辑的冗余测试
+    @Test
+    void add1and2() {
+        assertThat(calculator.add(1, 2)).isEqualTo(3);
+    }
+
+    @Test
+    void add0and0() {
+        assertThat(calculator.add(0, 0)).isEqualTo(0);
+    }
+
+    @Test
+    void addNegative5and5() {
+        assertThat(calculator.add(-5, 5)).isEqualTo(0);
+    }
+
+    @Test
+    void add10andNegative3() {
+        assertThat(calculator.add(10, -3)).isEqualTo(7);
+    }
+}
+```
+
+### 示例8：利用模拟处理依赖（Mockito）
+
+标题：使用Mockito等模拟框架隔离被测试单元
+描述：单元测试应该仅专注于被测试类（被测系统 - SUT）的逻辑，而不是其依赖项（数据库、网络服务、其他类）。使用Mockito等模拟框架创建模拟对象来模拟这些依赖项的行为。这确保测试快速、可靠，并真正地在隔离状态下测试单元。
+
+**好的例子：**
+
+```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private UserService userService;
+
+    @Test
+    @DisplayName("通过id找到用户时应该返回用户")
+    void findUserById_Success() {
+        // Given
+        User expectedUser = new User("123", "John Doe");
+        when(userRepository.findById("123")).thenReturn(Optional.of(expectedUser));
+
+        // When
+        Optional<User> actualUser = userService.findUserById("123");
+
+        // Then
+        assertThat(actualUser).isPresent().contains(expectedUser);
+        verify(userRepository, times(1)).findById("123");
+        verifyNoMoreInteractions(userRepository);
+    }
+}
+```
+
+**坏的例子：**
+
+```java
+import org.junit.jupiter.api.Test;
+
+class UserServiceTestBad {
+
+    @Test
+    void findUserById() {
+        // 坏：使用真实依赖而不是模拟
+        DatabaseConnection connection = new DatabaseConnection("localhost", 5432);
+        UserRepository userRepository = new PostgresUserRepository(connection);
+        UserService userService = new UserService(userRepository);
+
+        // 此测试依赖于数据库的可用性和状态
+        Optional<User> user = userService.findUserById("123");
+
+        // 测试缓慢、脆弱，并且不隔离被测试单元
+        assertThat(user).isPresent();
+    }
+}
+```
+
+### 示例9：考虑测试覆盖率，但不要过分追求
+
+标题：使用代码覆盖率作为指导，而不是确定性的质量指标
+描述：像JaCoCo这样的工具可以测量您的测试执行了哪些代码行（代码覆盖率）。追求高覆盖率（例如>80%行/分支覆盖率）通常是好的实践，因为它表明大多数代码路径都被测试了。然而，100%的覆盖率并不保证无错误的代码或高质量的测试。关注为关键逻辑和边界情况编写有意义的测试，而不是仅仅追求覆盖率数字。测试可能覆盖一行代码，但实际上并没有有效验证其正确性。
+
+### 示例10：测试作用域
+
+标题：测试类和方法的包私有可见性
+描述：测试类应该具有包私有可见性。没有必要将它们设为公共的。测试方法也应该具有包私有可见性。没有必要将它们设为公共的。
+
+### 示例11：代码分割策略
+
+标题：有效组织测试代码
+描述：- **小的测试方法：**保持测试方法小且专注于测试单个行为。- **辅助方法：**使用辅助方法避免测试设置和断言中的代码重复。- **参数化测试：**利用JUnit的参数化测试用不同的输入值测试相同的逻辑。
+
+### 示例12：反模式和代码异味
+
+标题：要避免的常见测试错误
+描述：- **测试实现细节：**避免测试可能改变的实现细节，这会导致脆弱的测试。专注于测试行为和结果。- **硬编码值：**避免在测试中硬编码值。使用常量或测试数据使测试更可维护。- **复杂的测试逻辑：**保持测试逻辑简单，避免测试内的复杂计算或条件语句。- **忽略边界情况：**不要忽略边界情况或边界条件。确保测试覆盖广泛的输入，包括无效或意外值。- **缓慢的测试：**避免使开发人员不愿意频繁运行的缓慢测试。- **过度依赖模拟：**明智地使用模拟；太多的模拟会掩盖实际行为并使测试不太可靠。- **忽略测试失败：**永远不要忽略失败的测试。及时调查和修复它们。
+
+### 示例13：状态管理
+
+标题：有效管理测试状态
+描述：- **隔离状态：**确保每个测试都有自己的隔离状态，以避免测试间的干扰。使用`@BeforeEach`在每个测试前重置状态。- **不可变对象：**优先使用不可变对象来简化状态管理并避免意外的副作用。- **无状态组件：**尽可能设计无状态组件以减少测试中状态管理的需要。
+
+### 示例14：错误处理
+
+标题：有效测试异常场景
+描述：- **预期异常：**使用AssertJ的`assertThatThrownBy`验证方法在特定条件下抛出预期异常。- **异常消息：**断言异常消息以确保抛出正确的错误并带有有用的上下文。- **优雅降级：**测试应用程序如何处理错误以及在依赖项不可用时如何优雅降级。
+
+
+## 输出格式
+
+- **分析** 当前测试代码库，识别具体的单元测试问题并按影响程度分类（关键、可维护性、性能等）
+- **分类** 发现的测试问题：框架使用（JUnit 4 vs 5）、断言风格（JUnit vs AssertJ）、测试结构（命名、组织）、测试独立性（共享状态问题）和覆盖率缺口（边界条件、错误场景）
+- **提出** 针对每个识别出的问题的多个解决方案选项，并明确权衡：测试框架迁移的替代方法、断言库采用、测试结构改进和模拟策略
+- **解释** 每个提出解决方案的好处和考虑因素：JUnit 5 迁移路径、AssertJ 采用策略、Given-When-Then 实现选项、参数化测试方法和模拟框架选择
+- **展示** 全面的测试方法选项：RIGHT-BICEP 边界测试方法、A-TRIP 测试特征实现、CORRECT 验证策略和 JSpecify null 安全集成选择
+- **询问** 用户为每个改进类别选择他们偏好的方法，而不是自动实施所有更改
+- **验证** 任何提出的更改在实施前都能编译并维护现有功能
+
+## 安全保护措施
+
+- **阻塞安全检查**：在任何测试建议之前始终运行 `./mvnw compile` 以确保项目稳定性
+- **关键验证**：执行 `./mvnw clean verify` 以确保在实施新测试策略之前所有现有测试都通过
+- **强制验证**：确认在应用任何测试改进后所有现有功能保持完整
+- **回滚要求**：确保所有测试更改可以在引入编译或运行时问题时轻松回滚
+- **增量安全**：增量应用测试改进，在每次修改后验证编译和测试执行
+- **依赖验证**：验证任何新的测试依赖项（AssertJ、Mockito 扩展）都已正确配置且兼容
+- **测试隔离验证**：确保新测试不会在测试方法或类之间引入依赖关系
+- **性能监控**：验证测试执行时间保持合理，不会显著影响构建性能
