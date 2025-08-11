@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 /**
  * 项目控制器
@@ -24,20 +26,28 @@ public class ProjectController {
     @Autowired
     private ProjectAppService projectAppService;
 
-    @PostMapping("/page")
+    @GetMapping("/page")
     @ApiOperation("分页查询项目")
     public ApiResponse<PageResult<ProjectResponse>> page(
-            @RequestBody @Valid ProjectPageRequest request) {
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "1") Long pageNum,
+            @RequestParam(defaultValue = "10") Long pageSize) {
+        ProjectPageRequest request = new ProjectPageRequest();
+        request.setName(name);
+        request.setPageNum(pageNum);
+        request.setPageSize(pageSize);
         PageResult<ProjectResponse> pageResult = projectAppService.page(request);
         return ApiResponse.success(pageResult);
     }
 
     @PostMapping
     @ApiOperation("新增项目")
-    public ApiResponse<Integer> addProject(
+    public ResponseEntity<ApiResponse<Integer>> addProject(
             @RequestBody @Valid ProjectAddRequest request) {
         Integer projectId = projectAppService.addProject(request);
-        return ApiResponse.success(projectId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header("Location", "/api/v1/projects/" + projectId)
+                .body(ApiResponse.success(projectId));
     }
 
     @PutMapping
@@ -66,9 +76,10 @@ public class ProjectController {
 
     @DeleteMapping("/{id}")
     @ApiOperation("删除项目")
-    public ApiResponse<Boolean> deleteProject(
+    public ResponseEntity<ApiResponse<Boolean>> deleteProject(
             @ApiParam("项目ID") @PathVariable Integer id) {
         Boolean result = projectAppService.deleteProject(id);
-        return ApiResponse.success(result);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body(ApiResponse.success(result));
     }
 } 

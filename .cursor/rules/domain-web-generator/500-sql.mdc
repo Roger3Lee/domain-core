@@ -43,7 +43,7 @@ alwaysApply: false
 **通用规则：**
 
 - 对所有数据库对象使用snake_case
-- 表名使用复数形式（例如：`users`、`orders`）
+- 表名使用单数形式（例如：`user`、`order`）
 - 列名使用单数形式（例如：`user_id`、`order_date`）
 - 外键应以引用表名为前缀（例如：`user_id`）
 - 存储过程使用动词_名词格式（例如：`get_user`、`update_order`）

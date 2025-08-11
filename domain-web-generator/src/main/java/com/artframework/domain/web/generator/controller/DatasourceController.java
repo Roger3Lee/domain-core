@@ -5,6 +5,8 @@ import com.artframework.domain.web.generator.service.DatasourceAppService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,9 +21,20 @@ public class DatasourceController {
   @Autowired
   private DatasourceAppService datasourceAppService;
 
-  @PostMapping("/page")
+  @GetMapping("/page")
   @ApiOperation("分页查询数据源")
-  public ApiResponse<PageResult<DatasourceResponse>> page(@RequestBody @Valid DatasourcePageRequest request) {
+  public ApiResponse<PageResult<DatasourceResponse>> page(
+          @RequestParam(required = false) String name,
+          @RequestParam(required = false) String code,
+          @RequestParam(required = false) String dbType,
+          @RequestParam(defaultValue = "1") Long pageNum,
+          @RequestParam(defaultValue = "10") Long pageSize) {
+    DatasourcePageRequest request = new DatasourcePageRequest();
+    request.setName(name);
+    request.setCode(code);
+    request.setDbType(dbType);
+    request.setPageNum(pageNum);
+    request.setPageSize(pageSize);
     PageResult<DatasourceResponse> pageResult = datasourceAppService.page(request);
     return ApiResponse.success(pageResult);
   }
@@ -35,9 +48,11 @@ public class DatasourceController {
 
   @PostMapping
   @ApiOperation("新增数据源")
-  public ApiResponse<Integer> add(@RequestBody @Valid DatasourceAddRequest request) {
+  public ResponseEntity<ApiResponse<Integer>> add(@RequestBody @Valid DatasourceAddRequest request) {
     Integer id = datasourceAppService.addDatasource(request);
-    return ApiResponse.success(id);
+    return ResponseEntity.status(HttpStatus.CREATED)
+            .header("Location", "/api/v1/datasources/" + id)
+            .body(ApiResponse.success(id));
   }
 
   @PutMapping
@@ -49,9 +64,10 @@ public class DatasourceController {
 
   @DeleteMapping("/{id}")
   @ApiOperation("删除数据源")
-  public ApiResponse<Boolean> delete(@PathVariable Integer id) {
+  public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable Integer id) {
     Boolean result = datasourceAppService.deleteDatasource(id);
-    return ApiResponse.success(result);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT)
+            .body(ApiResponse.success(result));
   }
 
   @PostMapping("/{id}/sync")

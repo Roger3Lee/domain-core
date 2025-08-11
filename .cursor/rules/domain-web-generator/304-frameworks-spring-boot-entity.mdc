@@ -1,5 +1,5 @@
 ---
-globs: **/**DO.java
+globs: *DO.java
 alwaysApply: false
 ---
 # MyBatis Plus 实体层设计原则

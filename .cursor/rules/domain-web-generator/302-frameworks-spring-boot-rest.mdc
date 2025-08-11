@@ -1,6 +1,6 @@
 ---
 description: 
-globs: **/**Controller.java
+globs: *Controller.java
 alwaysApply: false
 ---
 # Java REST API设计原则

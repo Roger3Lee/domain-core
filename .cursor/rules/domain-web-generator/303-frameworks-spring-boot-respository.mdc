@@ -1,6 +1,6 @@
 ---
 description: 
-globs: **/**Repository.java,**/**RepositoryImpl.java
+globs: *Repository.java,*RepositoryImpl.java
 alwaysApply: false
 ---
 # Spring Boot MyBatis Plus 数据访问层设计原则

@@ -6,6 +6,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -24,20 +26,30 @@ public class DomainConfigController {
     @Autowired
     private DomainConfigAppService domainConfigAppService;
 
-    @PostMapping("/page")
+    @GetMapping("/page")
     @ApiOperation("分页查询领域模型")
     public ApiResponse<PageResult<DomainConfigResponse>> page(
-            @RequestBody @Valid DomainPageRequest request) {
+            @RequestParam(required = false) Integer projectId,
+            @RequestParam(required = false) String domainName,
+            @RequestParam(defaultValue = "1") Long pageNum,
+            @RequestParam(defaultValue = "10") Long pageSize) {
+        DomainPageRequest request = new DomainPageRequest();
+        request.setProjectId(projectId);
+        request.setDomainName(domainName);
+        request.setPageNum(pageNum);
+        request.setPageSize(pageSize);
         PageResult<DomainConfigResponse> pageResult = domainConfigAppService.page(request);
         return ApiResponse.success(pageResult);
     }
 
     @PostMapping
     @ApiOperation("新增领域模型")
-    public ApiResponse<Integer> addDomainConfig(
+    public ResponseEntity<ApiResponse<Integer>> addDomainConfig(
             @RequestBody @Valid DomainConfigAddRequest request) {
         Integer domainId = domainConfigAppService.addDomainConfig(request);
-        return ApiResponse.success(domainId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header("Location", "/api/v1/domain-configs/" + domainId)
+                .body(ApiResponse.success(domainId));
     }
 
     @PutMapping
@@ -58,10 +70,11 @@ public class DomainConfigController {
 
     @DeleteMapping("/{id}")
     @ApiOperation("删除领域模型")
-    public ApiResponse<Boolean> deleteDomainConfig(
+    public ResponseEntity<ApiResponse<Boolean>> deleteDomainConfig(
             @ApiParam("领域模型ID") @PathVariable Integer id) {
         Boolean result = domainConfigAppService.deleteDomainConfig(id);
-        return ApiResponse.success(result);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body(ApiResponse.success(result));
     }
 
     @PostMapping("/{id}/generate-code")

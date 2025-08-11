@@ -1,6 +1,5 @@
 ---
-description: 
-globs: globs: **/**Service.java, **/**ServiceImpl.java
+globs: *Service.java,*ServiceImpl.java
 alwaysApply: false
 ---
 # Spring Boot 服务层设计原则
