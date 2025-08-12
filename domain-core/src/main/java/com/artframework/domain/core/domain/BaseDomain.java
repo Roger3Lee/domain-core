@@ -1,6 +1,7 @@
 package com.artframework.domain.core.domain;
 
 
+import cn.hutool.core.annotation.PropIgnore;
 import com.artframework.domain.core.constants.SaveState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,6 +17,7 @@ public class BaseDomain {
 
     @ApiModelProperty(hidden = true)
     @JsonIgnore
+    @PropIgnore
     private transient Object _thisDomain;
 
     /**
