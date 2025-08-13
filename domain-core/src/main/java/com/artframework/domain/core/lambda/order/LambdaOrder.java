@@ -1,6 +1,5 @@
 package com.artframework.domain.core.lambda.order;
 
-import com.artframework.domain.core.MPFieldLambda;
 import com.artframework.domain.core.constants.Order;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import lombok.Getter;

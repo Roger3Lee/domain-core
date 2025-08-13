@@ -8,6 +8,8 @@ import com.artframework.domain.core.lambda.LambdaCache;
 import com.artframework.domain.core.lambda.order.LambdaOrder;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.Getter;
@@ -168,6 +170,8 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
     @Data
     @NoArgsConstructor
     public static class ConditionGroup {
+        @JsonProperty("logic")
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
         private LogicalOperator op = LogicalOperator.AND;
         private List<Object> condition = new ArrayList<>();
 
