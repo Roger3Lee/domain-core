@@ -64,8 +64,7 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
                 LambdaQuery<FamilyDomain.FamilyAddressDomain> lambdaQuery = LambdaQuery.of(FamilyDomain.FamilyAddressDomain.class);
                 lambdaQuery.eq(FamilyLambdaExp.familyAddress_familyIdTargetLambda,FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(resp));
                 FamilyDomain.FamilyAddressDomain item= familyAddressRepository.query(
-                    LambdaQueryUtils.combine(lambdaQuery, LambdaQueryUtils.getEntityFilters(loadFlag.getFilters(), FamilyDomain.FamilyAddressDomain.class),
-                    LambdaQueryUtils.getEntityOrders(loadFlag.getOrders(), FamilyDomain.FamilyAddressDomain.class)));
+                    LambdaQueryUtils.combine(lambdaQuery, loadFlag, FamilyDomain.FamilyAddressDomain.class));
                 if(ObjectUtil.isNotNull(item)){
                     item.set_thisDomain(resp);
                 }
@@ -75,8 +74,7 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
                 LambdaQuery<FamilyDomain.FamilyMemberDomain> lambdaQuery = LambdaQuery.of(FamilyDomain.FamilyMemberDomain.class);
                 lambdaQuery.eq(FamilyLambdaExp.familyMember_familyIdTargetLambda,FamilyLambdaExp.familyId_RelatedFamilyMember_SourceLambda.apply(resp));
                 List<FamilyDomain.FamilyMemberDomain> queryList = familyMemberRepository.queryList(
-                    LambdaQueryUtils.combine(lambdaQuery, LambdaQueryUtils.getEntityFilters(loadFlag.getFilters(), FamilyDomain.FamilyMemberDomain.class),
-                    LambdaQueryUtils.getEntityOrders(loadFlag.getOrders(), FamilyDomain.FamilyMemberDomain.class)))
+                    LambdaQueryUtils.combine(lambdaQuery, loadFlag, FamilyDomain.FamilyMemberDomain.class))
                                             .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
                 if (CollectionUtil.isEmpty(resp.getFamilyMemberList())){
                     resp.setFamilyMemberList(queryList);

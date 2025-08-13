@@ -2,7 +2,6 @@ package com.artframework.sample.domains.family.domain;
 
 import com.artframework.domain.core.domain.*;
 import com.artframework.domain.core.lambda.query.*;
-import com.artframework.domain.core.constants.*;
 import com.artframework.domain.core.utils.LambdaQueryUtils;
 import com.artframework.domain.core.utils.LoadFlagUtils;
 import lombok.*;
@@ -12,13 +11,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import com.artframework.sample.domains.family.convertor.*;
 import com.artframework.sample.domains.family.service.*;
-import com.artframework.sample.domains.family.lambdaexp.*;
 import cn.hutool.core.util.*;
 import cn.hutool.core.collection.*;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
 /**
@@ -218,8 +212,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
             builder.loadFamilyMemberDomain = true;
         }
         LoadFlag loadFlag = builder.build();
-        LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.toFilters(query), LambdaQueryUtils.getEntityName(tClass));
-        LoadFlagUtils.addOrders(loadFlag, LambdaQueryUtils.toOrders(query));
+        LoadFlagUtils.mergeQueryCondition(loadFlag, query, LambdaQueryUtils.getEntityName(tClass));
         this._service.find(this, loadFlag);
     }
 
@@ -277,15 +270,14 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
             if ((null == loadFlag.loadFamilyAddressDomain || BooleanUtil.isFalse(loadFlag.loadFamilyAddressDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadFamilyAddressDomain)) {
                 loadFlag.loadFamilyAddressDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFilters(loadFlagSource.getFilters(), FamilyDomain.FamilyAddressDomain.class), LambdaQueryUtils.getEntityName(FamilyDomain.FamilyAddressDomain.class));
+                LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(FamilyDomain.FamilyAddressDomain.class));
             }
             // 合併FamilyMemberDomain
             if ((null == loadFlag.loadFamilyMemberDomain || BooleanUtil.isFalse(loadFlag.loadFamilyMemberDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadFamilyMemberDomain)) {
                 loadFlag.loadFamilyMemberDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFilters(loadFlagSource.getFilters(), FamilyDomain.FamilyMemberDomain.class), LambdaQueryUtils.getEntityName(FamilyDomain.FamilyMemberDomain.class));
+                LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(FamilyDomain.FamilyMemberDomain.class));
             }
-            LoadFlagUtils.addOrders(loadFlag, loadFlagSource.getOrders());
             return loadFlag;
         }
     }

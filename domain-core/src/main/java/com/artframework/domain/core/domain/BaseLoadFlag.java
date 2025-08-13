@@ -17,12 +17,17 @@ public class BaseLoadFlag {
      * filter信息
      */
     @Getter
-    private Map<String, LambdaQuery.ConditionGroup> filters = new HashMap<>();
+    private Map<String, Query> query = new HashMap<>();
 
-    /**
-     * 排序
-     */
-    @Getter
-    private Map<String, List<LambdaOrderItem>> orders = new HashMap<>();
-
+    @Data
+    public static class Query {
+        /**
+         * 过滤条件
+         */
+        private LambdaQuery.ConditionGroup filter;
+        /**
+         * 排序
+         */
+        private List<LambdaOrderItem> order;
+    }
 }

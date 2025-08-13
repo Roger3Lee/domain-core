@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.constants.Op;
+import com.artframework.domain.core.domain.BaseLoadFlag;
 import com.artframework.domain.core.lambda.LambdaCache;
 import com.artframework.domain.core.lambda.order.LambdaOrderItem;
 import com.artframework.domain.core.lambda.query.LambdaQuery;
@@ -29,7 +30,7 @@ public class LambdaQueryUtils {
      * @param orderItems  排序项列表
      * @return 合并后的查询对象
      */
-    public static <T> LambdaQuery<T> combine(LambdaQuery<T> lambdaQuery,
+    private static <T> LambdaQuery<T> combine(LambdaQuery<T> lambdaQuery,
             LambdaQuery.ConditionGroup filter,
             List<LambdaOrderItem> orderItems) {
         if (ObjectUtil.isNotNull(filter)) {
@@ -40,6 +41,27 @@ public class LambdaQueryUtils {
             orderItems.forEach(orderItem -> lambdaQuery.orderBy(orderItem.getField(), orderItem.getOrder()));
         }
         return lambdaQuery;
+    }
+
+    /**
+     * 合并查询条件和排序（从BaseLoadFlag中提取）
+     * 
+     * @param lambdaQuery 目标查询对象
+     * @param loadFlag    LoadFlag对象
+     * @param entityClass 实体类
+     * @return 合并后的查询对象
+     */
+    public static <T> LambdaQuery<T> combine(LambdaQuery<T> lambdaQuery,
+            BaseLoadFlag loadFlag,
+            Class<T> entityClass) {
+        if (ObjectUtil.isNull(loadFlag) || ObjectUtil.isNull(entityClass)) {
+            return lambdaQuery;
+        }
+
+        LambdaQuery.ConditionGroup filter = getEntityFilters(loadFlag, entityClass);
+        List<LambdaOrderItem> orderItems = getEntityOrders(loadFlag, entityClass);
+
+        return combine(lambdaQuery, filter, orderItems);
     }
 
     /**
@@ -62,14 +84,21 @@ public class LambdaQueryUtils {
     }
 
     /**
-     * 获取指定实体类的排序条件
+     * 从BaseLoadFlag中获取指定实体类的排序条件
      */
-    public static <T> List<LambdaOrderItem> getEntityOrders(Map<String, List<LambdaOrderItem>> orders,
-            Class<T> entityClass) {
-        if (ObjectUtil.isNull(orders) || entityClass == null) {
+    private static <T> List<LambdaOrderItem> getEntityOrders(BaseLoadFlag loadFlag, Class<T> entityClass) {
+        return getEntityOrders(loadFlag, getEntityName(entityClass));
+    }
+
+    /**
+     * 从BaseLoadFlag中获取指定实体名称的排序条件
+     */
+    private static List<LambdaOrderItem> getEntityOrders(BaseLoadFlag loadFlag, String entityName) {
+        if (ObjectUtil.isNull(loadFlag) || ObjectUtil.isEmpty(entityName)) {
             return null;
         }
-        return orders.get(entityClass.getCanonicalName());
+        BaseLoadFlag.Query query = loadFlag.getQuery().get(entityName);
+        return query != null ? query.getOrder() : null;
     }
 
     /**
@@ -115,22 +144,21 @@ public class LambdaQueryUtils {
     }
 
     /**
-     * 根据实体类获取过滤条件
+     * 从BaseLoadFlag中获取指定实体类的过滤条件
      */
-    public static <T> LambdaQuery.ConditionGroup getEntityFilters(Map<String, LambdaQuery.ConditionGroup> filters,
-            Class<T> entityClass) {
-        return getEntityFilters(filters, getEntityName(entityClass));
+    public static <T> LambdaQuery.ConditionGroup getEntityFilters(BaseLoadFlag loadFlag, Class<T> entityClass) {
+        return getEntityFilters(loadFlag, getEntityName(entityClass));
     }
 
     /**
-     * 根据实体名称获取过滤条件
+     * 从BaseLoadFlag中获取指定实体名称的过滤条件
      */
-    public static LambdaQuery.ConditionGroup getEntityFilters(Map<String, LambdaQuery.ConditionGroup> filters,
-            String entityName) {
-        if (filters == null || entityName == null) {
+    public static LambdaQuery.ConditionGroup getEntityFilters(BaseLoadFlag loadFlag, String entityName) {
+        if (ObjectUtil.isNull(loadFlag) || ObjectUtil.isEmpty(entityName)) {
             return null;
         }
-        return filters.get(entityName);
+        BaseLoadFlag.Query query = loadFlag.getQuery().get(entityName);
+        return query != null ? query.getFilter() : null;
     }
 
 

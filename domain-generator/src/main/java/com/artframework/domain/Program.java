@@ -20,13 +20,13 @@ public class Program {
                                         .dbQuery(new CustomPostgreSqlQuery())
                                 .schema("family")
                                 .keyWordsHandler(new PostgreSqlKeyWordsHandler())
-                                .addConnectionProperty("currentSchema", "family")
+                                .addConnectionProperty("currentSchema", "domain-generator")
                                 .addConnectionProperty("useUnicode", "true")
                                 .addConnectionProperty("characterEncoding", "UTF-8")
                                 .build();
 
                 GlobalSetting.loadFromDB(dataSourceConfig,
-                                new File("E:\\github\\domain-core\\config\\domain-config.xml"));
+                                new File("D:\\work\\github\\domain-core\\domain-web-generator\\domain\\domain-generator.xml"));
 
                 Map<String, String> packageParam = new HashMap<>();
                 packageParam.put("tablePackage", "com.artframework.sample.entities");

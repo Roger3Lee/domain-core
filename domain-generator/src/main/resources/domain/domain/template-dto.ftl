@@ -270,8 +270,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
         }
     </#list>
         LoadFlag loadFlag = builder.build();
-        LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.toFilters(query), LambdaQueryUtils.getEntityName(tClass));
-        LoadFlagUtils.addOrders(loadFlag, LambdaQueryUtils.toOrders(query));
+        LoadFlagUtils.mergeQueryCondition(loadFlag, query, LambdaQueryUtils.getEntityName(tClass));
         this._service.find(this, loadFlag);
     }
 </#if>
@@ -333,10 +332,10 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
             if ((null == loadFlag.${relatedLoadPropertyName} || BooleanUtil.isFalse(loadFlag.${relatedLoadPropertyName})) &&
                     BooleanUtil.isTrue(loadFlagSource.${relatedLoadPropertyName})) {
                 loadFlag.${relatedLoadPropertyName} = true;
-                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFilters(loadFlagSource.getFilters(), ${className}.${relateClassName}.class), LambdaQueryUtils.getEntityName(${className}.${relateClassName}.class));
+                LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(${className}.${relateClassName}.class));
             }
     </#list>
-            LoadFlagUtils.addOrders(loadFlag, loadFlagSource.getOrders());
+
             return loadFlag;
         }
     }
