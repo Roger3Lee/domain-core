@@ -351,8 +351,7 @@ public class DatasourceDomain extends BaseAggregateDomain<DatasourceDomain,Datas
             builder.loadDatasourceTableColumnDomain = true;
         }
         LoadFlag loadFlag = builder.build();
-        LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.toFilters(query), LambdaQueryUtils.getEntityName(tClass));
-        LoadFlagUtils.addOrders(loadFlag, LambdaQueryUtils.toOrders(query));
+        LoadFlagUtils.mergeQueryCondition(loadFlag, query, LambdaQueryUtils.getEntityName(tClass));
         this._service.find(this, loadFlag);
     }
 
@@ -410,15 +409,15 @@ public class DatasourceDomain extends BaseAggregateDomain<DatasourceDomain,Datas
             if ((null == loadFlag.loadDatasourceTableDomain || BooleanUtil.isFalse(loadFlag.loadDatasourceTableDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadDatasourceTableDomain)) {
                 loadFlag.loadDatasourceTableDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFilters(loadFlagSource.getFilters(), DatasourceDomain.DatasourceTableDomain.class), LambdaQueryUtils.getEntityName(DatasourceDomain.DatasourceTableDomain.class));
+                LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(DatasourceDomain.DatasourceTableDomain.class));
             }
             // 合併DatasourceTableColumnDomain
             if ((null == loadFlag.loadDatasourceTableColumnDomain || BooleanUtil.isFalse(loadFlag.loadDatasourceTableColumnDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadDatasourceTableColumnDomain)) {
                 loadFlag.loadDatasourceTableColumnDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFilters(loadFlagSource.getFilters(), DatasourceDomain.DatasourceTableColumnDomain.class), LambdaQueryUtils.getEntityName(DatasourceDomain.DatasourceTableColumnDomain.class));
+                LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(DatasourceDomain.DatasourceTableColumnDomain.class));
             }
-            LoadFlagUtils.addOrders(loadFlag, loadFlagSource.getOrders());
+
             return loadFlag;
         }
     }

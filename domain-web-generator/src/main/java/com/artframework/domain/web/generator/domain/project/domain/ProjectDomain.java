@@ -253,8 +253,7 @@ public class ProjectDomain extends BaseAggregateDomain<ProjectDomain,ProjectServ
             builder.loadDomainConfigDomain = true;
         }
         LoadFlag loadFlag = builder.build();
-        LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.toFilters(query), LambdaQueryUtils.getEntityName(tClass));
-        LoadFlagUtils.addOrders(loadFlag, LambdaQueryUtils.toOrders(query));
+        LoadFlagUtils.mergeQueryCondition(loadFlag, query, LambdaQueryUtils.getEntityName(tClass));
         this._service.find(this, loadFlag);
     }
 
@@ -306,9 +305,9 @@ public class ProjectDomain extends BaseAggregateDomain<ProjectDomain,ProjectServ
             if ((null == loadFlag.loadDomainConfigDomain || BooleanUtil.isFalse(loadFlag.loadDomainConfigDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadDomainConfigDomain)) {
                 loadFlag.loadDomainConfigDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFilters(loadFlagSource.getFilters(), ProjectDomain.DomainConfigDomain.class), LambdaQueryUtils.getEntityName(ProjectDomain.DomainConfigDomain.class));
+                LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(ProjectDomain.DomainConfigDomain.class));
             }
-            LoadFlagUtils.addOrders(loadFlag, loadFlagSource.getOrders());
+
             return loadFlag;
         }
     }

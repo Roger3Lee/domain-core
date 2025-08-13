@@ -68,8 +68,7 @@ public class DDDServiceImpl extends BaseDomainServiceImpl implements DDDService 
                 LambdaQuery<DDDDomain.DomainConfigTablesDomain> lambdaQuery = LambdaQuery.of(DDDDomain.DomainConfigTablesDomain.class);
                 lambdaQuery.eq(DDDLambdaExp.domainConfigTables_domainIdTargetLambda,DDDLambdaExp.domainConfigId_RelatedDomainConfigTables_SourceLambda.apply(resp));
                 List<DDDDomain.DomainConfigTablesDomain> queryList = domainConfigTablesRepository.queryList(
-                    LambdaQueryUtils.combine(lambdaQuery, LambdaQueryUtils.getEntityFilters(loadFlag.getFilters(), DDDDomain.DomainConfigTablesDomain.class),
-                    LambdaQueryUtils.getEntityOrders(loadFlag.getOrders(), DDDDomain.DomainConfigTablesDomain.class)))
+                    LambdaQueryUtils.combine(lambdaQuery, loadFlag, DDDDomain.DomainConfigTablesDomain.class))
                                             .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
                 if (CollectionUtil.isEmpty(resp.getDomainConfigTablesList())){
                     resp.setDomainConfigTablesList(queryList);
@@ -81,8 +80,7 @@ public class DDDServiceImpl extends BaseDomainServiceImpl implements DDDService 
                 LambdaQuery<DDDDomain.DomainConfigLineDomain> lambdaQuery = LambdaQuery.of(DDDDomain.DomainConfigLineDomain.class);
                 lambdaQuery.eq(DDDLambdaExp.domainConfigLine_domainIdTargetLambda,DDDLambdaExp.domainConfigId_RelatedDomainConfigLine_SourceLambda.apply(resp));
                 List<DDDDomain.DomainConfigLineDomain> queryList = domainConfigLineRepository.queryList(
-                    LambdaQueryUtils.combine(lambdaQuery, LambdaQueryUtils.getEntityFilters(loadFlag.getFilters(), DDDDomain.DomainConfigLineDomain.class),
-                    LambdaQueryUtils.getEntityOrders(loadFlag.getOrders(), DDDDomain.DomainConfigLineDomain.class)))
+                    LambdaQueryUtils.combine(lambdaQuery, loadFlag, DDDDomain.DomainConfigLineDomain.class))
                                             .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
                 if (CollectionUtil.isEmpty(resp.getDomainConfigLineList())){
                     resp.setDomainConfigLineList(queryList);
@@ -94,8 +92,7 @@ public class DDDServiceImpl extends BaseDomainServiceImpl implements DDDService 
                 LambdaQuery<DDDDomain.DomainConfigLineConfigDomain> lambdaQuery = LambdaQuery.of(DDDDomain.DomainConfigLineConfigDomain.class);
                 lambdaQuery.eq(DDDLambdaExp.domainConfigLineConfig_domainIdTargetLambda,DDDLambdaExp.domainConfigId_RelatedDomainConfigLineConfig_SourceLambda.apply(resp));
                 List<DDDDomain.DomainConfigLineConfigDomain> queryList = domainConfigLineConfigRepository.queryList(
-                    LambdaQueryUtils.combine(lambdaQuery, LambdaQueryUtils.getEntityFilters(loadFlag.getFilters(), DDDDomain.DomainConfigLineConfigDomain.class),
-                    LambdaQueryUtils.getEntityOrders(loadFlag.getOrders(), DDDDomain.DomainConfigLineConfigDomain.class)))
+                    LambdaQueryUtils.combine(lambdaQuery, loadFlag, DDDDomain.DomainConfigLineConfigDomain.class))
                                             .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
                 if (CollectionUtil.isEmpty(resp.getDomainConfigLineConfigList())){
                     resp.setDomainConfigLineConfigList(queryList);

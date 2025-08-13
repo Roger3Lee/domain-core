@@ -49,7 +49,7 @@ public class FamilyController {
         FamilyDomain findDomain = FamilyDomain.load(request.getKey(), familyService);
         findDomain.loadRelated(FamilyDomain.FamilyMemberDomain.class,
                 x -> x.eq(FamilyDomain.FamilyMemberDomain::getName, "王芳")
-                        .or(y -> y.like(FamilyDomain.FamilyMemberDomain::getName, "张三")));
+                        .like(FamilyDomain.FamilyMemberDomain::getName, "张三"));
         findDomain.loadRelated(FamilyDomain.FamilyAddressDomain.class);
         return findDomain;
     }

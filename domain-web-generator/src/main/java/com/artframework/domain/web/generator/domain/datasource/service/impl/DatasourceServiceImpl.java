@@ -64,8 +64,7 @@ public class DatasourceServiceImpl extends BaseDomainServiceImpl implements Data
                 LambdaQuery<DatasourceDomain.DatasourceTableDomain> lambdaQuery = LambdaQuery.of(DatasourceDomain.DatasourceTableDomain.class);
                 lambdaQuery.eq(DatasourceLambdaExp.datasourceTable_dsIdTargetLambda,DatasourceLambdaExp.datasourceConfigId_RelatedDatasourceTable_SourceLambda.apply(resp));
                 List<DatasourceDomain.DatasourceTableDomain> queryList = datasourceTableRepository.queryList(
-                    LambdaQueryUtils.combine(lambdaQuery, LambdaQueryUtils.getEntityFilters(loadFlag.getFilters(), DatasourceDomain.DatasourceTableDomain.class),
-                    LambdaQueryUtils.getEntityOrders(loadFlag.getOrders(), DatasourceDomain.DatasourceTableDomain.class)))
+                    LambdaQueryUtils.combine(lambdaQuery, loadFlag, DatasourceDomain.DatasourceTableDomain.class))
                                             .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
                 if (CollectionUtil.isEmpty(resp.getDatasourceTableList())){
                     resp.setDatasourceTableList(queryList);
@@ -77,8 +76,7 @@ public class DatasourceServiceImpl extends BaseDomainServiceImpl implements Data
                 LambdaQuery<DatasourceDomain.DatasourceTableColumnDomain> lambdaQuery = LambdaQuery.of(DatasourceDomain.DatasourceTableColumnDomain.class);
                 lambdaQuery.eq(DatasourceLambdaExp.datasourceTableColumn_dsIdTargetLambda,DatasourceLambdaExp.datasourceConfigId_RelatedDatasourceTableColumn_SourceLambda.apply(resp));
                 List<DatasourceDomain.DatasourceTableColumnDomain> queryList = datasourceTableColumnRepository.queryList(
-                    LambdaQueryUtils.combine(lambdaQuery, LambdaQueryUtils.getEntityFilters(loadFlag.getFilters(), DatasourceDomain.DatasourceTableColumnDomain.class),
-                    LambdaQueryUtils.getEntityOrders(loadFlag.getOrders(), DatasourceDomain.DatasourceTableColumnDomain.class)))
+                    LambdaQueryUtils.combine(lambdaQuery, loadFlag, DatasourceDomain.DatasourceTableColumnDomain.class))
                                             .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
                 if (CollectionUtil.isEmpty(resp.getDatasourceTableColumnList())){
                     resp.setDatasourceTableColumnList(queryList);

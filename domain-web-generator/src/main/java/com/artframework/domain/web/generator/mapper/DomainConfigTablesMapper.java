@@ -1,4 +1,4 @@
-package com.artframework.domain.web.mapper;
+package com.artframework.domain.web.generator.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 

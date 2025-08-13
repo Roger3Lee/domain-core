@@ -60,8 +60,7 @@ public class ProjectServiceImpl extends BaseDomainServiceImpl implements Project
                 LambdaQuery<ProjectDomain.DomainConfigDomain> lambdaQuery = LambdaQuery.of(ProjectDomain.DomainConfigDomain.class);
                 lambdaQuery.eq(ProjectLambdaExp.domainConfig_projectIdTargetLambda,ProjectLambdaExp.projectId_RelatedDomainConfig_SourceLambda.apply(resp));
                 List<ProjectDomain.DomainConfigDomain> queryList = domainConfigRepository.queryList(
-                    LambdaQueryUtils.combine(lambdaQuery, LambdaQueryUtils.getEntityFilters(loadFlag.getFilters(), ProjectDomain.DomainConfigDomain.class),
-                    LambdaQueryUtils.getEntityOrders(loadFlag.getOrders(), ProjectDomain.DomainConfigDomain.class)))
+                    LambdaQueryUtils.combine(lambdaQuery, loadFlag, ProjectDomain.DomainConfigDomain.class))
                                             .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
                 if (CollectionUtil.isEmpty(resp.getDomainConfigList())){
                     resp.setDomainConfigList(queryList);

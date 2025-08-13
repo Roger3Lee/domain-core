@@ -27,7 +27,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 * @author auto
 * @version v1.0
 */
-@ApiModel(value = "项目")
+@ApiModel(value = "领域模型")
 @NoArgsConstructor
 @AllArgsConstructor
 public class DDDDomain extends BaseAggregateDomain<DDDDomain,DDDService> {
@@ -565,8 +565,7 @@ public class DDDDomain extends BaseAggregateDomain<DDDDomain,DDDService> {
             builder.loadDomainConfigLineConfigDomain = true;
         }
         LoadFlag loadFlag = builder.build();
-        LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.toFilters(query), LambdaQueryUtils.getEntityName(tClass));
-        LoadFlagUtils.addOrders(loadFlag, LambdaQueryUtils.toOrders(query));
+        LoadFlagUtils.mergeQueryCondition(loadFlag, query, LambdaQueryUtils.getEntityName(tClass));
         this._service.find(this, loadFlag);
     }
 
@@ -630,21 +629,21 @@ public class DDDDomain extends BaseAggregateDomain<DDDDomain,DDDService> {
             if ((null == loadFlag.loadDomainConfigTablesDomain || BooleanUtil.isFalse(loadFlag.loadDomainConfigTablesDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadDomainConfigTablesDomain)) {
                 loadFlag.loadDomainConfigTablesDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFilters(loadFlagSource.getFilters(), DDDDomain.DomainConfigTablesDomain.class), LambdaQueryUtils.getEntityName(DDDDomain.DomainConfigTablesDomain.class));
+                LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(DDDDomain.DomainConfigTablesDomain.class));
             }
             // 合併DomainConfigLineDomain
             if ((null == loadFlag.loadDomainConfigLineDomain || BooleanUtil.isFalse(loadFlag.loadDomainConfigLineDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadDomainConfigLineDomain)) {
                 loadFlag.loadDomainConfigLineDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFilters(loadFlagSource.getFilters(), DDDDomain.DomainConfigLineDomain.class), LambdaQueryUtils.getEntityName(DDDDomain.DomainConfigLineDomain.class));
+                LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(DDDDomain.DomainConfigLineDomain.class));
             }
             // 合併DomainConfigLineConfigDomain
             if ((null == loadFlag.loadDomainConfigLineConfigDomain || BooleanUtil.isFalse(loadFlag.loadDomainConfigLineConfigDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadDomainConfigLineConfigDomain)) {
                 loadFlag.loadDomainConfigLineConfigDomain = true;
-                LoadFlagUtils.addFilters(loadFlag, LambdaQueryUtils.getEntityFilters(loadFlagSource.getFilters(), DDDDomain.DomainConfigLineConfigDomain.class), LambdaQueryUtils.getEntityName(DDDDomain.DomainConfigLineConfigDomain.class));
+                LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(DDDDomain.DomainConfigLineConfigDomain.class));
             }
-            LoadFlagUtils.addOrders(loadFlag, loadFlagSource.getOrders());
+
             return loadFlag;
         }
     }

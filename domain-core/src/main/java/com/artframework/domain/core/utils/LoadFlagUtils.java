@@ -69,9 +69,12 @@ public class LoadFlagUtils {
         LambdaQuery.ConditionGroup filter = LambdaQueryUtils.toFilters(query);
         List<LambdaOrderItem> orders = LambdaQueryUtils.toOrders(query);
 
-        // 创建临时LoadFlag并合并
-        BaseLoadFlag tempSource = createTempLoadFlag(filter, orders, entityName);
-        mergeEntityQuery(loadFlag, tempSource, entityName);
+        if ((ObjectUtil.isNotNull(filter) && CollUtil.isNotEmpty(filter.getCondition()))
+                || CollUtil.isNotEmpty(orders)) {
+            // 创建临时LoadFlag并合并
+            BaseLoadFlag tempSource = createTempLoadFlag(filter, orders, entityName);
+            mergeEntityQuery(loadFlag, tempSource, entityName);
+        }
     }
     
     /**
@@ -86,7 +89,7 @@ public class LoadFlagUtils {
         BaseLoadFlag tempLoadFlag = new BaseLoadFlag();
         BaseLoadFlag.Query query = new BaseLoadFlag.Query();
         
-        if (ObjectUtil.isNotNull(filter)) {
+        if (ObjectUtil.isNotNull(filter) && CollUtil.isNotEmpty(filter.getCondition())) {
             query.setFilter(filter);
         }
         
