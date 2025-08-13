@@ -181,7 +181,7 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
         }
 
         // INPUT 类型且有序列：包含并使用序列生成值
-        return tableInfo.getIdType() == IdType.INPUT && null == tableInfo.getKeySequence();
+        return tableInfo.getIdType() == IdType.INPUT && tableInfo.getKeySequence() != null;
     }
 
     /**

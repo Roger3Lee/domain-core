@@ -15,18 +15,18 @@ import lombok.ToString;
 @Setter
 @ToString
 @TableName(value = "family_member", autoResultMap = true)
-@KeySequence("seq_family_member_id")
 public class FamilyMemberDO {
+
     /**
-     * 序列主键
+     * 自增主键
      */
-    @TableId(value = "id", type = IdType.INPUT)
-    private Integer id;
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
     /**
      * 家庭ID
      */
     @TableField("family_id")
-    private Integer familyId;
+    private Long familyId;
     /**
      * 家庭名称
      */

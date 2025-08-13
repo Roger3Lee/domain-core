@@ -2,12 +2,11 @@ spring:
   application:
     name: domain-sample
   datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://127.0.0.1:3306/family?useSSL=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://127.0.0.1:5432/postgres?currentSchema=domain&useUnicode=true&characterEncoding=UTF-8
     username: postgres
     password: 123456
+
 server:
   port: 8080
   servlet:
@@ -25,8 +24,7 @@ mybatis-plus:
     map-underscore-to-camel-case: true
   global-config:
     db-config:
-      id-type: INPUT
-
+      id-type: AUTO
     banner: false
 
 logging:
@@ -34,9 +32,3 @@ logging:
     com.artframework.sample.mappers: DEBUG
     com.artframework.domain.postgresql: DEBUG
     root: INFO
-#
-#springfox:
-#  documentation:
-#    swagger-ui:
-#      enabled: true
-#      base-url: /v3/api-docs
