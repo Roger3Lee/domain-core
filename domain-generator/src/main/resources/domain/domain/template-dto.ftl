@@ -294,11 +294,6 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
     @AllArgsConstructor
     @Builder
     public static class LoadFlag extends BaseLoadFlag{
-        /**
-        * 加載所有數據， 謹慎使用
-        */
-        @ApiModelProperty(value =  "加載所有數據， 謹慎使用")
-        private Boolean loadAll;
     <#list source.relatedTable as relateTable>
     <#assign relateClassName= NameUtils.dataTOName(relateTable.name)/>
     <#assign relatedLoadPropertyName=NameUtils.getFieldWithPrefix(relateClassName,"load")/>

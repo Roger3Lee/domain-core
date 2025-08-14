@@ -161,7 +161,7 @@ public class LambdaQueryUtils {
 
 
     private static Boolean isAndLogic(LambdaQuery.ConditionGroup rootGroup, List<Object> conditionList) {
-        if (!LogicalOperator.AND.equals(rootGroup.getOp())) {
+        if (!LogicalOperator.AND.equals(rootGroup.getLogic())) {
             return false;
         }
 
@@ -170,7 +170,7 @@ public class LambdaQueryUtils {
         for (Object child : rootGroup.getCondition()) {
             if (child instanceof LambdaQuery.ConditionGroup) {
                 LambdaQuery.ConditionGroup group = (LambdaQuery.ConditionGroup) child;
-                if (LogicalOperator.OR.equals(group.getOp())) {
+                if (LogicalOperator.OR.equals(group.getLogic())) {
                     isAndGroup = false;
                 } else {
                     if (!isAndLogic(group, conditionList)) {
@@ -215,7 +215,7 @@ public class LambdaQueryUtils {
                         }
                     });
                 } else {
-                    if (LogicalOperator.AND.equals(((LambdaQuery.ConditionGroup) child).getOp())) {
+                    if (LogicalOperator.AND.equals(((LambdaQuery.ConditionGroup) child).getLogic())) {
                         wrapper.and(w -> buildFilterWrapper(w, (LambdaQuery.ConditionGroup) child, doClass));
                     } else {
                         wrapper.or(w -> buildFilterWrapper(w, (LambdaQuery.ConditionGroup) child, doClass));

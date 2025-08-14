@@ -27,7 +27,6 @@ public class BaseDomain {
      * 用于跟踪对象的修改状态
      */
     @ApiModelProperty(value = "是否已更改", hidden = true)
-    @JsonIgnore
     private Boolean changed = false;
 
     /**

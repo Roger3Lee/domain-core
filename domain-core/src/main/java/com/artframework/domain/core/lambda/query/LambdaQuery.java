@@ -3,6 +3,7 @@ package com.artframework.domain.core.lambda.query;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.artframework.domain.core.constants.Op;
 import com.artframework.domain.core.lambda.LambdaCache;
 import com.artframework.domain.core.lambda.order.LambdaOrder;
@@ -10,6 +11,8 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.Getter;
@@ -171,12 +174,30 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
     @NoArgsConstructor
     public static class ConditionGroup {
         @JsonProperty("logic")
-        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-        private LogicalOperator op = LogicalOperator.AND;
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        public LogicalOperator getLogic() {
+            if(ObjectUtil.equal(this.logic, LogicalOperator.AND)){
+                return null;
+            }
+            return logic;
+        }
+
+        @JsonProperty("logic")
+        private LogicalOperator logic = LogicalOperator.AND;
+
+        @JsonTypeInfo(
+            use = JsonTypeInfo.Id.NAME,
+            property = "@type",
+            defaultImpl = Object.class
+        )
+        @JsonSubTypes({
+            @JsonSubTypes.Type(value = Condition.class, name = "condition"),
+            @JsonSubTypes.Type(value = ConditionGroup.class, name = "conditionGroup")
+        })
         private List<Object> condition = new ArrayList<>();
 
         public ConditionGroup(LogicalOperator operator) {
-            this.op = operator;
+            this.logic = operator;
         }
 
         public void addChild(Object child) {
@@ -236,6 +257,7 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
         @ApiModelProperty("值")
         private Object value;
 
+        @SuppressWarnings("rawtypes")
         public Condition(SFunction<?, Serializable> column, Op op, Object value) {
             LambdaCache.LambdaInfo lambdaInfo = LambdaCache.info(column);
             this.entity = lambdaInfo.getClazzName();

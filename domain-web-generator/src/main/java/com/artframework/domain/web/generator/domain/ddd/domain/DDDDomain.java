@@ -586,11 +586,7 @@ public class DDDDomain extends BaseAggregateDomain<DDDDomain,DDDService> {
     @AllArgsConstructor
     @Builder
     public static class LoadFlag extends BaseLoadFlag{
-        /**
-        * 加載所有數據， 謹慎使用
-        */
-        @ApiModelProperty(value =  "加載所有數據， 謹慎使用")
-        private Boolean loadAll;
+
 
         /**
         * 加載DomainConfigTablesDomain
