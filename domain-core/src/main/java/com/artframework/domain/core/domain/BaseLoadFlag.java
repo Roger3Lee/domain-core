@@ -17,12 +17,6 @@ import java.util.*;
 @Data
 public class BaseLoadFlag {
     /**
-     * 加載所有數據， 謹慎使用
-     */
-    @ApiModelProperty(value =  "加載所有數據， 謹慎使用")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Boolean loadAll;
-    /**
      * filter信息
      */
     @Getter

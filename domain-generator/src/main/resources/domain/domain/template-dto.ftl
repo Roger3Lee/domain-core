@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 </#if>
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
@@ -294,6 +295,13 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
     @AllArgsConstructor
     @Builder
     public static class LoadFlag extends BaseLoadFlag{
+        /**
+         * 加載所有數據， 謹慎使用
+         */
+        @ApiModelProperty(value =  "加載所有數據， 謹慎使用")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        private Boolean loadAll;
+
     <#list source.relatedTable as relateTable>
     <#assign relateClassName= NameUtils.dataTOName(relateTable.name)/>
     <#assign relatedLoadPropertyName=NameUtils.getFieldWithPrefix(relateClassName,"load")/>
