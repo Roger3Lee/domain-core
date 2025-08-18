@@ -52,11 +52,11 @@ public interface DomainConfigAppService {
 
     /**
      * 生成代码
-     * 
+     *
      * @param id 领域模型ID
      * @return 生成的代码内容
      */
-    String generateCode(Integer id);
+    CodeGenerationResult generateCode(Integer id);
 
     /**
      * 获取领域模型ER图信息
@@ -81,4 +81,6 @@ public interface DomainConfigAppService {
      * @return 生成的XML内容
      */
     String generateDomainXml(Integer id);
+
+    byte[] downloadGeneratedCode(Integer id);
 } 

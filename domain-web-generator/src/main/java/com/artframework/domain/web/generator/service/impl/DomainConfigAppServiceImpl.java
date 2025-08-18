@@ -1,20 +1,23 @@
 package com.artframework.domain.web.generator.service.impl;
 
-import com.artframework.domain.web.generator.service.DomainConfigAppService;
-import com.artframework.domain.web.generator.service.CodeGenerationService;
 import com.artframework.domain.web.generator.domain.ddd.domain.DDDDomain;
 import com.artframework.domain.web.generator.domain.ddd.service.DDDService;
-import com.artframework.domain.web.generator.service.convert.DomainConfigAppConvertor;
 import com.artframework.domain.web.generator.domain.project.domain.ProjectDomain;
 import com.artframework.domain.web.generator.domain.project.service.ProjectService;
+import com.artframework.domain.web.generator.service.DomainConfigAppService;
+import com.artframework.domain.web.generator.service.CodeGenerationService;
+import com.artframework.domain.web.generator.service.DatabaseService;
 import com.artframework.domain.web.generator.dto.*;
+import com.artframework.domain.web.generator.service.convert.DomainConfigAppConvertor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.artframework.domain.core.lambda.query.LambdaQuery;
 import com.artframework.domain.core.constants.Order;
 import com.artframework.domain.core.domain.PageDomain;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.collection.CollUtil;
 
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
  * @author auto
  * @version v1.0
  */
+@Slf4j
 @Service
 public class DomainConfigAppServiceImpl implements DomainConfigAppService {
 
@@ -41,6 +45,9 @@ public class DomainConfigAppServiceImpl implements DomainConfigAppService {
 
     @Autowired
     private CodeGenerationService codeGenerationService;
+
+    @Autowired
+    private DatabaseService databaseService;
 
     @Override
     public PageResult<DomainConfigResponse> page(DomainPageRequest request) {
@@ -115,43 +122,8 @@ public class DomainConfigAppServiceImpl implements DomainConfigAppService {
     }
 
     @Override
-    public String generateCode(Integer id) {
-        // 加载领域模型
-        DDDDomain domain = DDDDomain.load(id, dddService);
-        
-        // 生成代码
-        return generateCodeFromDomain(domain);
-    }
-
-    /**
-     * 转换为领域模型响应对象
-     */
-    private DomainConfigResponse toDomainConfigResponse(DDDDomain domain) {
-        DomainConfigResponse response = domainConfigAppConvertor.toResponse(domain);
-        
-        // 加载项目信息
-        if (domain.getProjectId() != null) {
-            ProjectDomain project = ProjectDomain.load(domain.getProjectId(), projectService);
-            // 使用现有的转换方法，不修改领域驱动代码
-            ProjectDTO projectDTO = new ProjectDTO();
-            projectDTO.setId(project.getId());
-            projectDTO.setName(project.getName());
-            projectDTO.setDomainPackage(project.getDomainPackage());
-            projectDTO.setControllerPackage(project.getControllerPackage());
-            projectDTO.setDoPackage(project.getDoPackage());
-            projectDTO.setMapperPackage(project.getMapperPackage());
-            response.setProject(projectDTO);
-        }
-        
-        return response;
-    }
-
-    /**
-     * 从领域模型生成代码
-     */
-    private String generateCodeFromDomain(DDDDomain domain) {
-        // 调用代码生成服务
-        return codeGenerationService.generateCode(domain);
+    public CodeGenerationResult generateCode(Integer id) {
+        return codeGenerationService.generateCodeById(id);
     }
 
     @Override
@@ -263,6 +235,45 @@ public class DomainConfigAppServiceImpl implements DomainConfigAppService {
         dddService.update(updateDomain, originalDomain);
         
         return xml;
+    }
+
+    @Override
+    public byte[] downloadGeneratedCode(Integer id) {
+        return codeGenerationService.generateCodeAsZipById(id);
+    }
+
+    /**
+     * 转换为领域模型响应对象
+     */
+    private DomainConfigResponse toDomainConfigResponse(DDDDomain domain) {
+        DomainConfigResponse response = new DomainConfigResponse();
+        
+        // 加载项目信息
+        if (domain.getProjectId() != null) {
+            ProjectDomain project = ProjectDomain.load(domain.getProjectId(), projectService);
+            // 使用现有的转换方法，不修改领域驱动代码
+            ProjectDTO projectDTO = new ProjectDTO();
+            projectDTO.setId(project.getId());
+            projectDTO.setName(project.getName());
+            projectDTO.setDomainPackage(project.getDomainPackage());
+            projectDTO.setControllerPackage(project.getControllerPackage());
+            projectDTO.setDoPackage(project.getDoPackage());
+            projectDTO.setMapperPackage(project.getMapperPackage());
+            response.setProject(projectDTO);
+        }
+        
+        response.setId(domain.getId());
+        response.setProjectId(domain.getProjectId());
+        response.setDomainName(domain.getDomainName());
+        response.setDomainXml(domain.getDomainXml());
+        response.setMainTable(domain.getMainTable());
+        response.setFolder(domain.getFolder());
+        response.setCreatedBy(domain.getCreatedBy());
+        response.setCreatedTime(domain.getCreatedTime());
+        response.setUpdatedBy(domain.getUpdatedBy());
+        response.setUpdatedTime(domain.getUpdatedTime());
+        
+        return response;
     }
 
     /**
