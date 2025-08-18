@@ -108,6 +108,14 @@ public class ProjectDomain extends BaseAggregateDomain<ProjectDomain,ProjectServ
     @ApiModelProperty(value =  "Mapper package")
     private String mapperPackage;
 
+    /**
+    * 关联的数据源配置ID
+    */
+    @Getter
+    @Setter
+    @ApiModelProperty(value =  "关联的数据源配置ID")
+    private Integer datasourceId;
+
 
     /**
     * RELATE domain_config

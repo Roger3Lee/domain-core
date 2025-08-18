@@ -225,6 +225,7 @@ CREATE TABLE project(
     controller_package VARCHAR(255),
     do_package VARCHAR(255),
     mapper_package VARCHAR(255),
+    datasource_id INTEGER,
     PRIMARY KEY (id)
 );
 
@@ -239,4 +240,5 @@ COMMENT ON COLUMN project.domain_package IS '领域package';
 COMMENT ON COLUMN project.controller_package IS '控制器package';
 COMMENT ON COLUMN project.do_package IS 'DO package';
 COMMENT ON COLUMN project.mapper_package IS 'Mapper package';
+COMMENT ON COLUMN project.datasource_id IS '关联的数据源配置ID';
 

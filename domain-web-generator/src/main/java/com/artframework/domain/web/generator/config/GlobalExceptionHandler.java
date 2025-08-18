@@ -20,12 +20,13 @@ import java.util.stream.Collectors;
 
 /**
  * 全局异常处理器
+ * 只对web-generator包下的控制器生效
  * 
  * @author auto
  * @version v1.0
  */
 @Slf4j
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.artframework.domain.web.generator")
 public class GlobalExceptionHandler {
 
     /**

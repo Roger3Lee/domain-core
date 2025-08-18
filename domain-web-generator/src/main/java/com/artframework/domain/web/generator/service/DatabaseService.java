@@ -4,6 +4,7 @@ import com.artframework.domain.web.generator.domain.datasource.domain.Datasource
 import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain.DatasourceTableDomain;
 import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain.DatasourceTableColumnDomain;
 import com.artframework.domain.web.generator.service.impl.TableStructureInfo;
+import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
 
 import java.util.List;
 
@@ -48,4 +49,11 @@ public interface DatabaseService {
      * @return 字段列表
      */
     List<DatasourceTableColumnDomain> getColumnList(Integer datasourceId, String tableName);
+
+    /**
+     * 根据项目ID获取默认数据源配置
+     * @param projectId 项目ID
+     * @return 数据源配置
+     */
+    DataSourceConfig getDefaultDataSourceConfig(Integer projectId);
 } 

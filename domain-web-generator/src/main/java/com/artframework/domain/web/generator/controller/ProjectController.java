@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 /**
  * 项目控制器
@@ -28,7 +26,7 @@ public class ProjectController {
 
     @GetMapping("/page")
     @ApiOperation("分页查询项目")
-    public ApiResponse<PageResult<ProjectResponse>> page(
+    public PageResult<ProjectResponse> page(
             @RequestParam(required = false) String name,
             @RequestParam(defaultValue = "1") Long pageNum,
             @RequestParam(defaultValue = "10") Long pageSize) {
@@ -36,58 +34,48 @@ public class ProjectController {
         request.setName(name);
         request.setPageNum(pageNum);
         request.setPageSize(pageSize);
-        PageResult<ProjectResponse> pageResult = projectAppService.page(request);
-        return ApiResponse.success(pageResult);
+        return projectAppService.page(request);
     }
 
     @PostMapping
     @ApiOperation("新增项目")
-    public ResponseEntity<ApiResponse<Integer>> addProject(
+    public Integer addProject(
             @RequestBody @Valid ProjectAddRequest request) {
-        Integer projectId = projectAppService.addProject(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .header("Location", "/api/v1/projects/" + projectId)
-                .body(ApiResponse.success(projectId));
+        return projectAppService.addProject(request);
     }
 
     @PutMapping
     @ApiOperation("编辑项目")
-    public ApiResponse<Boolean> editProject(
+    public Boolean editProject(
             @RequestBody @Valid ProjectEditRequest request) {
-        Boolean result = projectAppService.editProject(request);
-        return ApiResponse.success(result);
+        return projectAppService.editProject(request);
     }
 
     @GetMapping("/{id}")
     @ApiOperation("获取项目详情")
-    public ApiResponse<ProjectResponse> getProjectDetail(
+    public ProjectResponse getProjectDetail(
             @ApiParam("项目ID") @PathVariable Integer id) {
-        ProjectResponse response = projectAppService.getProjectDetail(id);
-        return ApiResponse.success(response);
+        return projectAppService.getProjectDetail(id);
     }
 
     @GetMapping("/{id}/with-domains")
     @ApiOperation("获取项目详情（包含领域模型）")
-    public ApiResponse<ProjectResponse> getProjectDetailWithDomains(
+    public ProjectResponse getProjectDetailWithDomains(
             @ApiParam("项目ID") @PathVariable Integer id) {
-        ProjectResponse response = projectAppService.getProjectDetailWithDomains(id);
-        return ApiResponse.success(response);
+        return projectAppService.getProjectDetailWithDomains(id);
     }
 
     @GetMapping("/{id}/with-domains-and-tables")
     @ApiOperation("获取项目详情（包含数据源表和领域模型）")
-    public ApiResponse<ProjectDetailWithDomainsResponse> getProjectDetailWithDomainsAndTables(
+    public ProjectDetailWithDomainsResponse getProjectDetailWithDomainsAndTables(
             @ApiParam("项目ID") @PathVariable Integer id) {
-        ProjectDetailWithDomainsResponse response = projectAppService.getProjectDetailWithDomainsAndTables(id);
-        return ApiResponse.success(response);
+        return projectAppService.getProjectDetailWithDomainsAndTables(id);
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation("删除项目")
-    public ResponseEntity<ApiResponse<Boolean>> deleteProject(
+    public Boolean deleteProject(
             @ApiParam("项目ID") @PathVariable Integer id) {
-        Boolean result = projectAppService.deleteProject(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .body(ApiResponse.success(result));
+        return projectAppService.deleteProject(id);
     }
 } 

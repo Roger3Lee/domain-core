@@ -5,8 +5,6 @@ import com.artframework.domain.web.generator.service.DatasourceAppService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +21,7 @@ public class DatasourceController {
 
   @GetMapping("/page")
   @ApiOperation("分页查询数据源")
-  public ApiResponse<PageResult<DatasourceResponse>> page(
+  public PageResult<DatasourceResponse> page(
           @RequestParam(required = false) String name,
           @RequestParam(required = false) String code,
           @RequestParam(required = false) String dbType,
@@ -35,52 +33,42 @@ public class DatasourceController {
     request.setDbType(dbType);
     request.setPageNum(pageNum);
     request.setPageSize(pageSize);
-    PageResult<DatasourceResponse> pageResult = datasourceAppService.page(request);
-    return ApiResponse.success(pageResult);
+    return datasourceAppService.page(request);
   }
 
   @GetMapping("/{id}")
   @ApiOperation("获取数据源详情")
-  public ApiResponse<DatasourceResponse> detail(@PathVariable Integer id) {
-    DatasourceResponse response = datasourceAppService.getById(id);
-    return ApiResponse.success(response);
+  public DatasourceResponse detail(@PathVariable Integer id) {
+    return datasourceAppService.getById(id);
   }
 
   @PostMapping
   @ApiOperation("新增数据源")
-  public ResponseEntity<ApiResponse<Integer>> add(@RequestBody @Valid DatasourceAddRequest request) {
-    Integer id = datasourceAppService.addDatasource(request);
-    return ResponseEntity.status(HttpStatus.CREATED)
-            .header("Location", "/api/v1/datasources/" + id)
-            .body(ApiResponse.success(id));
+  public Integer add(@RequestBody @Valid DatasourceAddRequest request) {
+    return datasourceAppService.addDatasource(request);
   }
 
   @PutMapping
   @ApiOperation("编辑数据源")
-  public ApiResponse<Boolean> edit(@RequestBody @Valid DatasourceEditRequest request) {
-    Boolean result = datasourceAppService.editDatasource(request);
-    return ApiResponse.success(result);
+  public Boolean edit(@RequestBody @Valid DatasourceEditRequest request) {
+    return datasourceAppService.editDatasource(request);
   }
 
   @DeleteMapping("/{id}")
   @ApiOperation("删除数据源")
-  public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable Integer id) {
-    Boolean result = datasourceAppService.deleteDatasource(id);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT)
-            .body(ApiResponse.success(result));
+  public Boolean delete(@PathVariable Integer id) {
+    return datasourceAppService.deleteDatasource(id);
   }
 
   @PostMapping("/{id}/sync")
   @ApiOperation("同步表结构")
-  public ApiResponse<Boolean> syncTable(@PathVariable Integer id) {
-    Boolean result = datasourceAppService.syncTableStructure(id);
-    return ApiResponse.success(result);
+  public Boolean syncTable(@PathVariable Integer id) {
+    return datasourceAppService.syncTableStructure(id);
   }
 
   @PostMapping("/test-connection")
   @ApiOperation("测试数据库连接")
-  public ApiResponse<Boolean> testConnection(@RequestBody @Valid DatasourceAddRequest request) {
-    Boolean result = datasourceAppService.testConnection(request);
-    return ApiResponse.success(result);
+  public Boolean testConnection(@RequestBody @Valid DatasourceAddRequest request) {
+    return datasourceAppService.testConnection(request);
   }
 }

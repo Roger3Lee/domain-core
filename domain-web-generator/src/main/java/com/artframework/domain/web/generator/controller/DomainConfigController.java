@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
 /**
  * 领域模型控制器
@@ -23,12 +25,14 @@ import org.springframework.http.ResponseEntity;
 @RequestMapping("/api/v1/domain-configs")
 public class DomainConfigController {
 
+    private static final Logger log = LoggerFactory.getLogger(DomainConfigController.class);
+
     @Autowired
     private DomainConfigAppService domainConfigAppService;
 
     @GetMapping("/page")
     @ApiOperation("分页查询领域模型")
-    public ApiResponse<PageResult<DomainConfigResponse>> page(
+    public PageResult<DomainConfigResponse> page(
             @RequestParam Integer projectId,
             @RequestParam(required = false) String domainName,
             @RequestParam(required = false) String folder,
@@ -40,76 +44,82 @@ public class DomainConfigController {
         request.setFolder(folder);
         request.setPageNum(pageNum);
         request.setPageSize(pageSize);
-        PageResult<DomainConfigResponse> pageResult = domainConfigAppService.page(request);
-        return ApiResponse.success(pageResult);
+        return domainConfigAppService.page(request);
     }
 
     @PostMapping
     @ApiOperation("新增领域模型")
-    public ResponseEntity<ApiResponse<Integer>> addDomainConfig(
+    public Integer addDomainConfig(
             @RequestBody @Valid DomainConfigAddRequest request) {
-        Integer domainConfigId = domainConfigAppService.addDomainConfig(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .header("Location", "/api/v1/domain-configs/" + domainConfigId)
-                .body(ApiResponse.success(domainConfigId));
+        return domainConfigAppService.addDomainConfig(request);
     }
 
     @PutMapping
     @ApiOperation("编辑领域模型")
-    public ApiResponse<Boolean> editDomainConfig(
+    public Boolean editDomainConfig(
             @RequestBody @Valid DomainConfigEditRequest request) {
-        Boolean result = domainConfigAppService.editDomainConfig(request);
-        return ApiResponse.success(result);
+        return domainConfigAppService.editDomainConfig(request);
     }
 
     @GetMapping("/{id}")
     @ApiOperation("获取领域模型详情")
-    public ApiResponse<DomainConfigResponse> getDomainConfigDetail(
+    public DomainConfigResponse getDomainConfigDetail(
             @ApiParam("领域模型ID") @PathVariable Integer id) {
-        DomainConfigResponse response = domainConfigAppService.getDomainConfigDetail(id);
-        return ApiResponse.success(response);
+        return domainConfigAppService.getDomainConfigDetail(id);
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation("删除领域模型")
-    public ResponseEntity<ApiResponse<Boolean>> deleteDomainConfig(
+    public Boolean deleteDomainConfig(
             @ApiParam("领域模型ID") @PathVariable Integer id) {
-        Boolean result = domainConfigAppService.deleteDomainConfig(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .body(ApiResponse.success(result));
+        return domainConfigAppService.deleteDomainConfig(id);
     }
 
     @PostMapping("/{id}/generate-code")
     @ApiOperation("生成代码")
-    public ApiResponse<String> generateCode(
+    public CodeGenerationResult generateCode(
             @ApiParam("领域模型ID") @PathVariable Integer id) {
-        String result = domainConfigAppService.generateCode(id);
-        return ApiResponse.success(result);
+        return domainConfigAppService.generateCode(id);
+    }
+
+    @GetMapping("/{id}/download-code")
+    @ApiOperation("下载生成的代码文件压缩包")
+    public ResponseEntity<byte[]> downloadGeneratedCode(
+            @ApiParam("领域模型ID") @PathVariable Integer id) {
+        try {
+            byte[] zipData = domainConfigAppService.downloadGeneratedCode(id);
+            String filename = "generated-code-" + id + ".zip";
+            
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+                    .header("Content-Type", "application/zip")
+                    .body(zipData);
+        } catch (Exception e) {
+            log.error("下载代码文件失败，领域ID: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GetMapping("/{id}/er-diagram")
     @ApiOperation("获取领域模型ER图信息")
-    public ApiResponse<ERDiagramRequest> getERDiagram(
+    public ERDiagramRequest getERDiagram(
             @ApiParam("领域模型ID") @PathVariable Integer id) {
-        ERDiagramRequest result = domainConfigAppService.getERDiagram(id);
-        return ApiResponse.success(result);
+        return domainConfigAppService.getERDiagram(id);
     }
 
     @PostMapping("/{id}/er-diagram")
     @ApiOperation("保存领域模型ER图信息")
-    public ApiResponse<Boolean> saveERDiagram(
+    public Boolean saveERDiagram(
             @ApiParam("领域模型ID") @PathVariable Integer id,
             @RequestBody @Valid ERDiagramRequest request) {
         request.setDomainId(id);
-        Boolean result = domainConfigAppService.saveERDiagram(request);
-        return ApiResponse.success(result);
+        return domainConfigAppService.saveERDiagram(request);
     }
 
     @PostMapping("/{id}/generate-xml")
     @ApiOperation("基于ER图生成领域模型XML")
-    public ApiResponse<String> generateDomainXml(
+    public String generateDomainXml(
             @ApiParam("领域模型ID") @PathVariable Integer id) {
-        String result = domainConfigAppService.generateDomainXml(id);
-        return ApiResponse.success(result);
+        return domainConfigAppService.generateDomainXml(id);
     }
 }

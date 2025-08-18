@@ -1,9 +1,11 @@
 package com.artframework.domain.web.generator.service.impl;
 
+import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain;
 import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain.DatasourceTableDomain;
 import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain.DatasourceTableColumnDomain;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,7 +19,20 @@ public class TableStructureInfo {
     
     private List<DatasourceTableDomain> tables;
     private List<DatasourceTableColumnDomain> columns;
-    
+
+    public TableStructureInfo(){
+
+    }
+    /**
+     * 构造函数
+     */
+    public TableStructureInfo(List<DatasourceDomain.DatasourceTableDomain> tables,
+                              List<DatasourceDomain.DatasourceTableColumnDomain> columns) {
+        this.tables = tables != null ? tables : new ArrayList<>();
+        this.columns = columns != null ? columns : new ArrayList<>();
+    }
+
+
     public boolean isEmpty() {
         return (tables == null || tables.isEmpty()) && (columns == null || columns.isEmpty());
     }

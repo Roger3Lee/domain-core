@@ -18,7 +18,7 @@ import lombok.AllArgsConstructor;
 @ApiModel(value = "统一API响应")
 public class ApiResponse<T> {
 
-  @ApiModelProperty(value = "响应码")
+  @ApiModelProperty(value = "响应码，0表示成功，非0表示失败")
   private String code;
 
   @ApiModelProperty(value = "响应消息")
@@ -31,11 +31,11 @@ public class ApiResponse<T> {
   private Boolean success;
 
   public static <T> ApiResponse<T> success(T data) {
-    return new ApiResponse<>("200", "操作成功", data, true);
+    return new ApiResponse<>("0", "操作成功", data, true);
   }
 
   public static <T> ApiResponse<T> success() {
-    return new ApiResponse<>("200", "操作成功", null, true);
+    return new ApiResponse<>("0", "操作成功", null, true);
   }
 
   public static <T> ApiResponse<T> fail(String message) {
