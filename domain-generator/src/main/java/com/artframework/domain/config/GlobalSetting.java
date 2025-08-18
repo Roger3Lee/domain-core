@@ -106,10 +106,8 @@ public class GlobalSetting {
         load(StreamUtils.readAsString(Files.newInputStream(tableFile.toPath())),
                 StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())));
     }
-
-    public static void loadFromDB(DataSourceConfig dataSourceConfig, File domainFile)
+    public static void loadFromDB(DataSourceConfig dataSourceConfig, String domainSetting)
             throws IOException, JAXBException {
-
         TableQuery tableQuery = new TableQuery(dataSourceConfig);
         List<TableInfo> tableInfos = tableQuery.queryTables();
         List<TableMetaInfo> tableMetaInfos = tableInfos.stream().map(GlobalSetting::convert)
@@ -121,10 +119,15 @@ public class GlobalSetting {
         INSTANCE.tableMetaInfoMap = tableMetaInfos.stream()
                 .collect(Collectors.toMap(TableMetaInfo::getName, x -> x, (x, y) -> x));
         DomainCollection domainCollection = XmlUtils
-                .xmlToBean(StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())), DomainCollection.class);
+                .xmlToBean(domainSetting, DomainCollection.class);
         if (ObjectUtil.isNotEmpty(domainCollection)) {
             INSTANCE.domainMetaInfoList = domainCollection.getDomain();
         }
+    }
+
+    public static void loadFromDB(DataSourceConfig dataSourceConfig, File domainFile)
+            throws IOException, JAXBException {
+        loadFromDB(dataSourceConfig,StreamUtils.readAsString(Files.newInputStream(domainFile.toPath())));
     }
 
     public static TableMetaInfo convert(TableInfo tableInfo) {

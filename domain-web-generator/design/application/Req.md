@@ -1,7 +1,6 @@
 # 表设计
 
 ```sql
-
 DROP TABLE IF EXISTS domain_config;
 CREATE TABLE domain_config(
     id SERIAL NOT NULL,
@@ -144,6 +143,7 @@ CREATE TABLE project(
     controller_package VARCHAR(255),
     do_package VARCHAR(255),
     mapper_package VARCHAR(255),
+    data_source_id INTEGER,
     PRIMARY KEY (id)
 );
 
@@ -158,6 +158,8 @@ COMMENT ON COLUMN project.domain_package IS '领域package';
 COMMENT ON COLUMN project.controller_package IS '控制器package';
 COMMENT ON COLUMN project.do_package IS 'DO package';
 COMMENT ON COLUMN project.mapper_package IS 'Mapper package';
+
+
 ```
 
 # 领域模型设计
@@ -202,6 +204,11 @@ COMMENT ON COLUMN project.mapper_package IS 'Mapper package';
 
 - 删除领域模型：
 
-- 查询领域模型: 查询领域模型相关的数据，另需要基于领域对应的应用的数据库连接查询表和表列的数据，用于ER图展示。
+- 查询领域模型: 查询领域模型相关的数据，另需基于领域模型所属应用的数据源和`domain_config_tables`的表列表 查询`datasource_table`和表`datasource_table_column`表列的数据，用于ER图展示。
 
-- 生成代码：基于领域模型生成领域代码，DO，mapper和domain， 具体生成代码的方法参考 `domain-generator`工程
+- 生成代码：基于领域模型生成领域代码，DO，mapper和domain， 具体生成代码的方法参考 `domain-generator`工程的main方法的样例。 生成的代码需要分层
+    - 代码分层
+        - controller
+        - domain ：按照domain, repository , service, lambdaexp, convertor 等目录分层
+        - dataobject
+        - mapper

@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+
 
 /**
  * 数据源新增请求

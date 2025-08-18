@@ -69,4 +69,9 @@ public class ProjectDO  {
     */
     @TableField("mapper_package")
     private String mapperPackage;
+    /**
+    * 
+    */
+    @TableField("data_source_id")
+    private Integer dataSourceId;
 }

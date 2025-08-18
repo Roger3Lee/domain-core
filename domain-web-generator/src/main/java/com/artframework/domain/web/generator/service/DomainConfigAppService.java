@@ -57,4 +57,28 @@ public interface DomainConfigAppService {
      * @return 生成的代码内容
      */
     String generateCode(Integer id);
+
+    /**
+     * 获取领域模型ER图信息
+     * 
+     * @param id 领域模型ID
+     * @return ER图信息
+     */
+    ERDiagramRequest getERDiagram(Integer id);
+
+    /**
+     * 保存领域模型ER图信息
+     * 
+     * @param request ER图保存请求
+     * @return 是否成功
+     */
+    Boolean saveERDiagram(ERDiagramRequest request);
+
+    /**
+     * 基于ER图生成领域模型XML
+     * 
+     * @param id 领域模型ID
+     * @return 生成的XML内容
+     */
+    String generateDomainXml(Integer id);
 } 

@@ -74,6 +74,14 @@ public class ProjectController {
         return ApiResponse.success(response);
     }
 
+    @GetMapping("/{id}/with-domains-and-tables")
+    @ApiOperation("获取项目详情（包含数据源表和领域模型）")
+    public ApiResponse<ProjectDetailWithDomainsResponse> getProjectDetailWithDomainsAndTables(
+            @ApiParam("项目ID") @PathVariable Integer id) {
+        ProjectDetailWithDomainsResponse response = projectAppService.getProjectDetailWithDomainsAndTables(id);
+        return ApiResponse.success(response);
+    }
+
     @DeleteMapping("/{id}")
     @ApiOperation("删除项目")
     public ResponseEntity<ApiResponse<Boolean>> deleteProject(

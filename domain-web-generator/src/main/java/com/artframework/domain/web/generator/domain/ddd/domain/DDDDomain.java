@@ -15,7 +15,6 @@ import com.artframework.domain.web.generator.domain.ddd.service.*;
 import com.artframework.domain.web.generator.domain.ddd.lambdaexp.*;
 import cn.hutool.core.util.*;
 import cn.hutool.core.collection.*;
-import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonIgnore;

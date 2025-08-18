@@ -51,6 +51,14 @@ public interface ProjectAppService {
     ProjectResponse getProjectDetailWithDomains(Integer id);
 
     /**
+     * 获取项目详情（包含数据源表和领域模型）
+     * 
+     * @param id 项目ID
+     * @return 项目详情（包含数据源表和领域模型）
+     */
+    ProjectDetailWithDomainsResponse getProjectDetailWithDomainsAndTables(Integer id);
+
+    /**
      * 删除项目
      * 
      * @param id 项目ID

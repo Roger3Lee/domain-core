@@ -4,7 +4,7 @@
   "avatar": "",
   "version": "4.9.4",
   "createdTime": "2025-4-18 15:24:57",
-  "updatedTime": "2025-7-21 16:57:52",
+  "updatedTime": "2025-8-17 12:17:07",
   "dbConns": [],
   "profile": {
     "default": {
@@ -4115,6 +4115,24 @@
           "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
           "id": "B29494AA-1DCD-49B3-B085-58603FDB8761",
           "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
+        },
+        {
+          "defKey": "data_source_id",
+          "defName": "",
+          "comment": "",
+          "type": "INT",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
+          "extProps": {},
+          "domain": "",
+          "id": "A1AA4D1C-008C-42F2-A3D1-1AC553473329"
         }
       ],
       "correlations": [],

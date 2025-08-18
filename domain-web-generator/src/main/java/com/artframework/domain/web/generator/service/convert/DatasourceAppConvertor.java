@@ -3,6 +3,7 @@ package com.artframework.domain.web.generator.service.convert;
 import com.artframework.domain.web.generator.domain.datasource.domain.DatasourceDomain;
 import com.artframework.domain.web.generator.dto.*;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
@@ -25,9 +26,7 @@ public interface DatasourceAppConvertor {
    */
   DatasourceDomain convertToDomain(DatasourceAddRequest request);
 
-  /**
-   * Request DTO 转换为 Domain
-   */
+  @Mapping(target = "changed", constant = "true")
   DatasourceDomain convertToDomain(DatasourceEditRequest request);
 
   /**

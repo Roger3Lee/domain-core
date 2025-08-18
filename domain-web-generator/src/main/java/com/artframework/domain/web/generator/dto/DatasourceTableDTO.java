@@ -4,19 +4,26 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * 项目 DTO
+ * 数据源表 DTO
  * 
  * @author auto
  * @version v1.0
  */
 @Data
-@ApiModel(value = "项目DTO")
-public class ProjectDTO {
+@ApiModel(value = "数据源表DTO")
+public class DatasourceTableDTO {
 
   @ApiModelProperty(value = "主键")
   private Integer id;
+
+  @ApiModelProperty(value = "数据源ID")
+  private Integer dsId;
+
+  @ApiModelProperty(value = "乐观锁")
+  private Integer revision;
 
   @ApiModelProperty(value = "创建人")
   private String createdBy;
@@ -30,21 +37,12 @@ public class ProjectDTO {
   @ApiModelProperty(value = "更新时间")
   private LocalDateTime updatedTime;
 
-  @ApiModelProperty(value = "项目名称")
+  @ApiModelProperty(value = "表名")
   private String name;
 
-  @ApiModelProperty(value = "领域package")
-  private String domainPackage;
+  @ApiModelProperty(value = "表备注")
+  private String comment;
 
-  @ApiModelProperty(value = "控制器package")
-  private String controllerPackage;
-
-  @ApiModelProperty(value = "DO package")
-  private String doPackage;
-
-  @ApiModelProperty(value = "Mapper package")
-  private String mapperPackage;
-
-  @ApiModelProperty(value = "关联数据源ID")
-  private Integer datasourceId;
+  @ApiModelProperty(value = "表列信息")
+  private List<DatasourceTableColumnDTO> columns;
 }

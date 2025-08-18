@@ -3,6 +3,7 @@ package com.artframework.domain.web.generator.service.convert;
 import com.artframework.domain.web.generator.domain.ddd.domain.DDDDomain;
 import com.artframework.domain.web.generator.dto.*;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -24,9 +25,11 @@ public interface DomainConfigAppConvertor {
      */
     DDDDomain toDomain(DomainConfigAddRequest request);
     
+
     /**
      * 请求DTO转领域对象
      */
+    @Mapping(target = "changed", constant = "true")
     DDDDomain toDomain(DomainConfigEditRequest request);
     
     /**

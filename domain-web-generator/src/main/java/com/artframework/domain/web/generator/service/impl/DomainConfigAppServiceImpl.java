@@ -153,4 +153,301 @@ public class DomainConfigAppServiceImpl implements DomainConfigAppService {
         // 调用代码生成服务
         return codeGenerationService.generateCode(domain);
     }
+
+    @Override
+    public ERDiagramRequest getERDiagram(Integer id) {
+        // 加载领域模型
+        DDDDomain domain = DDDDomain.load(id, dddService);
+        
+        // 加载关联的表和连线信息
+        domain.loadRelated(DDDDomain.DomainConfigTablesDomain.class);
+        domain.loadRelated(DDDDomain.DomainConfigLineDomain.class);
+        domain.loadRelated(DDDDomain.DomainConfigLineConfigDomain.class);
+        
+        ERDiagramRequest response = new ERDiagramRequest();
+        response.setDomainId(id);
+        
+        // 转换表配置
+        if (CollUtil.isNotEmpty(domain.getDomainConfigTablesList())) {
+            List<DomainConfigTablesDTO> tables = domain.getDomainConfigTablesList().stream()
+                    .map(this::toDomainConfigTablesDTO)
+                    .collect(Collectors.toList());
+            response.setTables(tables);
+        }
+        
+        // 转换连线配置
+        if (CollUtil.isNotEmpty(domain.getDomainConfigLineList())) {
+            List<DomainConfigLineDTO> lines = domain.getDomainConfigLineList().stream()
+                    .map(line -> toDomainConfigLineDTO(line, domain.getDomainConfigLineConfigList()))
+                    .collect(Collectors.toList());
+            response.setLines(lines);
+        }
+        
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public Boolean saveERDiagram(ERDiagramRequest request) {
+        // 加载原始领域模型
+        DDDDomain originalDomain = DDDDomain.load(request.getDomainId(), dddService);
+        originalDomain.loadRelated(DDDDomain.DomainConfigTablesDomain.class);
+        originalDomain.loadRelated(DDDDomain.DomainConfigLineDomain.class);
+        originalDomain.loadRelated(DDDDomain.DomainConfigLineConfigDomain.class);
+        
+        // 创建新的领域模型用于更新
+        DDDDomain newDomain = new DDDDomain();
+        newDomain.setId(request.getDomainId());
+        newDomain.setProjectId(originalDomain.getProjectId());
+        newDomain.setDomainName(originalDomain.getDomainName());
+        newDomain.setMainTable(originalDomain.getMainTable());
+        newDomain.setFolder(originalDomain.getFolder());
+        
+        // 转换表配置
+        if (CollUtil.isNotEmpty(request.getTables())) {
+            List<DDDDomain.DomainConfigTablesDomain> tables = request.getTables().stream()
+                    .map(this::fromDomainConfigTablesDTO)
+                    .collect(Collectors.toList());
+            newDomain.setDomainConfigTablesList(tables);
+        }
+        
+        // 转换连线配置
+        if (CollUtil.isNotEmpty(request.getLines())) {
+            List<DDDDomain.DomainConfigLineDomain> lines = new java.util.ArrayList<>();
+            List<DDDDomain.DomainConfigLineConfigDomain> lineConfigs = new java.util.ArrayList<>();
+            
+            for (DomainConfigLineDTO lineDTO : request.getLines()) {
+                DDDDomain.DomainConfigLineDomain line = fromDomainConfigLineDTO(lineDTO);
+                lines.add(line);
+                
+                if (CollUtil.isNotEmpty(lineDTO.getLineConfigs())) {
+                    List<DDDDomain.DomainConfigLineConfigDomain> configs = lineDTO.getLineConfigs().stream()
+                            .map(this::fromDomainConfigLineConfigDTO)
+                            .collect(Collectors.toList());
+                    lineConfigs.addAll(configs);
+                }
+            }
+            
+            newDomain.setDomainConfigLineList(lines);
+            newDomain.setDomainConfigLineConfigList(lineConfigs);
+        }
+        
+        // 设置LoadFlag，指定需要更新的关联实体
+        newDomain.setLoadFlag(DDDDomain.LoadFlag.builder()
+                .loadDomainConfigTablesDomain(true)
+                .loadDomainConfigLineDomain(true)
+                .loadDomainConfigLineConfigDomain(true)
+                .build());
+        
+        // 执行更新
+        return dddService.update(newDomain, originalDomain);
+    }
+
+    @Override
+    public String generateDomainXml(Integer id) {
+        // 加载领域模型完整信息
+        DDDDomain domain = DDDDomain.load(id, dddService);
+        domain.loadRelated(DDDDomain.DomainConfigTablesDomain.class);
+        domain.loadRelated(DDDDomain.DomainConfigLineDomain.class);
+        domain.loadRelated(DDDDomain.DomainConfigLineConfigDomain.class);
+        
+        // 生成XML
+        String xml = generateDomainXmlFromERDiagram(domain);
+        
+        // 更新领域模型的XML字段
+        DDDDomain updateDomain = new DDDDomain();
+        updateDomain.setId(id);
+        updateDomain.setDomainXml(xml);
+        
+        DDDDomain originalDomain = DDDDomain.load(id, dddService);
+        dddService.update(updateDomain, originalDomain);
+        
+        return xml;
+    }
+
+    /**
+     * 转换表配置为DTO
+     */
+    private DomainConfigTablesDTO toDomainConfigTablesDTO(DDDDomain.DomainConfigTablesDomain table) {
+        DomainConfigTablesDTO dto = new DomainConfigTablesDTO();
+        dto.setId(table.getId());
+        dto.setProjectId(table.getProjectId());
+        dto.setDomainId(table.getDomainId());
+        dto.setTableName(table.getTableName());
+        dto.setX(table.getX());
+        dto.setY(table.getY());
+        dto.setW(table.getW());
+        dto.setH(table.getH());
+        dto.setCreatedBy(table.getCreatedBy());
+        dto.setCreatedTime(table.getCreatedTime());
+        dto.setUpdatedBy(table.getUpdatedBy());
+        dto.setUpdatedTime(table.getUpdatedTime());
+        return dto;
+    }
+
+    /**
+     * 转换连线配置为DTO
+     */
+    private DomainConfigLineDTO toDomainConfigLineDTO(DDDDomain.DomainConfigLineDomain line, 
+            List<DDDDomain.DomainConfigLineConfigDomain> allConfigs) {
+        DomainConfigLineDTO dto = new DomainConfigLineDTO();
+        dto.setId(line.getId());
+        dto.setProjectId(line.getProjectId());
+        dto.setDomainId(line.getDomainId());
+        dto.setLineCode(line.getLineCode());
+        dto.setLineType(line.getLineType());
+        dto.setSourceTable(line.getSourceTable());
+        dto.setSourceColunm(line.getSourceColunm());
+        dto.setTargetTable(line.getTargetTable());
+        dto.setTargetColunm(line.getTargetColunm());
+        dto.setMany(line.getMany());
+        dto.setCreatedBy(line.getCreatedBy());
+        dto.setCreatedTime(line.getCreatedTime());
+        dto.setUpdatedBy(line.getUpdatedBy());
+        dto.setUpdatedTime(line.getUpdatedTime());
+        
+        // 加载连线的详细配置
+        if (CollUtil.isNotEmpty(allConfigs)) {
+            List<DomainConfigLineConfigDTO> configs = allConfigs.stream()
+                    .filter(config -> line.getLineCode().equals(config.getLineCode()))
+                    .map(this::toDomainConfigLineConfigDTO)
+                    .collect(Collectors.toList());
+            dto.setLineConfigs(configs);
+        }
+        
+        return dto;
+    }
+
+    /**
+     * 转换连线详细配置为DTO
+     */
+    private DomainConfigLineConfigDTO toDomainConfigLineConfigDTO(DDDDomain.DomainConfigLineConfigDomain config) {
+        DomainConfigLineConfigDTO dto = new DomainConfigLineConfigDTO();
+        dto.setId(config.getId());
+        dto.setProjectId(config.getProjectId());
+        dto.setDomainId(config.getDomainId());
+        dto.setLineCode(config.getLineCode());
+        dto.setSourceColunm(config.getSourceColunm());
+        dto.setSourceColumnValue(config.getSourceColumnValue());
+        dto.setSourceColumnValueDataType(config.getSourceColumnValueDataType());
+        dto.setTargetColunm(config.getTargetColunm());
+        dto.setTargetColumnValue(config.getTargetColumnValue());
+        dto.setTargetColumnValueDataType(config.getTargetColumnValueDataType());
+        dto.setCreatedBy(config.getCreatedBy());
+        dto.setCreatedTime(config.getCreatedTime());
+        dto.setUpdatedBy(config.getUpdatedBy());
+        dto.setUpdatedTime(config.getUpdatedTime());
+        return dto;
+    }
+
+    /**
+     * 从DTO转换表配置
+     */
+    private DDDDomain.DomainConfigTablesDomain fromDomainConfigTablesDTO(DomainConfigTablesDTO dto) {
+        DDDDomain.DomainConfigTablesDomain table = new DDDDomain.DomainConfigTablesDomain();
+        table.setId(dto.getId());
+        table.setProjectId(dto.getProjectId());
+        table.setDomainId(dto.getDomainId());
+        table.setTableName(dto.getTableName());
+        table.setX(dto.getX());
+        table.setY(dto.getY());
+        table.setW(dto.getW());
+        table.setH(dto.getH());
+        return table;
+    }
+
+    /**
+     * 从DTO转换连线配置
+     */
+    private DDDDomain.DomainConfigLineDomain fromDomainConfigLineDTO(DomainConfigLineDTO dto) {
+        DDDDomain.DomainConfigLineDomain line = new DDDDomain.DomainConfigLineDomain();
+        line.setId(dto.getId());
+        line.setProjectId(dto.getProjectId());
+        line.setDomainId(dto.getDomainId());
+        line.setLineCode(dto.getLineCode());
+        line.setLineType(dto.getLineType());
+        line.setSourceTable(dto.getSourceTable());
+        line.setSourceColunm(dto.getSourceColunm());
+        line.setTargetTable(dto.getTargetTable());
+        line.setTargetColunm(dto.getTargetColunm());
+        line.setMany(dto.getMany());
+        return line;
+    }
+
+    /**
+     * 从DTO转换连线详细配置
+     */
+    private DDDDomain.DomainConfigLineConfigDomain fromDomainConfigLineConfigDTO(DomainConfigLineConfigDTO dto) {
+        DDDDomain.DomainConfigLineConfigDomain config = new DDDDomain.DomainConfigLineConfigDomain();
+        config.setId(dto.getId());
+        config.setProjectId(dto.getProjectId());
+        config.setDomainId(dto.getDomainId());
+        config.setLineCode(dto.getLineCode());
+        config.setSourceColunm(dto.getSourceColunm());
+        config.setSourceColumnValue(dto.getSourceColumnValue());
+        config.setSourceColumnValueDataType(dto.getSourceColumnValueDataType());
+        config.setTargetColunm(dto.getTargetColunm());
+        config.setTargetColumnValue(dto.getTargetColumnValue());
+        config.setTargetColumnValueDataType(dto.getTargetColumnValueDataType());
+        return config;
+    }
+
+    /**
+     * 基于ER图生成领域模型XML
+     */
+    private String generateDomainXmlFromERDiagram(DDDDomain domain) {
+        StringBuilder xml = new StringBuilder();
+        xml.append("<domain name=\"").append(domain.getDomainName()).append("\"");
+        xml.append(" description=\"").append(domain.getDomainName()).append("\"");
+        xml.append(" main-table=\"").append(domain.getMainTable()).append("\">\n");
+        
+        // 根据连线配置生成related元素
+        if (CollUtil.isNotEmpty(domain.getDomainConfigLineList())) {
+            for (DDDDomain.DomainConfigLineDomain line : domain.getDomainConfigLineList()) {
+                if ("FK".equals(line.getLineType())) {
+                    // 外键关系
+                    xml.append("    <related description=\"").append(getTableDescription(line.getTargetTable()))
+                       .append("\" table=\"").append(line.getTargetTable()).append("\"");
+                    
+                    if ("1".equals(line.getMany())) {
+                        xml.append(" many=\"true\"");
+                    }
+                    
+                    xml.append(" fk=\"").append(line.getSourceColunm()).append(":").append(line.getTargetColunm()).append("\"");
+                    
+                    // 添加冗余字段
+                    String redundancy = generateRedundancyFromLineConfigs(line.getLineCode(), domain.getDomainConfigLineConfigList());
+                    if (StrUtil.isNotEmpty(redundancy)) {
+                        xml.append(" redundancy=\"").append(redundancy).append("\"");
+                    }
+                    
+                    xml.append("/>\n");
+                }
+            }
+        }
+        
+        xml.append("</domain>");
+        return xml.toString();
+    }
+
+    /**
+     * 获取表描述（简化实现）
+     */
+    private String getTableDescription(String tableName) {
+        return tableName;
+    }
+
+    /**
+     * 从连线配置生成冗余字段配置
+     */
+    private String generateRedundancyFromLineConfigs(String lineCode, List<DDDDomain.DomainConfigLineConfigDomain> configs) {
+        if (CollUtil.isEmpty(configs)) {
+            return "";
+        }
+        
+        return configs.stream()
+                .filter(config -> lineCode.equals(config.getLineCode()))
+                .map(config -> config.getSourceColunm() + ":" + config.getTargetColunm())
+                .collect(Collectors.joining(","));
+    }
 } 

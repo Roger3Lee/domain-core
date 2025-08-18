@@ -231,7 +231,7 @@ public Boolean editDomainConfig(DomainConfigEditRequest request) {
     // 1. 获取更新前的原始数据（包含关联实体）
     DDDDomain originalDomain = getDomainConfigDetail(request.getId());
 
-    // 2. 将包含更新数据的Request DTO转换为新的Domain对象
+    // 2. 将包含更新数据的Request DTO转换为新的Domain对象，需要设置changed=true
     DDDDomain newDomain = DDDConvertor.INSTANCE.toDomain(request);
 
     // 3. 设置LoadFlag，指定本次需要更新的关联实体范围
@@ -343,6 +343,7 @@ LambdaQuery<DDDDomain.DomainConfigLineDomain> query =
 6. **引用关系**: 支持复杂的跨实体引用关系
 7. **缓存机制**: 内置缓存机制提高查询性能
 8. **内存查询**: 引用关系使用内存过滤，避免额外数据库查询
+9. **更新策略**: 领域模型更新方法会比较老数据和新数据的差异,比较差异的方法参见`CompareUtil`，标记为`changed=true`的数据会做更新。
 
 通过合理使用XML配置，可以快速构建高质量的DDD应用，提高开发效率和代码质量。
 

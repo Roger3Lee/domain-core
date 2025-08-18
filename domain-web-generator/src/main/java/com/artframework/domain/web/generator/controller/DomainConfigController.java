@@ -6,11 +6,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 /**
  * 领域模型控制器
@@ -29,13 +29,15 @@ public class DomainConfigController {
     @GetMapping("/page")
     @ApiOperation("分页查询领域模型")
     public ApiResponse<PageResult<DomainConfigResponse>> page(
-            @RequestParam(required = false) Integer projectId,
+            @RequestParam Integer projectId,
             @RequestParam(required = false) String domainName,
+            @RequestParam(required = false) String folder,
             @RequestParam(defaultValue = "1") Long pageNum,
             @RequestParam(defaultValue = "10") Long pageSize) {
         DomainPageRequest request = new DomainPageRequest();
         request.setProjectId(projectId);
         request.setDomainName(domainName);
+        request.setFolder(folder);
         request.setPageNum(pageNum);
         request.setPageSize(pageSize);
         PageResult<DomainConfigResponse> pageResult = domainConfigAppService.page(request);
@@ -46,10 +48,10 @@ public class DomainConfigController {
     @ApiOperation("新增领域模型")
     public ResponseEntity<ApiResponse<Integer>> addDomainConfig(
             @RequestBody @Valid DomainConfigAddRequest request) {
-        Integer domainId = domainConfigAppService.addDomainConfig(request);
+        Integer domainConfigId = domainConfigAppService.addDomainConfig(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .header("Location", "/api/v1/domain-configs/" + domainId)
-                .body(ApiResponse.success(domainId));
+                .header("Location", "/api/v1/domain-configs/" + domainConfigId)
+                .body(ApiResponse.success(domainConfigId));
     }
 
     @PutMapping
@@ -81,7 +83,33 @@ public class DomainConfigController {
     @ApiOperation("生成代码")
     public ApiResponse<String> generateCode(
             @ApiParam("领域模型ID") @PathVariable Integer id) {
-        String code = domainConfigAppService.generateCode(id);
-        return ApiResponse.success(code);
+        String result = domainConfigAppService.generateCode(id);
+        return ApiResponse.success(result);
     }
-} 
+
+    @GetMapping("/{id}/er-diagram")
+    @ApiOperation("获取领域模型ER图信息")
+    public ApiResponse<ERDiagramRequest> getERDiagram(
+            @ApiParam("领域模型ID") @PathVariable Integer id) {
+        ERDiagramRequest result = domainConfigAppService.getERDiagram(id);
+        return ApiResponse.success(result);
+    }
+
+    @PostMapping("/{id}/er-diagram")
+    @ApiOperation("保存领域模型ER图信息")
+    public ApiResponse<Boolean> saveERDiagram(
+            @ApiParam("领域模型ID") @PathVariable Integer id,
+            @RequestBody @Valid ERDiagramRequest request) {
+        request.setDomainId(id);
+        Boolean result = domainConfigAppService.saveERDiagram(request);
+        return ApiResponse.success(result);
+    }
+
+    @PostMapping("/{id}/generate-xml")
+    @ApiOperation("基于ER图生成领域模型XML")
+    public ApiResponse<String> generateDomainXml(
+            @ApiParam("领域模型ID") @PathVariable Integer id) {
+        String result = domainConfigAppService.generateDomainXml(id);
+        return ApiResponse.success(result);
+    }
+}
