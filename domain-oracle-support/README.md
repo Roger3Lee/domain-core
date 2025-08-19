@@ -19,7 +19,7 @@ Oracle 数据库支持模块，提供 Oracle 特有的增强批量操作实现�
 <dependency>
     <groupId>com.artframework</groupId>
     <artifactId>domain-oracle-support</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 

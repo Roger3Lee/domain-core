@@ -19,7 +19,7 @@ MySQL 数据库支持模块，提供 MySQL 特有的批量操作实现。
 <dependency>
     <groupId>com.artframework</groupId>
     <artifactId>domain-mysql-support</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 

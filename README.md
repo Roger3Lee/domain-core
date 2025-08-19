@@ -83,27 +83,27 @@ Mybatis plus, mapstruct、hutool
 <dependency>
     <groupId>com.artframework</groupId>
     <artifactId>domain-mysql-support</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 
 <!-- PolarDB 支持 -->
 <dependency>
     <groupId>com.artframework</groupId>
     <artifactId>domain-polardb-support</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 
 <!-- PostgreSQL 支持 -->
 <dependency>
     <groupId>com.artframework</groupId>
     <artifactId>domain-postgresql-support</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 
 <!-- Oracle 支持 -->
 <dependency>
     <groupId>com.artframework</groupId>
     <artifactId>domain-oracle-support</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
