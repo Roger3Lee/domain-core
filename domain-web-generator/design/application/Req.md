@@ -1,6 +1,42 @@
-# 表设计
+# 角色
+
+你是一个高级java 开发工程师，擅长使用领域模型开发业务系统。
+
+# 上下文
+
+此部分描述***领域模型的XML定义***和***数据库表结构设计***
+
+## 表结构设计
 
 ```sql
+DROP TABLE IF EXISTS project;
+CREATE TABLE project(
+    id SERIAL NOT NULL,
+    created_by VARCHAR(90),
+    created_time TIMESTAMP,
+    updated_by VARCHAR(90),
+    updated_time TIMESTAMP,
+    name VARCHAR(255),
+    domain_package VARCHAR(255),
+    controller_package VARCHAR(255),
+    do_package VARCHAR(255),
+    mapper_package VARCHAR(255),
+    data_source_id INTEGER,
+    PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE project IS '领域项目';
+COMMENT ON COLUMN project.id IS '主键';
+COMMENT ON COLUMN project.created_by IS '创建人';
+COMMENT ON COLUMN project.created_time IS '创建时间';
+COMMENT ON COLUMN project.updated_by IS '更新人';
+COMMENT ON COLUMN project.updated_time IS '更新时间';
+COMMENT ON COLUMN project.name IS '项目名称';
+COMMENT ON COLUMN project.domain_package IS '领域package';
+COMMENT ON COLUMN project.controller_package IS '控制器package';
+COMMENT ON COLUMN project.do_package IS 'DO package';
+COMMENT ON COLUMN project.mapper_package IS 'Mapper package';
+
 DROP TABLE IF EXISTS domain_config;
 CREATE TABLE domain_config(
     id SERIAL NOT NULL,
@@ -130,46 +166,26 @@ COMMENT ON COLUMN domain_config_line.source_colunm IS '源表列';
 COMMENT ON COLUMN domain_config_line.target_table IS '目标表';
 COMMENT ON COLUMN domain_config_line.target_colunm IS '目标列';
 COMMENT ON COLUMN domain_config_line.many IS '是否一对多';
-
-DROP TABLE IF EXISTS project;
-CREATE TABLE project(
-    id SERIAL NOT NULL,
-    created_by VARCHAR(90),
-    created_time TIMESTAMP,
-    updated_by VARCHAR(90),
-    updated_time TIMESTAMP,
-    name VARCHAR(255),
-    domain_package VARCHAR(255),
-    controller_package VARCHAR(255),
-    do_package VARCHAR(255),
-    mapper_package VARCHAR(255),
-    data_source_id INTEGER,
-    PRIMARY KEY (id)
-);
-
-COMMENT ON TABLE project IS '领域项目';
-COMMENT ON COLUMN project.id IS '主键';
-COMMENT ON COLUMN project.created_by IS '创建人';
-COMMENT ON COLUMN project.created_time IS '创建时间';
-COMMENT ON COLUMN project.updated_by IS '更新人';
-COMMENT ON COLUMN project.updated_time IS '更新时间';
-COMMENT ON COLUMN project.name IS '项目名称';
-COMMENT ON COLUMN project.domain_package IS '领域package';
-COMMENT ON COLUMN project.controller_package IS '控制器package';
-COMMENT ON COLUMN project.do_package IS 'DO package';
-COMMENT ON COLUMN project.mapper_package IS 'Mapper package';
-
-
 ```
 
-# 领域模型设计
+## 表结构概览
+
+| 表名                        | 注释                        |
+| ------------------------- | ------------------------- |
+| project                   | 领域项目                      |
+| domain_config             | 领域模型设置                    |
+| domain_config_tables      | 领域模型的表列表                  |
+| domain_config_line_config | 领域模型表关联信息                 |
+| domain_config_line        | 领域模型表之间关联连线配置（用于配置常量关联关系） |
+
+## 领域模型XML配置
 
 - 应用领域：主要管理应用的基本信息及领域模型和应用之间的关系
 
 - 领域模型：基于应用关联的数据源，使用ER图的方式管理领域模型之间的关系， 最终通过ER图生成领域模型XML配置
 
 ```xml
- <domain name="project" description="应用" main-table="project">
+ <domain name="project" description="应用领域" main-table="project">
         <related description="领域模型基本配置" table="domain_config" many="true" fk="id:project_id" />
     </domain>
     <domain name="DDD" description="领域模型" main-table="domain_config">
@@ -181,7 +197,9 @@ COMMENT ON COLUMN project.mapper_package IS 'Mapper package';
     </domain>
 ```
 
-# 功能
+# 任务
+
+以TODO List的方式实现如下接口功能， 每个章节生成一个控制器。
 
 ## 应用管理 :用于配置应用名称及后端java不同层级的包名
 
@@ -189,15 +207,16 @@ COMMENT ON COLUMN project.mapper_package IS 'Mapper package';
 
 - 新增应用:  新增应用的基本信息
 
-- 编辑应用： 修改应用的基本信息
+- 编辑应用:  修改应用的基本信息
 
-- 应用详情: 加载应用的基本信息
+- 应用详情:  加载应用的基本信息
 
 - 应用详情（包含领域模型）：加载应用的基本信息 ，应用关联的数据源的表和表列信息， 以及所有的领域模型的基本信息
 
 - 删除应用：如果应用下有领域模型则不能删除，抛出BizException
 
 ## 领域模型
+
 - 新增领域模型: 基于设计数据库ER图的方式设计领域模型， 并在保存的时候要基于连线生成领域模型的XML
 
 - 编辑领域模型: 修改领域模型的ER图， 并在保存的时候要基于连线生成领域模型的XML
@@ -207,8 +226,26 @@ COMMENT ON COLUMN project.mapper_package IS 'Mapper package';
 - 查询领域模型: 查询领域模型相关的数据，另需基于领域模型所属应用的数据源和`domain_config_tables`的表列表 查询`datasource_table`和表`datasource_table_column`表列的数据，用于ER图展示。
 
 - 生成代码：基于领域模型生成领域代码，DO，mapper和domain， 具体生成代码的方法参考 `domain-generator`工程的main方法的样例。 生成的代码需要分层
-    - 代码分层
-        - controller
-        - domain ：按照domain, repository , service, lambdaexp, convertor 等目录分层
-        - dataobject
-        - mapper
+  
+  - 代码分层
+    - controller
+    - domain ：按照domain, repository , service, lambdaexp, convertor 等目录分层
+    - dataobject
+    - mapper
+
+# 指令
+
+- 生成接口定义（包括controller和需要的请求响应类型) 后提示如下内容以等下后续指令。
+  
+  ```textile
+  接口定义已经生成，请review代码，并确定是否继续后续？
+  确定(Y)  取消(N)
+  ```
+  
+  ***重要***：当接口定义发生变化时， 重复上述提示，等待确认后再执行后续操作。
+
+- 所有任务完成后 ， 提示如下内容以确定是否进行总结， 如果需要总结则按照章节`输出`的内容输出总结
+
+# 输出
+
+在当前需求文档的目录下生成需求文档名称+summary.md的文件， 用来记录变更内容。例如 `req01_summary.md`
