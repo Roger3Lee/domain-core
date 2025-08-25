@@ -1,6 +1,6 @@
 ---
 description: "领域驱动设计(DDD)框架指南 - 领域驱动设计、XML配置和代码生成的综合指南"
-alwaysApply: false
+alwaysApply: true
 ---
 # DDD框架综合指南
 

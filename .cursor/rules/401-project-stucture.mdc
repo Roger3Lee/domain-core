@@ -1,7 +1,7 @@
 ---
 description: 项目技术栈和结构介绍
 globs: **/src/main/java/**/*
-alwaysApply: false
+alwaysApply: true
 ---
 # 项目框架开发规范指南
 
@@ -13,46 +13,90 @@ alwaysApply: false
 
 项目基于**领域驱动设计（DDD）** 的思想，采用经典的分层架构，各模块职责清晰：
 
-- `boot/`:
-  
-  - **职责**: Spring Boot应用启动模块。
-  - **包含**: `Bootstrap.java` (应用入口)、核心配置 (`MybatisPlusConfig`, `WebMvcConfig`等)、国际化资源 (`i18n`) 和静态资源。
+### 核心架构层次
 
-- `business/`:
-  
-  - **职责**: 核心业务逻辑层。
-  - `core/`: 存放领域模型 (`*Domain.java`) 和领域服务接口 (`*Service.java`)。
-  - `application/`: 存放应用服务 (`*AppService.java`)，负责编排领域服务和处理DTO转换，是业务用例的主要实现层。
+- **启动层**:
+  - `Bootstrap.java`: Spring Boot应用入口
 
-- `infra/`:
-  
-  - **职责**: 基础设施层，提供技术实现。
-  - `dal/`: 数据访问层，包含MyBatis-Plus的Mapper接口及XML文件。
-  - `integration/`: 与外部系统集成的客户端代码。
-  - `common/`: 项目范围内的通用工具类、常量和枚举。
+- **表现层（Presentation Layer）**:
+  - `controller/`: RESTful API控制器 (`*Controller.java`)，负责接收HTTP请求和返回响应
+  - `dto/`: 数据传输对象，包含API请求响应的数据结构
 
-- `present/`:
-  
-  - **职责**: 表现层，面向前端或其他客户端。
-  - `api/`: 存放数据传输对象（DTOs）对象。
-  - `server/`: 包含对外暴露的RESTful API控制器 (`*Controller.java`)。
+- **应用层（Application Layer）**:
+  - `service/`: 应用服务层，编排领域服务实现业务用例
+
+- **领域层（Domain Layer）**:
+  - `domain/`: 核心领域逻辑，按领域聚合组织
+    - `{领域名}/domain/`: 领域实体和聚合根 (`*Domain.java`)
+    - `{领域名}/service/`: 领域服务接口和实现 (`*Service.java`)
+    - `{领域名}/repository/`: 仓储接口和实现 (`*Repository.java`)
+    - `{领域名}/convertor/`: MapStruct转换器 (`*Convertor.java`)
+    - `{领域名}/lambdaexp/`: Lambda表达式工具类
+
+- **基础设施层（Infrastructure Layer）**:
+  - `mapper/`: MyBatis-Plus数据访问映射接口
+  - `dataobject/`: 数据库实体对象 (DO)
+  - `config/`: 框架配置和全局配置
+  - `exception/`: 异常定义和处理
+
+### 当前已实现的领域模块
+
+#### 1. 数据源管理领域 (`domain/datasource/`)
+- **聚合根**: `DatasourceDomain`
+- **职责**: 管理数据库连接配置、表结构和字段信息
+- **关联实体**: 数据源表(`DatasourceTableDO`)、表字段(`DatasourceTableColumnDO`)
+
+#### 2. DDD配置管理领域 (`domain/ddd/`)
+- **聚合根**: `DDDDomain`
+- **职责**: 管理领域驱动设计的配置信息、实体关系和代码生成规则
+- **关联实体**: 领域配置表(`DomainConfigTablesDO`)、关系连线(`DomainConfigLineDO`)、连线配置(`DomainConfigLineConfigDO`)
+
+#### 3. 项目管理领域 (`domain/project/`)
+- **聚合根**: `ProjectDomain`
+- **职责**: 管理项目基本信息和项目级别的配置
+- **关联实体**: 领域配置(`DomainConfigDO`)
 
 ---
 
 ## 核心技术栈
 
 - **开发语言**: Java 1.8
-- **核心框架**: Spring Boot 2.7.18
-- **持久层框架**: MyBatis-Plus 3.4.3
-- **数据库连接池**: Druid
-- **服务发现与配置**: Nacos
-- **代码简化**: Lombok 1.18.30
-- **对象映射**: MapStruct 1.4.2.Final
-- **工具包**: Hutool 5.8.23
-- **API文档**: Swagger (通过`@Api`和`@ApiOperation`注解)
-- **测试框架**: JUnit 4, Mockito 2
+- **核心框架**: Spring Boot 2.7.18 (通过parent依赖管理)
+- **持久层框架**: MyBatis-Plus (版本由domain-dependencies统一管理)
+- **数据库**: PostgreSQL (主要支持)，同时支持MySQL
+- **数据库连接池**: Druid Spring Boot Starter
+- **代码简化**: Lombok
+- **对象映射**: MapStruct (包含processor和jdk8支持)
+- **API文档**: Swagger (springfox-boot-starter)
+- **JSON处理**: Jackson Core & Databind
+- **数据验证**: Java Validation API
+- **领域框架**: Domain Core 2.0.0-SNAPSHOT (自研DDD框架)
+- **代码生成**: Domain Generator 2.0.0-SNAPSHOT (自研代码生成器)
 ---
 
-## 约束
- **遵循** API的调用链路为： `*Controller-> *AppService-> *Service-> *Repository -> *Mapper`
- **遵循** 使用MapStruct进行对象映射，完成`*DTO`到领域模型`*Domain`的转换,参考 `@403-dto-conventions.mdc`
+## 架构约束与规范
+
+### 调用链路
+- **API调用链路**: `*Controller -> *AppService -> 领域Service -> *Repository -> *Mapper`
+- **跨层访问**: 严格按照DDD分层架构，禁止跨层直接调用
+
+### 代码组织规范
+- **领域划分**: 按业务领域组织代码，每个领域包含完整的domain、service、repository、convertor
+- **命名约定**: 
+  - 领域实体：`*Domain.java`
+  - 领域服务：`*Service.java` 
+  - 仓储：`*Repository.java`
+  - 转换器：`*Convertor.java`
+  - Lambda表达式：`*LambdaExp.java`
+  - 数据对象：`*DO.java`
+
+### 对象映射与转换
+- **遵循** 使用MapStruct进行对象映射，完成DTO到领域模型的双向转换
+- **转换器位置**: 每个领域的convertor包下实现对应的转换器
+- **装饰器模式**: 支持ConvertorDecorator进行复杂转换逻辑的扩展
+
+### DDD核心原则
+- **聚合根**: 使用Domain Core框架的BaseAggregateDomain作为聚合根基类
+- **领域服务**: 领域逻辑封装在领域服务中，不允许在Controller或AppService中编写业务逻辑
+- **仓储模式**: 通过Repository接口封装数据访问，具体实现在impl包下
+- **Lambda查询**: 使用类型安全的Lambda表达式进行查询构建
