@@ -136,7 +136,7 @@ COMMENT ON COLUMN datasource_table_column.key IS '是否是主键';
 
 - 测试数据源连接：检查数据源配置的链接的联通性。
 
-- 加载数据库表结构：基于数据源连接加载表结构，使用mybatis plus generator提供的功能实现，具体生成代码的方法参考 `domain-generator`工程
+- 载入数据库表结构：基于数据源连接加载表结构并存储到数据库表`datasource_table`和`datasource_table_column`中。使用mybatis plus generator提供的功能实现，具体生成代码的方法参考 `domain-generator`工程
 
 # 指令
 
