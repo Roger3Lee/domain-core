@@ -1,7 +1,7 @@
 package ${mapperPackage!''};
 
 import org.apache.ibatis.annotations.Mapper;
-
+import com.artframework.domain.core.mapper.BatchBaseMapper;
 import ${tablePackage!''}.*;
 
 /**
@@ -11,5 +11,5 @@ import ${tablePackage!''}.*;
 * @version v1.0
 */
 @Mapper
-public interface ${NameUtils.mapperName(source.name)} extends ${baseMapperClass}<${NameUtils.dataObjectName(source.name)}> {
+public interface ${NameUtils.mapperName(source.name)} extends BatchBaseMapper<${NameUtils.dataObjectName(source.name)}> {
 }
