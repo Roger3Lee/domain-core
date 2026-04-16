@@ -36,7 +36,7 @@ public class GenerateUtils {
             domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_IMPL_PATH);
             FileUtils.saveFile(path + File.separator + getDomainFolderName(domainInfo) + File.separator + "repository"+File.separator+"impl" + File.separator, domainInfo.nameSuffix("RepositoryImpl") + ".java", domainDtoGenerator.generate(domainInfo), null != overWrite ? overWrite : false);
 
-            for (DomainInfo.RelateTableInfo relateTableInfo : domainInfo.getRelatedTableDistinct()) {
+            for (DomainInfo.RelateTableInfo relateTableInfo : domainInfo.getRelatedTable()) {
                 domainDtoGenerator.setTemplateFilePath(FTLConstants.REPOSITORY_RELATED_PATH);
                 domainDtoGenerator.putParam("table", relateTableInfo);
                 FileUtils.saveFile(path + File.separator + getDomainFolderName(domainInfo) + File.separator + "repository" + File.separator, relateTableInfo.nameSuffix("Repository") + ".java", domainDtoGenerator.generate(domainInfo), null != overWrite ? overWrite : false);

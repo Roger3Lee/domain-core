@@ -16,9 +16,9 @@ public class Program {
         public static void main(String[] args) throws JAXBException, IOException {
                 // 数据源配置
                 DataSourceConfig dataSourceConfig = new DataSourceConfig.Builder(
-                                "jdbc:postgresql://127.0.0.1:5432/postgres", "postgres", "123456")
+                                "jdbc:postgresql://127.0.0.1:5433/postgres", "postgres", "123456")
                                         .dbQuery(new CustomPostgreSqlQuery())
-                                .schema("family")
+                                .schema("public")
                                 .keyWordsHandler(new PostgreSqlKeyWordsHandler())
                                 .addConnectionProperty("currentSchema", "domain-generator")
                                 .addConnectionProperty("useUnicode", "true")
@@ -26,7 +26,7 @@ public class Program {
                                 .build();
 
                 GlobalSetting.loadFromDB(dataSourceConfig,
-                                new File("D:\\work\\github\\domain-core\\domain-web-generator\\domain\\domain-generator.xml"));
+                                new File("D:\\work\\code\\domain\\domain-core\\config\\domain-config.xml"));
 
                 Map<String, String> packageParam = new HashMap<>();
                 packageParam.put("tablePackage", "com.artframework.sample.entities");
@@ -35,14 +35,14 @@ public class Program {
                 packageParam.put("controllerPackage", "com.artframework.sample.controllers");
                 //
                 GenerateUtils.generateTables(
-                                "E:\\github\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\mappers",
-                                "E:\\github\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\entities",
+                                "D:\\work\\code\\domain\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\mappers",
+                                "D:\\work\\code\\domain\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\entities",
                                 GlobalSetting.INSTANCE.getTableList(), packageParam, true, true);
                 GenerateUtils.generateDomains(
-                                "E:\\github\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\domains",
+                                "D:\\work\\code\\domain\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\domains",
                                 GlobalSetting.INSTANCE.getDomainList(), packageParam, true);
                 GenerateUtils.generateController(
-                                "E:\\github\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\controllers",
+                                "D:\\work\\code\\domain\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\controllers",
                                 GlobalSetting.INSTANCE.getDomainList(), packageParam, true);
 
                 // DomainGenerator domainDtoGenerator = new DomainGenerator();

@@ -43,8 +43,8 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
     @Autowired
     private ${repositoryClassName} ${repositoryName};
 
-<#list source.relatedTableDistinct as relateTable>
-    <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.tableName)/>
+<#list source.relatedTable as relateTable>
+    <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
     @Autowired
     private ${relateRepositoryClassName} ${NameUtils.getFieldName(relateRepositoryClassName)};
 
@@ -54,7 +54,7 @@ public class ${serviceImplClassName} extends <#if (source.relatedTable?size>0)>B
     public void init(){
         this.addRepository(${dtoClassName}.class, this.${repositoryName});
     <#list source.relatedTable as relateTable>
-        <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.tableName)/>
+        <#assign relateRepositoryClassName=NameUtils.repositoryName(relateTable.name)/>
         <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
         this.addRepository(${dtoClassName}.${relateDtoClassName}.class, this.${NameUtils.getFieldName(relateRepositoryClassName)});
     </#list>

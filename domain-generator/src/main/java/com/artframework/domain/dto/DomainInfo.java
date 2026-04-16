@@ -195,7 +195,7 @@ public class DomainInfo {
         }
 
         public String nameSuffix(String suffix) {
-            return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", this.getTableName()))) + suffix;
+            return StringUtils.capitalize(StrUtil.toCamelCase(StrUtil.format("{}", this.getName()))) + suffix;
         }
 
         public static void main(String[] args) {

@@ -61,7 +61,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
 <#--    关联实体属性-->
     <#list source.relatedTable as relateTable>
         <#assign relateClassName=NameUtils.dataObjectName(relateTable.name)/>
-        <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.tableName)/>
+        <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
         <#assign fieldName=NameUtils.getFieldName(relateTable.name)/>
         <#assign fieldNameList=NameUtils.getListFieldName(relateTable.name)/>
         <#assign relatedDomainGetterList=NameUtils.genListGetter(relateTable.name)/>
