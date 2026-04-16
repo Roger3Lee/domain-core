@@ -35,7 +35,7 @@ public interface FamilyService extends BaseDomainService {
     * @param request 请求体
     * @return
     */
-    Integer insert(FamilyDomain request);
+    Long insert(FamilyDomain request);
 
     /**
     * 修改
@@ -55,12 +55,12 @@ public interface FamilyService extends BaseDomainService {
     * @param key 数据ID
     * @return 成功OR失败
     */
-    Boolean delete(Integer key);
+    Boolean delete(Long key);
     /**
     * 删除
     * @param key 数据ID
     * @param loadFlag 數據加載參數
     * @return 成功OR失败
     */
-    Boolean delete(Integer key, FamilyDomain.LoadFlag loadFlag);
+    Boolean delete(Long key, FamilyDomain.LoadFlag loadFlag);
 }

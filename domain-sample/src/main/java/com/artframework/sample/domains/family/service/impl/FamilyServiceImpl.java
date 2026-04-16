@@ -105,13 +105,13 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer insert(FamilyDomain request){
+    public Long insert(FamilyDomain request){
         //插入数据
         FamilyDomain domain = familyRepository.insert(request);
 
         //插入关联数据family_address
         if(ObjectUtil.isNotNull(request.getFamilyAddress())){
-            FamilyLambdaExp.familyAddressFamilyIdTargetSetLambda.accept(request.getFamilyAddress(), (Integer)FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(domain));
+            FamilyLambdaExp.familyAddressFamilyIdTargetSetLambda.accept(request.getFamilyAddress(), (Long)FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(domain));
             FamilyLambdaExp.familyAddressFamilyNameTargetSetLambda.accept(request.getFamilyAddress(), (String)FamilyLambdaExp.familyName_RelatedFamilyAddress_SourceLambda.apply(domain));
             familyAddressRepository.insert(request.getFamilyAddress());
         }
@@ -119,12 +119,12 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
         //插入关联数据family_member
         if(CollUtil.isNotEmpty(request.getFamilyMemberList())){
             request.getFamilyMemberList().forEach(x->{
-                FamilyLambdaExp.familyMemberFamilyIdTargetSetLambda.accept(x, (Integer)FamilyLambdaExp.familyId_RelatedFamilyMember_SourceLambda.apply(domain));
+                FamilyLambdaExp.familyMemberFamilyIdTargetSetLambda.accept(x, (Long)FamilyLambdaExp.familyId_RelatedFamilyMember_SourceLambda.apply(domain));
                 FamilyLambdaExp.familyMemberFamilyNameTargetSetLambda.accept(x, (String)FamilyLambdaExp.familyName_RelatedFamilyMember_SourceLambda.apply(domain));
             });
             familyMemberRepository.insert(request.getFamilyMemberList());
         }
-        return (Integer) FamilyLambdaExp.dtoKeyLambda.apply(domain);
+        return (Long) FamilyLambdaExp.dtoKeyLambda.apply(domain);
     }
 
     @Override
@@ -149,7 +149,7 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
         if(ObjectUtil.isNotNull(request.getLoadFlag())
             && (BooleanUtil.isTrue(request.getLoadFlag().getLoadAll()) || BooleanUtil.isTrue(request.getLoadFlag().getLoadFamilyAddressDomain()))){
             if(ObjectUtil.isNotNull(request.getFamilyAddress())){
-                FamilyLambdaExp.familyAddressFamilyIdTargetSetLambda.accept(request.getFamilyAddress(), (Integer)FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(request));
+                FamilyLambdaExp.familyAddressFamilyIdTargetSetLambda.accept(request.getFamilyAddress(), (Long)FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(request));
                 FamilyLambdaExp.familyAddressFamilyNameTargetSetLambda.accept(request.getFamilyAddress(), (String)FamilyLambdaExp.familyName_RelatedFamilyAddress_SourceLambda.apply(request));
             }
             this.merge(ObjectUtil.isNotNull(old.getFamilyAddress())? CollUtil.toList(old.getFamilyAddress()):ListUtil.empty(),
@@ -161,7 +161,7 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
             && (BooleanUtil.isTrue(request.getLoadFlag().getLoadAll()) || BooleanUtil.isTrue(request.getLoadFlag().getLoadFamilyMemberDomain()))){
             if(CollUtil.isNotEmpty(request.getFamilyMemberList())){
                 request.getFamilyMemberList().forEach(x->{
-                    FamilyLambdaExp.familyMemberFamilyIdTargetSetLambda.accept(x, (Integer)FamilyLambdaExp.familyId_RelatedFamilyMember_SourceLambda.apply(request));
+                    FamilyLambdaExp.familyMemberFamilyIdTargetSetLambda.accept(x, (Long)FamilyLambdaExp.familyId_RelatedFamilyMember_SourceLambda.apply(request));
                     FamilyLambdaExp.familyMemberFamilyNameTargetSetLambda.accept(x, (String)FamilyLambdaExp.familyName_RelatedFamilyMember_SourceLambda.apply(request));
                 });
             }
@@ -182,7 +182,7 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean delete(Integer id){
+    public Boolean delete(Long id){
         return delete(id, FamilyDomain.LoadFlag.builder().loadAll(true).build());
     }
     /**
@@ -193,7 +193,7 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean delete(Integer id, FamilyDomain.LoadFlag loadFlag){
+    public Boolean delete(Long id, FamilyDomain.LoadFlag loadFlag){
         FamilyDomain old = find(new FamilyFindDomain(id ,FamilyDomain.LoadFlag.builder().build()));
         if (ObjectUtil.isNull(old)) {
             return false;

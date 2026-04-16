@@ -2,6 +2,7 @@ package com.artframework.sample.domains.family.domain;
 
 import com.artframework.domain.core.domain.*;
 import com.artframework.domain.core.lambda.query.*;
+import com.artframework.domain.core.constants.*;
 import com.artframework.domain.core.utils.LambdaQueryUtils;
 import com.artframework.domain.core.utils.LoadFlagUtils;
 import lombok.*;
@@ -11,8 +12,14 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import com.artframework.sample.domains.family.convertor.*;
 import com.artframework.sample.domains.family.service.*;
+import com.artframework.sample.domains.family.lambdaexp.*;
 import cn.hutool.core.util.*;
 import cn.hutool.core.collection.*;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
 /**
@@ -26,7 +33,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 @AllArgsConstructor
 public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService> {
 
-    public FamilyDomain(Integer key, FamilyService service){
+    public FamilyDomain(Long key, FamilyService service){
         this.id = key;
         this._service = service;
     }
@@ -36,7 +43,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     @Getter
     @Setter
     @ApiModelProperty(value =  "自增主键")
-    private Integer id;
+    private Long id;
     /**
     * 名称
     */
@@ -98,14 +105,14 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         @Getter
         @Setter
         @ApiModelProperty(value =  "自增主键")
-        private Integer id;
+        private Long id;
         /**
-        * 关联用户
+        * 家庭ID
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "关联用户")
-        private Integer familyId;
+        @ApiModelProperty(value =  "家庭ID")
+        private Long familyId;
         /**
         * 家庭名称
         */
@@ -130,14 +137,14 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         @Getter
         @Setter
         @ApiModelProperty(value =  "自增主键")
-        private Integer id;
+        private Long id;
         /**
         * 家庭ID
         */
         @Getter
         @Setter
         @ApiModelProperty(value =  "家庭ID")
-        private Integer familyId;
+        private Long familyId;
         /**
         * 家庭名称
         */
@@ -234,10 +241,12 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     @Builder
     public static class LoadFlag extends BaseLoadFlag{
         /**
-        * 加載所有數據， 謹慎使用
-        */
+         * 加載所有數據， 謹慎使用
+         */
         @ApiModelProperty(value =  "加載所有數據， 謹慎使用")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private Boolean loadAll;
+
 
         /**
         * 加載FamilyAddressDomain
@@ -278,6 +287,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
                 loadFlag.loadFamilyMemberDomain = true;
                 LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(FamilyDomain.FamilyMemberDomain.class));
             }
+
             return loadFlag;
         }
     }

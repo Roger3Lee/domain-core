@@ -3,7 +3,7 @@ spring:
     name: domain-sample
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://127.0.0.1:5432/postgres?currentSchema=domain&useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:postgresql://127.0.0.1:5433/postgres?currentSchema=public&useUnicode=true&characterEncoding=UTF-8
     username: postgres
     password: 123456
 
