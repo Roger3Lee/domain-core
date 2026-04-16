@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 增强的 PostgreSQL 批量操作方法实现
- * 支持主键自动回填、ignore null策略和逻辑删除字段过滤
+ * 优化版本 - PostgreSQL 批量操作方法
+ * 使用 COALESCE 简化 ignore null 策略
  */
-public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
+public class EnhancedPostgreSqlBatchMethodV2 extends EnhancedBatchMethod {
 
-    public EnhancedPostgreSqlBatchMethod(BatchOperationType operationType) {
+    public EnhancedPostgreSqlBatchMethodV2(BatchOperationType operationType) {
         super(getMethodName(operationType), operationType);
     }
 
@@ -62,14 +62,13 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
         StringBuilder sql = new StringBuilder("<script>");
         sql.append("UPDATE ").append(tableInfo.getTableName()).append(" SET ");
 
-        // 构建SET子句 - 使用COALESCE实现ignore null策略（简化版）
+        // 【优化】使用 COALESCE 简化 ignore null 策略
         for (int i = 0; i < fields.size(); i++) {
             TableFieldInfo field = fields.get(i);
             if (i > 0)
                 sql.append(", ");
 
-            // 使用COALESCE简化ignore null策略：COALESCE(v.column, table.column)
-            // 如果v.column为NULL，则使用table.column（保持原值）
+            // COALESCE(v.column, table.column) - 如果v.column为NULL，使用原值
             sql.append(field.getColumn())
                     .append(" = COALESCE(v.").append(field.getColumn())
                     .append(", ").append(tableInfo.getTableName()).append(".").append(field.getColumn())
@@ -102,19 +101,13 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
         return sql.toString();
     }
 
-    /**
-     * 构建列名列表（排除逻辑删除字段和自增主键）
-     */
     private String buildColumnList(TableInfo tableInfo) {
         StringBuilder columns = new StringBuilder();
 
-        // PostgreSQL 自增主键完全省略，让数据库自动生成
-        // 只有非自增主键且有序列或有值时才包含
         if (shouldIncludeKeyColumn(tableInfo)) {
             columns.append(tableInfo.getKeyColumn());
         }
 
-        // 添加其他字段（排除逻辑删除字段）
         List<TableFieldInfo> validFields = getValidFields(tableInfo);
         for (TableFieldInfo field : validFields) {
             if (columns.length() > 0) {
@@ -126,32 +119,24 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
         return columns.toString();
     }
 
-    /**
-     * 构建参数列表（支持ignore null策略）
-     */
     private String buildParameterList(TableInfo tableInfo, String itemName) {
         StringBuilder params = new StringBuilder();
 
-        // PostgreSQL 自增主键完全省略
         if (shouldIncludeKeyColumn(tableInfo)) {
             KeySequence keySequence = tableInfo.getKeySequence();
             if (keySequence != null) {
-                // 序列主键：使用 nextval
                 params.append("nextval('").append(keySequence.value()).append("')");
             } else {
-                // 非自增非序列主键：直接使用值（不为null时才会包含该列）
                 params.append("#{").append(itemName).append(".").append(tableInfo.getKeyProperty()).append("}");
             }
         }
 
-        // 添加其他字段参数（支持ignore null策略）
         List<TableFieldInfo> validFields = getValidFields(tableInfo);
         for (TableFieldInfo field : validFields) {
             if (params.length() > 0) {
                 params.append(", ");
             }
 
-            // 支持null值时使用DEFAULT
             params.append("<choose>");
             params.append("<when test=\"").append(itemName).append(".").append(field.getProperty())
                     .append(" != null\">");
@@ -164,30 +149,18 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
         return params.toString();
     }
 
-    /**
-     * 判断是否应该包含主键列
-     * PostgreSQL 中的处理策略：
-     * 1. AUTO 类型：完全省略（数据库自增）
-     * 2. INPUT + KeySequence：包含并使用序列
-     * 3. INPUT 无序列：不包含（避免null值问题）
-     */
     private boolean shouldIncludeKeyColumn(TableInfo tableInfo) {
         if (StringUtils.isBlank(tableInfo.getKeyProperty())) {
             return false;
         }
 
-        // 自增主键完全省略（SERIAL、IDENTITY等）
         if (tableInfo.getIdType() == IdType.AUTO) {
             return false;
         }
 
-        // INPUT 类型且有序列：包含并使用序列生成值
         return tableInfo.getIdType() == IdType.INPUT && tableInfo.getKeySequence() != null;
     }
 
-    /**
-     * 获取有效字段列表（排除逻辑删除字段）
-     */
     public List<TableFieldInfo> getValidFields(TableInfo tableInfo) {
         return tableInfo.getFieldList().stream()
                 .filter(field -> !field.isLogicDelete())

@@ -2,6 +2,7 @@ package com.artframework.domain.postgresql.methods;
 
 import com.artframework.domain.core.batch.BatchOperationType;
 import com.artframework.domain.core.batch.EnhancedBatchMethod;
+import com.artframework.domain.core.batch.FieldStrategyHelper;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
@@ -9,15 +10,22 @@ import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * 增强的 PostgreSQL 批量操作方法实现
- * 支持主键自动回填、ignore null策略和逻辑删除字段过滤
+ * 优化版本 - PostgreSQL 批量操作方法（支持 FieldStrategy）
+ *
+ * 改进点：
+ * 1. 支持 insertStrategy（IGNORED, NOT_NULL, NOT_EMPTY, NEVER）
+ * 2. 支持 updateStrategy（IGNORED, NOT_NULL, NOT_EMPTY, NEVER）
+ * 3. 使用 COALESCE 简化 SQL
+ * 4. 完全遵循 MyBatis Plus 的字段策略配置
+ *
+ * @author framework
+ * @version 3.0
  */
-public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
+public class EnhancedPostgreSqlBatchMethodV3 extends EnhancedBatchMethod {
 
-    public EnhancedPostgreSqlBatchMethod(BatchOperationType operationType) {
+    public EnhancedPostgreSqlBatchMethodV3(BatchOperationType operationType) {
         super(getMethodName(operationType), operationType);
     }
 
@@ -34,8 +42,11 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
 
     @Override
     protected String buildBatchInsertSql(TableInfo tableInfo) {
-        String columns = "(" + buildColumnList(tableInfo) + ")";
-        String values = "(" + buildParameterList(tableInfo, "item") + ")";
+        // 使用 FieldStrategyHelper 获取插入字段（考虑 insertStrategy）
+        List<TableFieldInfo> fields = FieldStrategyHelper.getInsertFields(tableInfo);
+
+        String columns = "(" + buildColumnList(tableInfo, fields) + ")";
+        String values = "(" + buildParameterList(tableInfo, fields, "item") + ")";
 
         StringBuilder sql = new StringBuilder("<script>");
         sql.append("INSERT INTO ").append(tableInfo.getTableName()).append(" ").append(columns);
@@ -57,23 +68,21 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
     protected String buildBatchUpdateSql(TableInfo tableInfo) {
         String keyProperty = tableInfo.getKeyProperty();
         String keyColumn = tableInfo.getKeyColumn();
-        List<TableFieldInfo> fields = getValidFields(tableInfo);
+
+        // 使用 FieldStrategyHelper 获取更新字段（考虑 updateStrategy）
+        List<TableFieldInfo> fields = FieldStrategyHelper.getUpdateFields(tableInfo);
 
         StringBuilder sql = new StringBuilder("<script>");
         sql.append("UPDATE ").append(tableInfo.getTableName()).append(" SET ");
 
-        // 构建SET子句 - 使用COALESCE实现ignore null策略（简化版）
+        // 【改进】使用 FieldStrategyHelper 构建 SET 子句，考虑 updateStrategy
         for (int i = 0; i < fields.size(); i++) {
             TableFieldInfo field = fields.get(i);
             if (i > 0)
                 sql.append(", ");
 
-            // 使用COALESCE简化ignore null策略：COALESCE(v.column, table.column)
-            // 如果v.column为NULL，则使用table.column（保持原值）
-            sql.append(field.getColumn())
-                    .append(" = COALESCE(v.").append(field.getColumn())
-                    .append(", ").append(tableInfo.getTableName()).append(".").append(field.getColumn())
-                    .append(")");
+            // 根据 updateStrategy 生成不同的 SQL
+            sql.append(FieldStrategyHelper.buildUpdateSetClausePostgreSQL(field, tableInfo.getTableName()));
         }
 
         // 构建FROM VALUES子句
@@ -103,20 +112,18 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
     }
 
     /**
-     * 构建列名列表（排除逻辑删除字段和自增主键）
+     * 构建列名列表（考虑 insertStrategy，排除 NEVER 字段）
      */
-    private String buildColumnList(TableInfo tableInfo) {
+    private String buildColumnList(TableInfo tableInfo, List<TableFieldInfo> fields) {
         StringBuilder columns = new StringBuilder();
 
-        // PostgreSQL 自增主键完全省略，让数据库自动生成
-        // 只有非自增主键且有序列或有值时才包含
+        // 主键列
         if (shouldIncludeKeyColumn(tableInfo)) {
             columns.append(tableInfo.getKeyColumn());
         }
 
-        // 添加其他字段（排除逻辑删除字段）
-        List<TableFieldInfo> validFields = getValidFields(tableInfo);
-        for (TableFieldInfo field : validFields) {
+        // 其他字段（已通过 FieldStrategyHelper 过滤）
+        for (TableFieldInfo field : fields) {
             if (columns.length() > 0) {
                 columns.append(", ");
             }
@@ -127,38 +134,31 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
     }
 
     /**
-     * 构建参数列表（支持ignore null策略）
+     * 构建参数列表（考虑 insertStrategy）
      */
-    private String buildParameterList(TableInfo tableInfo, String itemName) {
+    private String buildParameterList(TableInfo tableInfo, List<TableFieldInfo> fields, String itemName) {
         StringBuilder params = new StringBuilder();
 
-        // PostgreSQL 自增主键完全省略
+        // 主键参数
         if (shouldIncludeKeyColumn(tableInfo)) {
             KeySequence keySequence = tableInfo.getKeySequence();
             if (keySequence != null) {
                 // 序列主键：使用 nextval
                 params.append("nextval('").append(keySequence.value()).append("')");
             } else {
-                // 非自增非序列主键：直接使用值（不为null时才会包含该列）
+                // 非自增非序列主键：直接使用值
                 params.append("#{").append(itemName).append(".").append(tableInfo.getKeyProperty()).append("}");
             }
         }
 
-        // 添加其他字段参数（支持ignore null策略）
-        List<TableFieldInfo> validFields = getValidFields(tableInfo);
-        for (TableFieldInfo field : validFields) {
+        // 【改进】使用 FieldStrategyHelper 构建参数，考虑 insertStrategy
+        for (TableFieldInfo field : fields) {
             if (params.length() > 0) {
                 params.append(", ");
             }
 
-            // 支持null值时使用DEFAULT
-            params.append("<choose>");
-            params.append("<when test=\"").append(itemName).append(".").append(field.getProperty())
-                    .append(" != null\">");
-            params.append("#{").append(itemName).append(".").append(field.getProperty()).append("}");
-            params.append("</when>");
-            params.append("<otherwise>DEFAULT</otherwise>");
-            params.append("</choose>");
+            // 根据 insertStrategy 生成不同的参数表达式
+            params.append(FieldStrategyHelper.buildInsertParameter(field, itemName));
         }
 
         return params.toString();
@@ -166,10 +166,6 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
 
     /**
      * 判断是否应该包含主键列
-     * PostgreSQL 中的处理策略：
-     * 1. AUTO 类型：完全省略（数据库自增）
-     * 2. INPUT + KeySequence：包含并使用序列
-     * 3. INPUT 无序列：不包含（避免null值问题）
      */
     private boolean shouldIncludeKeyColumn(TableInfo tableInfo) {
         if (StringUtils.isBlank(tableInfo.getKeyProperty())) {
@@ -183,14 +179,5 @@ public class EnhancedPostgreSqlBatchMethod extends EnhancedBatchMethod {
 
         // INPUT 类型且有序列：包含并使用序列生成值
         return tableInfo.getIdType() == IdType.INPUT && tableInfo.getKeySequence() != null;
-    }
-
-    /**
-     * 获取有效字段列表（排除逻辑删除字段）
-     */
-    public List<TableFieldInfo> getValidFields(TableInfo tableInfo) {
-        return tableInfo.getFieldList().stream()
-                .filter(field -> !field.isLogicDelete())
-                .collect(Collectors.toList());
     }
 }

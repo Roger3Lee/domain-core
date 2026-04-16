@@ -20,7 +20,10 @@ public class FamilyController {
     */
     @PostMapping("/query")
     public FamilyDomain find(@RequestBody FamilyFindDomain request){
-        return familyService.find(request);
+        FamilyDomain familyDomain = FamilyDomain.load(1, familyService);
+        familyDomain.loadRelated(FamilyDomain.FamilyMemberDomain.class, x->x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
+                .or(y->y.eq(FamilyDomain.FamilyMemberDomain::getType, "1")));
+        return familyDomain;
     }
 
     /**
