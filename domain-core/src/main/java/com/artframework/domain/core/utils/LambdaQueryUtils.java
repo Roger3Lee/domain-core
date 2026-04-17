@@ -78,15 +78,15 @@ public class LambdaQueryUtils {
 
         LambdaQuery.ConditionGroup rootFilter = lambdaQuery.getFilter();
 
-        // 检查用户条件是否为纯 AND 逻辑，如果是则展开
-        List<Object> conditionList = new ArrayList<>();
-        if (isAndLogic(filter, conditionList)) {
-            // 纯 AND 条件，直接添加到根 AND 组中（展开）
-            conditionList.forEach(rootFilter::addChild);
+        // 展开用户 filter 的逻辑：
+        // 如果用户 filter 是 AND 组且包含的元素可以直接展开，就展开它们
+        if (LogicalOperator.AND.equals(filter.getLogic())) {
+            // 遍历用户 filter 的所有子元素，直接添加到 rootFilter
+            for (Object child : filter.getCondition()) {
+                rootFilter.addChild(child);
+            }
         } else {
-            // 包含 OR 或嵌套逻辑，作为一个整体添加到根 AND 组中
-            // 这样确保：rootFilter (AND) + filter (整体)
-            // 例如：family_id = ? AND (type = ? OR type = ?)
+            // 用户 filter 是 OR 组，作为整体添加
             rootFilter.addChild(filter);
         }
     }
@@ -212,41 +212,39 @@ public class LambdaQueryUtils {
         }
 
         LogicalOperator groupLogic = filter.getLogic() != null ? filter.getLogic() : LogicalOperator.AND;
+        boolean isOrGroup = LogicalOperator.OR.equals(groupLogic);
 
         for (int i = 0; i < filter.getCondition().size(); i++) {
             Object child = filter.getCondition().get(i);
             boolean isFirst = (i == 0);
-            boolean useOr = LogicalOperator.OR.equals(groupLogic) && !isFirst;
 
             if (child instanceof LambdaQuery.Condition) {
                 // 简单条件
-                if (useOr) {
-                    wrapper.or(w -> applyCondition(w, (LambdaQuery.Condition) child, doClass));
-                } else {
-                    applyCondition(wrapper, (LambdaQuery.Condition) child, doClass);
+                if (isOrGroup && !isFirst) {
+                    wrapper.or();
                 }
+                applyCondition(wrapper, (LambdaQuery.Condition) child, doClass);
 
             } else if (child instanceof LambdaQuery.ConditionGroup) {
                 LambdaQuery.ConditionGroup childGroup = (LambdaQuery.ConditionGroup) child;
                 LogicalOperator childLogic = childGroup.getLogic() != null ? childGroup.getLogic() : LogicalOperator.AND;
 
-                // 判断子组是否需要用括号包裹
-                boolean needsNesting = !LogicalOperator.AND.equals(childLogic);
-
-                if (useOr) {
-                    // 当前位置需要 OR 连接
-                    if (needsNesting) {
+                // 只有 OR 组需要包裹，AND 组直接展开
+                if (LogicalOperator.OR.equals(childLogic)) {
+                    // OR 组需要括号包裹
+                    if (isOrGroup && !isFirst) {
+                        // 当前组也是 OR，用 OR 连接这个子 OR 组
                         wrapper.or(w -> w.and(w2 -> buildFilterWrapper(w2, childGroup, doClass)));
                     } else {
-                        wrapper.or(w -> buildFilterWrapper(w, childGroup, doClass));
+                        // 当前组是 AND，用 AND 连接这个子 OR 组
+                        wrapper.and(w -> buildFilterWrapper(w, childGroup, doClass));
                     }
                 } else {
-                    // 当前位置 AND 连接（或第一个元素）
-                    if (needsNesting) {
-                        wrapper.and(w -> buildFilterWrapper(w, childGroup, doClass));
-                    } else {
-                        buildFilterWrapper(wrapper, childGroup, doClass);
+                    // AND 组直接展开，不用括号
+                    if (isOrGroup && !isFirst) {
+                        wrapper.or();
                     }
+                    buildFilterWrapper(wrapper, childGroup, doClass);
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.artframework.sample.controllers;
 
+import com.artframework.domain.core.constants.Order;
 import com.artframework.sample.domains.family.domain.*;
 import com.artframework.sample.domains.family.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -20,12 +21,12 @@ public class FamilyController {
     */
     @PostMapping("/query")
     public FamilyDomain find(@RequestBody FamilyFindDomain request){
-        FamilyDomain familyDomain = FamilyDomain.load(1, familyService);
-        familyDomain.loadRelated(FamilyDomain.FamilyMemberDomain.class, x->
-                x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                .eq(FamilyDomain.FamilyMemberDomain::getName,"zhangsan")
-                .or(y->y.eq(FamilyDomain.FamilyMemberDomain::getType, "1").eq(FamilyDomain.FamilyMemberDomain::getName,"zhangsan")));
-        return familyDomain;
+        return FamilyDomain.load(1, familyService)
+                .loadRelated(FamilyDomain.FamilyAddressDomain.class)
+                .loadRelated(FamilyDomain.FamilyMemberDomain.class,
+                        x -> x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
+                                .or().eq(FamilyDomain.FamilyMemberDomain::getType, "DAUGHTER")
+                                .orderBy(FamilyDomain.FamilyMemberDomain::getId, Order.DESC));
     }
 
     /**
