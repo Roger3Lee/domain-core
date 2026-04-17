@@ -229,22 +229,29 @@ public class LambdaQueryUtils {
                 LambdaQuery.ConditionGroup childGroup = (LambdaQuery.ConditionGroup) child;
                 LogicalOperator childLogic = childGroup.getLogic() != null ? childGroup.getLogic() : LogicalOperator.AND;
 
-                // 只有 OR 组需要包裹，AND 组直接展开
-                if (LogicalOperator.OR.equals(childLogic)) {
-                    // OR 组需要括号包裹
-                    if (isOrGroup && !isFirst) {
-                        // 当前组也是 OR，用 OR 连接这个子 OR 组
+                // 判断子组是否需要括号包裹：
+                // 1. 子组是 OR 组 - 总是需要括号
+                // 2. 子组是 AND 组但父组是 OR - 也需要括号以保证运算优先级
+                boolean childNeedsWrapper = LogicalOperator.OR.equals(childLogic) ||
+                                          (LogicalOperator.AND.equals(childLogic) && isOrGroup);
+
+                if (isOrGroup && !isFirst) {
+                    // 父组是 OR，需要 OR 连接子组
+                    if (childNeedsWrapper) {
+                        // 子组需要括号
                         wrapper.or(w -> w.and(w2 -> buildFilterWrapper(w2, childGroup, doClass)));
                     } else {
-                        // 当前组是 AND，用 AND 连接这个子 OR 组
-                        wrapper.and(w -> buildFilterWrapper(w, childGroup, doClass));
+                        wrapper.or(w -> buildFilterWrapper(w, childGroup, doClass));
                     }
                 } else {
-                    // AND 组直接展开，不用括号
-                    if (isOrGroup && !isFirst) {
-                        wrapper.or();
+                    // 父组是 AND（或第一个元素）
+                    if (childNeedsWrapper) {
+                        // 子组需要括号
+                        wrapper.and(w -> buildFilterWrapper(w, childGroup, doClass));
+                    } else {
+                        // AND 组在 AND 上下文中可以展开，不需要括号
+                        buildFilterWrapper(wrapper, childGroup, doClass);
                     }
-                    buildFilterWrapper(wrapper, childGroup, doClass);
                 }
             }
         }
