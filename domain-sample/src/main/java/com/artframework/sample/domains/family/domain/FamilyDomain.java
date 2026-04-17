@@ -206,11 +206,11 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
      * 加載關聯數據
      * @param tClass
      * @param query
-     * @return
+     * @return 當前聚合根實例，支持鏈式調用
      * @param <T>
      */
     @Override
-    public <T> void loadRelated(Class<T> tClass, LambdaQuery<T> query) {
+    public <T> FamilyDomain loadRelated(Class<T> tClass, LambdaQuery<T> query) {
         LoadFlag.LoadFlagBuilder builder = LoadFlag.builder();
         if (tClass.equals(FamilyAddressDomain.class)) {
             builder.loadFamilyAddressDomain = true;
@@ -221,6 +221,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         LoadFlag loadFlag = builder.build();
         LoadFlagUtils.mergeQueryCondition(loadFlag, query, LambdaQueryUtils.getEntityName(tClass));
         this._service.find(this, loadFlag);
+        return this;
     }
 
      /**

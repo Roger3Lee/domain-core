@@ -64,7 +64,12 @@ public class LambdaQueryUtils {
 
     /**
      * 合并过滤条件到查询对象
-     * 智能合并：避免不必要的嵌套
+     * 确保外键条件和用户条件通过 AND 连接
+     *
+     * 预期行为：
+     * - 外键条件：family_id = ?
+     * - 用户条件：type = ? OR type = ?
+     * - 最终结果：family_id = ? AND (type = ? OR type = ?)
      */
     private static <T> void combineFilter(LambdaQuery<T> lambdaQuery, LambdaQuery.ConditionGroup filter) {
         if (filter == null || CollUtil.isEmpty(filter.getCondition())) {
@@ -72,11 +77,16 @@ public class LambdaQueryUtils {
         }
 
         LambdaQuery.ConditionGroup rootFilter = lambdaQuery.getFilter();
+
+        // 检查用户条件是否为纯 AND 逻辑，如果是则展开
         List<Object> conditionList = new ArrayList<>();
         if (isAndLogic(filter, conditionList)) {
+            // 纯 AND 条件，直接添加到根 AND 组中（展开）
             conditionList.forEach(rootFilter::addChild);
         } else {
-            // 3. 其他情况保持原有逻辑，但会生成嵌套结构
+            // 包含 OR 或嵌套逻辑，作为一个整体添加到根 AND 组中
+            // 这样确保：rootFilter (AND) + filter (整体)
+            // 例如：family_id = ? AND (type = ? OR type = ?)
             rootFilter.addChild(filter);
         }
     }
@@ -189,7 +199,7 @@ public class LambdaQueryUtils {
 
     /**
      * 构建过滤条件到 MyBatis Plus 查询包装器
-     * 
+     *
      * @param wrapper 查询包装器
      * @param filter  过滤条件组
      * @param doClass DO 类型
@@ -201,24 +211,41 @@ public class LambdaQueryUtils {
             return;
         }
 
-        for (Object child : filter.getCondition()) {
+        LogicalOperator groupLogic = filter.getLogic() != null ? filter.getLogic() : LogicalOperator.AND;
+
+        for (int i = 0; i < filter.getCondition().size(); i++) {
+            Object child = filter.getCondition().get(i);
+            boolean isFirst = (i == 0);
+            boolean useOr = LogicalOperator.OR.equals(groupLogic) && !isFirst;
+
             if (child instanceof LambdaQuery.Condition) {
-                applyCondition(wrapper, (LambdaQuery.Condition) child, doClass);
-            } else if (child instanceof LambdaQuery.ConditionGroup) {
-                List<Object> conditionList = new ArrayList<>();
-                if (isAndLogic((LambdaQuery.ConditionGroup) child, conditionList)) {
-                    conditionList.forEach(x -> {
-                        if (x instanceof LambdaQuery.Condition) {
-                            applyCondition(wrapper, (LambdaQuery.Condition) x, doClass);
-                        } else {
-                            buildFilterWrapper(wrapper, (LambdaQuery.ConditionGroup) x, doClass);
-                        }
-                    });
+                // 简单条件
+                if (useOr) {
+                    wrapper.or(w -> applyCondition(w, (LambdaQuery.Condition) child, doClass));
                 } else {
-                    if (LogicalOperator.AND.equals(((LambdaQuery.ConditionGroup) child).getLogic())) {
-                        wrapper.and(w -> buildFilterWrapper(w, (LambdaQuery.ConditionGroup) child, doClass));
+                    applyCondition(wrapper, (LambdaQuery.Condition) child, doClass);
+                }
+
+            } else if (child instanceof LambdaQuery.ConditionGroup) {
+                LambdaQuery.ConditionGroup childGroup = (LambdaQuery.ConditionGroup) child;
+                LogicalOperator childLogic = childGroup.getLogic() != null ? childGroup.getLogic() : LogicalOperator.AND;
+
+                // 判断子组是否需要用括号包裹
+                boolean needsNesting = !LogicalOperator.AND.equals(childLogic);
+
+                if (useOr) {
+                    // 当前位置需要 OR 连接
+                    if (needsNesting) {
+                        wrapper.or(w -> w.and(w2 -> buildFilterWrapper(w2, childGroup, doClass)));
                     } else {
-                        wrapper.or(w -> buildFilterWrapper(w, (LambdaQuery.ConditionGroup) child, doClass));
+                        wrapper.or(w -> buildFilterWrapper(w, childGroup, doClass));
+                    }
+                } else {
+                    // 当前位置 AND 连接（或第一个元素）
+                    if (needsNesting) {
+                        wrapper.and(w -> buildFilterWrapper(w, childGroup, doClass));
+                    } else {
+                        buildFilterWrapper(wrapper, childGroup, doClass);
                     }
                 }
             }

@@ -29,10 +29,12 @@ public abstract class BaseAggregateDomain<D extends BaseDomain, S extends BaseDo
      *
      * @param tClass
      * @param <T>
+     * @return 當前聚合根實例，支持鏈式調用
      */
-    public <T> void loadRelated(Class<T> tClass) {
+    public <T> D loadRelated(Class<T> tClass) {
         LambdaQuery<T> query = LambdaQuery.of(tClass);
         loadRelated(tClass, query);
+        return (D) this;
     }
 
     /**
@@ -41,16 +43,18 @@ public abstract class BaseAggregateDomain<D extends BaseDomain, S extends BaseDo
      * @param tClass
      * @param consumer
      * @param <T>
+     * @return 當前聚合根實例，支持鏈式調用
      */
-    public <T> void loadRelated(Class<T> tClass, Consumer<LambdaQuery<T>> consumer) {
+    public <T> D loadRelated(Class<T> tClass, Consumer<LambdaQuery<T>> consumer) {
         LambdaQuery<T> query = LambdaQuery.of(tClass);
         if (null != consumer) {
             consumer.accept(query);
         }
         this.loadRelated(tClass, query);
+        return (D) this;
     }
 
-    public <T> void loadRelated(Class<T> tClass, LambdaQuery<T> consumer) {
+    public <T> D loadRelated(Class<T> tClass, LambdaQuery<T> consumer) {
         throw new UnsupportedOperationException();
     }
 }
