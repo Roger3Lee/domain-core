@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.artframework.domain.oracle.config.OracleDomainConfiguration 
+io.github.roger3lee.domain.oracle.config.OracleDomainConfiguration 

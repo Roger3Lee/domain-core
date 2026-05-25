@@ -46,7 +46,7 @@
             <charset>${ENCODING}</charset>
         </encoder>
     </appender>
-    <logger name="com.artframework.sample.mappers" additivity="true" level="DEBUG">
+    <logger name="io.github.roger3lee.sample.mappers" additivity="true" level="DEBUG">
         <appender-ref ref="INFO"/>
     </logger>
     <root level="INFO">

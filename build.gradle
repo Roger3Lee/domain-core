@@ -1,7 +1,5 @@
 plugins {
     id 'java'
-    id 'maven-publish' apply false
-    id 'signing' apply false
 }
 
 group = 'io.github.roger3lee'
@@ -45,7 +43,26 @@ subprojects { subProj ->
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
 
-    // 发布版本才签名（SNAPSHOT 不强制）
+    // 源码 jar 任务
+    task sourceJar(type: Jar) {
+        archiveClassifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    // javadoc jar 任务
+    task javadocJar(type: Jar) {
+        archiveClassifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    // javadoc 编码设置
+    javadoc {
+        options.encoding = 'UTF-8'
+        if (JavaVersion.current().isJava9Compatible()) {
+            options.addBooleanOption('html5', true)
+        }
+    }
+
     publishing {
         publications {
             mavenJava(MavenPublication) {
@@ -59,7 +76,7 @@ subprojects { subProj ->
                 pom {
                     name = project.name
                     description = 'Domain-Driven Design (DDD) scaffolding framework'
-                    url = 'https://github.com/artframework/domain-core'
+                    url = 'https://github.com/roger3lee/domain-core'
 
                     licenses {
                         license {
@@ -70,16 +87,16 @@ subprojects { subProj ->
 
                     developers {
                         developer {
-                            id = 'artframework'
-                            name = 'artframework'
-                            email = 'your-email@example.com'
+                            id = 'roger3lee'
+                            name = 'roger3lee'
+                            email = 'roger3lee@gmail.com'
                         }
                     }
 
                     scm {
-                        connection = 'scm:git:git://github.com/artframework/domain-core.git'
-                        developerConnection = 'scm:git:ssh://github.com/artframework/domain-core.git'
-                        url = 'https://github.com/artframework/domain-core'
+                        connection = 'scm:git:git://github.com/roger3lee/domain-core.git'
+                        developerConnection = 'scm:git:ssh://github.com/roger3lee/domain-core.git'
+                        url = 'https://github.com/roger3lee/domain-core'
                     }
                 }
             }
@@ -102,84 +119,5 @@ subprojects { subProj ->
 
     signing {
         sign publishing.publications.mavenJava
-    }
-
-    // 源码 jar 任务
-    task sourceJar(type: Jar) {
-        archiveClassifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    // javadoc jar 任务
-    task javadocJar(type: Jar) {
-        archiveClassifier = 'javadoc'
-        from javadoc.destinationDir
-    }
-
-    // javadoc 编码设置
-    javadoc {
-        options.encoding = 'UTF-8'
-        if (JavaVersion.current().isJava9Compatible()) {
-            options.addBooleanOption('html5', true)
-        }
-    }
-}
-
-// ========== domain-dependencies (java-platform) 单独发布配置 ==========
-configure(project(':domain-dependencies')) {
-    apply plugin: 'maven-publish'
-    apply plugin: 'signing'
-
-    publishing {
-        publications {
-            mavenPlatform(MavenPublication) {
-                from components.javaPlatform
-
-                pom {
-                    name = 'domain-dependencies'
-                    description = 'Domain-Driven Design (DDD) scaffolding framework - BOM'
-                    url = 'https://github.com/artframework/domain-core'
-
-                    licenses {
-                        license {
-                            name = 'The Apache License, Version 2.0'
-                            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id = 'artframework'
-                            name = 'artframework'
-                            email = 'your-email@example.com'
-                        }
-                    }
-
-                    scm {
-                        connection = 'scm:git:git://github.com/artframework/domain-core.git'
-                        developerConnection = 'scm:git:ssh://github.com/artframework/domain-core.git'
-                        url = 'https://github.com/artframework/domain-core'
-                    }
-                }
-            }
-        }
-
-        repositories {
-            maven {
-                name = "OSSRH"
-                def releasesUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-                def snapshotsUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-                url = version.endsWith('SNAPSHOT') ? snapshotsUrl : releasesUrl
-
-                credentials {
-                    username = findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
-                    password = findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
-                }
-            }
-        }
-    }
-
-    signing {
-        sign publishing.publications.mavenPlatform
     }
 }

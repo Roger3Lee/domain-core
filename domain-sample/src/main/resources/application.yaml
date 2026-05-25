@@ -29,6 +29,6 @@ mybatis-plus:
 
 logging:
   level:
-    com.artframework.sample.mappers: DEBUG
-    com.artframework.domain.postgresql: DEBUG
+    io.github.roger3lee.sample.mappers: DEBUG
+    io.github.roger3lee.domain.postgresql: DEBUG
     root: INFO

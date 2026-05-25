@@ -33,13 +33,13 @@ validation-api = "2.0.1.Final"
 
 [libraries]
 # Internal modules (version set by project)
-domain-core = { module = "com.artframework:domain-core", version = "1.0-SNAPSHOT" }
-domain-dependencies = { module = "com.artframework:domain-dependencies", version = "1.0-SNAPSHOT" }
-domain-generator = { module = "com.artframework:domain-generator", version = "1.2.0-SNAPSHOT" }
-domain-postgresql-support = { module = "com.artframework:domain-postgresql-support", version = "1.0-SNAPSHOT" }
-domain-mysql-support = { module = "com.artframework:domain-mysql-support", version = "1.0-SNAPSHOT" }
-domain-oracle-support = { module = "com.artframework:domain-oracle-support", version = "1.0-SNAPSHOT" }
-domain-polardb-support = { module = "com.artframework:domain-polardb-support", version = "1.0-SNAPSHOT" }
+domain-core = { module = "io.github.roger3lee:domain-core", version = "1.0-SNAPSHOT" }
+domain-dependencies = { module = "io.github.roger3lee:domain-dependencies", version = "1.0-SNAPSHOT" }
+domain-generator = { module = "io.github.roger3lee:domain-generator", version = "1.2.0-SNAPSHOT" }
+domain-postgresql-support = { module = "io.github.roger3lee:domain-postgresql-support", version = "1.0-SNAPSHOT" }
+domain-mysql-support = { module = "io.github.roger3lee:domain-mysql-support", version = "1.0-SNAPSHOT" }
+domain-oracle-support = { module = "io.github.roger3lee:domain-oracle-support", version = "1.0-SNAPSHOT" }
+domain-polardb-support = { module = "io.github.roger3lee:domain-polardb-support", version = "1.0-SNAPSHOT" }
 
 # Utilities
 hutool-all = { module = "cn.hutool:hutool-all", version.ref = "hutool" }

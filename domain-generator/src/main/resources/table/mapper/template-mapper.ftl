@@ -1,7 +1,7 @@
 package ${mapperPackage!''};
 
 import org.apache.ibatis.annotations.Mapper;
-import com.artframework.domain.core.mapper.BatchBaseMapper;
+import io.github.roger3lee.domain.core.mapper.BatchBaseMapper;
 import ${tablePackage!''}.*;
 
 /**

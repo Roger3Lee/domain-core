@@ -1,0 +1,38 @@
+package io.github.roger3lee.sample.domains.family.repository.impl;
+
+import io.github.roger3lee.sample.domains.family.convertor.*;
+import io.github.roger3lee.sample.domains.family.lambdaexp.*;
+import io.github.roger3lee.sample.domains.family.domain.*;
+import io.github.roger3lee.sample.domains.family.repository.*;
+import io.github.roger3lee.sample.entities.*;
+import io.github.roger3lee.domain.core.repository.impl.*;
+
+import org.springframework.stereotype.Repository;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+
+import java.io.Serializable;
+import java.util.List;
+
+@Repository(value="family-FamilyAddressRepositoryImpl")
+public class FamilyAddressRepositoryImpl extends BaseRepositoryImpl<FamilyDomain.FamilyAddressDomain,FamilyAddressDO>  implements FamilyAddressRepository {
+
+    @Override
+    public List<FamilyAddressDO> convert2DO(List<FamilyDomain.FamilyAddressDomain> list) {
+        return FamilyConvertor.INSTANCE.convert2FamilyAddressDO(list);
+    }
+
+    @Override
+    public List<FamilyDomain.FamilyAddressDomain> convert2DTO(List<FamilyAddressDO> list) {
+        return FamilyConvertor.INSTANCE.convert2FamilyAddressDTO(list);
+    }
+
+    @Override
+    public void convert2DTO(FamilyAddressDO item ,FamilyDomain.FamilyAddressDomain targetItem){
+        FamilyConvertor.INSTANCE.convert2FamilyAddressDTO(item,targetItem);
+    }
+
+    @Override
+    public SFunction<FamilyDomain.FamilyAddressDomain, Serializable> keyLambda() {
+        return FamilyLambdaExp.familyAddressDomainKeyLambda;
+    }
+}

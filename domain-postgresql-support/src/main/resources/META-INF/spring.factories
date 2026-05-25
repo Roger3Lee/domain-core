@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.artframework.domain.postgresql.config.PostgreSqlDomainConfiguration 
+io.github.roger3lee.domain.postgresql.config.PostgreSqlDomainConfiguration 

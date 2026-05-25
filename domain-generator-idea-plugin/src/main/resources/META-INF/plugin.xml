@@ -1,7 +1,7 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-    <id>com.artframework.domain.domain-generator-plugin</id>
+    <id>io.github.roger3lee.domain.domain-generator-plugin</id>
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
@@ -26,12 +26,12 @@
 
     </extensions>
     <actions>
-        <group id="com.artframework.domain.domain-generator-plugin.group" text="Domain Code Generator" description="领域模型代碼生成器">
+        <group id="io.github.roger3lee.domain.domain-generator-plugin.group" text="Domain Code Generator" description="领域模型代碼生成器">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
-            <action id="com.artframework.domain.domain-generator-plugin.action" class="com.artframework.domain.generator.plugin.ToolMenu" text="Domain Code Generator" description="领域模型代碼生成器"/>
+            <action id="io.github.roger3lee.domain.domain-generator-plugin.action" class="io.github.roger3lee.domain.generator.plugin.ToolMenu" text="Domain Code Generator" description="领域模型代碼生成器"/>
         </group>
     </actions>
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="com.artframework.domain.generator.plugin.SettingsCache"></projectService>
+        <projectService serviceImplementation="io.github.roger3lee.domain.generator.plugin.SettingsCache"></projectService>
     </extensions>
 </idea-plugin>

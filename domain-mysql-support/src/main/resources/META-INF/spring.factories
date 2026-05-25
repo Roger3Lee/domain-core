@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.artframework.domain.mysql.config.MySqlDomainConfiguration 
+io.github.roger3lee.domain.mysql.config.MySqlDomainConfiguration 

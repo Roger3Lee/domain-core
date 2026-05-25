@@ -2,6 +2,7 @@ HELP.md
 ### Gradle ###
 .gradle/
 build/
+target/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
@@ -35,3 +36,4 @@ target/
 
 ### VS Code ###
 .vscode/
+/.qoder/*

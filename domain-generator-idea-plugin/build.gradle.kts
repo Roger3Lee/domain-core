@@ -4,7 +4,7 @@ plugins {
     id("org.jetbrains.intellij") version "1.5.2"
 }
 
-group = "com.artframework"
+group = "io.github.roger3lee"
 version = "1.2.0"
 
 repositories {
