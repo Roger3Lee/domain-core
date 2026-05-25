@@ -1,0 +1,69 @@
+plugins {
+    id 'java-platform'
+}
+
+group = 'com.artframework'
+version = '1.0-SNAPSHOT'
+
+dependencies {
+    constraints {
+        // Internal modules
+        api(libs.domain.core)
+
+        // Utilities
+        api(libs.hutool.all)
+        api(libs.commons.lang3)
+        api(libs.freemarker)
+
+        // MapStruct
+        api(libs.mapstruct)
+        api(libs.mapstruct.processor)
+        api(libs.mapstruct.jdk8)
+
+        // MyBatis Plus
+        api(libs.mybatis.plus.boot.starter)
+        api(libs.mybatis.plus.core)
+        api(libs.mybatis.plus.extension)
+        api(libs.mybatis.plus.annotation)
+        api(libs.mybatis.plus.generator)
+
+        // Lombok
+        api(libs.lombok)
+
+        // Spring Framework
+        api(libs.spring.beans)
+        api(libs.spring.tx)
+        api(libs.spring.context)
+
+        // Spring Boot
+        api(libs.spring.boot.starter.web)
+        api(libs.spring.boot.starter.logging)
+        api(libs.spring.boot.autoconfigure)
+        api(libs.spring.boot.starter.test)
+
+        // Logging
+        api(libs.slf4j.api)
+        api(libs.logback.classic)
+        api(libs.logback.core)
+
+        // Database Drivers
+        api(libs.postgresql)
+        api(libs.mysql.connector.java)
+        api(libs.ojdbc8)
+
+        // Database Connection Pool
+        api(libs.druid.spring.boot.starter)
+
+        // JSON
+        api(libs.jackson.annotations)
+        api(libs.jackson.core)
+        api(libs.jackson.databind)
+
+        // API Documentation
+        api(libs.springfox.boot.starter)
+        api(libs.swagger.annotations)
+
+        // Validation
+        api(libs.validation.api)
+    }
+}

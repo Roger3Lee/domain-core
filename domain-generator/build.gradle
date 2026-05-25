@@ -1,0 +1,18 @@
+group = 'com.artframework'
+version = '1.2.0-SNAPSHOT'
+
+dependencies {
+    implementation platform(project(':domain-dependencies'))
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+    implementation libs.commons.lang3
+    implementation libs.hutool.all
+    implementation libs.freemarker
+    implementation libs.slf4j.api
+    implementation libs.mybatis.plus.annotation
+    implementation libs.mybatis.plus.generator
+    implementation libs.mybatis.plus.core
+    implementation libs.mysql.connector.java
+    implementation libs.postgresql
+}

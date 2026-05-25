@@ -1,0 +1,16 @@
+group = 'com.artframework'
+version = '1.0-SNAPSHOT'
+
+dependencies {
+    implementation platform(project(':domain-dependencies'))
+
+    implementation project(':domain-core')
+    implementation libs.mybatis.plus.core
+    implementation libs.mybatis.plus.extension
+    compileOnly libs.ojdbc8
+    compileOnly libs.spring.context
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+    compileOnly libs.slf4j.api
+    compileOnly libs.spring.boot.autoconfigure
+}

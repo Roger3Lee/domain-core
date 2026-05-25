@@ -1,0 +1,101 @@
+[versions]
+# Framework
+spring = "5.3.27"
+spring-boot = "2.6.15"
+
+# Persistence
+mybatis-plus = "3.5.3.1"
+
+# Utilities
+hutool = "5.8.23"
+mapstruct = "1.4.2.Final"
+lombok = "1.18.28"
+commons-lang3 = "3.12.0"
+freemarker = "2.3.31"
+
+# Database Drivers
+mysql = "8.0.33"
+postgresql = "42.7.7"
+ojdbc8 = "21.9.0.0"
+
+# Logging
+slf4j = "2.0.7"
+logback = "1.2.12"
+
+# JSON
+jackson = "2.16.0"
+
+# Web & API
+druid = "1.2.16"
+springfox = "3.0.0"
+swagger = "1.5.20"
+validation-api = "2.0.1.Final"
+
+[libraries]
+# Internal modules (version set by project)
+domain-core = { module = "com.artframework:domain-core", version = "1.0-SNAPSHOT" }
+domain-dependencies = { module = "com.artframework:domain-dependencies", version = "1.0-SNAPSHOT" }
+domain-generator = { module = "com.artframework:domain-generator", version = "1.2.0-SNAPSHOT" }
+domain-postgresql-support = { module = "com.artframework:domain-postgresql-support", version = "1.0-SNAPSHOT" }
+domain-mysql-support = { module = "com.artframework:domain-mysql-support", version = "1.0-SNAPSHOT" }
+domain-oracle-support = { module = "com.artframework:domain-oracle-support", version = "1.0-SNAPSHOT" }
+domain-polardb-support = { module = "com.artframework:domain-polardb-support", version = "1.0-SNAPSHOT" }
+
+# Utilities
+hutool-all = { module = "cn.hutool:hutool-all", version.ref = "hutool" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
+freemarker = { module = "org.freemarker:freemarker", version.ref = "freemarker" }
+
+# MapStruct
+mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
+mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
+mapstruct-jdk8 = { module = "org.mapstruct:mapstruct-jdk8", version.ref = "mapstruct" }
+
+# MyBatis Plus
+mybatis-plus-boot-starter = { module = "com.baomidou:mybatis-plus-boot-starter", version.ref = "mybatis-plus" }
+mybatis-plus-core = { module = "com.baomidou:mybatis-plus-core", version.ref = "mybatis-plus" }
+mybatis-plus-extension = { module = "com.baomidou:mybatis-plus-extension", version.ref = "mybatis-plus" }
+mybatis-plus-annotation = { module = "com.baomidou:mybatis-plus-annotation", version.ref = "mybatis-plus" }
+mybatis-plus-generator = { module = "com.baomidou:mybatis-plus-generator", version.ref = "mybatis-plus" }
+
+# Lombok
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+
+# Spring Framework
+spring-beans = { module = "org.springframework:spring-beans", version.ref = "spring" }
+spring-tx = { module = "org.springframework:spring-tx", version.ref = "spring" }
+spring-context = { module = "org.springframework:spring-context", version.ref = "spring" }
+
+# Spring Boot
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
+spring-boot-starter-logging = { module = "org.springframework.boot:spring-boot-starter-logging", version.ref = "spring-boot" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
+spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "spring-boot" }
+
+# Logging
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
+
+# Database Drivers
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+mysql-connector-java = { module = "mysql:mysql-connector-java", version.ref = "mysql" }
+ojdbc8 = { module = "com.oracle.database.jdbc:ojdbc8", version.ref = "ojdbc8" }
+
+# Database Connection Pool
+druid-spring-boot-starter = { module = "com.alibaba:druid-spring-boot-starter", version.ref = "druid" }
+
+# JSON
+jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+
+# API Documentation
+springfox-boot-starter = { module = "io.springfox:springfox-boot-starter", version.ref = "springfox" }
+swagger-annotations = { module = "io.swagger:swagger-annotations", version.ref = "swagger" }
+
+# Validation
+validation-api = { module = "javax.validation:validation-api", version.ref = "validation-api" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }

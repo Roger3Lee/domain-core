@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.artframework'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+subprojects {
+    if (project.name == 'domain-dependencies') {
+        return
+    }
+
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+    }
+
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+}
