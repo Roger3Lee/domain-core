@@ -1,8 +1,9 @@
 group = 'io.github.roger3lee'
-version = '2.0.0'
+version = '3.0.0'
 
 dependencies {
     implementation platform(project(':domain-dependencies'))
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${libs.versions.spring.boot.get()}")
 
     compileOnly libs.lombok
     annotationProcessor libs.lombok
@@ -13,6 +14,7 @@ dependencies {
     implementation libs.mybatis.plus.annotation
     implementation libs.mybatis.plus.generator
     implementation libs.mybatis.plus.core
-    implementation libs.mysql.connector.java
     implementation libs.postgresql
+    implementation libs.jakarta.xml.bind.api
+    implementation libs.jaxb.runtime
 }

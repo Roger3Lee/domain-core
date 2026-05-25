@@ -1,5 +1,5 @@
 $bundleDir = "d:\work\code\domain\domain-core\build\central-bundle"
-$zipPath = "d:\work\code\domain\domain-core\build\domain-core-2.0.0-bundle.zip"
+$zipPath = "d:\work\code\domain\domain-core\build\domain-core-3.0.0-bundle.zip"
 
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 

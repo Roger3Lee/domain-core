@@ -22,7 +22,7 @@ import cn.hutool.core.util.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 <#else>
 import ${corePackage}.repository.*;
 </#if>

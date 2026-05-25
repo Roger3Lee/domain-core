@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'io.github.roger3lee'
-version = '2.0.0'
+version = '3.0.0'
 
 repositories {
     maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
@@ -24,8 +24,8 @@ subprojects {
         mavenCentral()
     }
 
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
+    sourceCompatibility = '21'
+    targetCompatibility = '21'
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'

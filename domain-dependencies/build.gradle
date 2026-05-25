@@ -5,12 +5,25 @@ plugins {
 }
 
 group = 'io.github.roger3lee'
-version = '2.0.0'
+version = '3.0.0'
 
 dependencies {
     constraints {
         // Internal modules
         api(libs.domain.core)
+
+        // MyBatis Plus (Spring Boot 3)
+        api(libs.mybatis.plus.spring.boot3.starter)
+        api(libs.mybatis.plus.core)
+        api(libs.mybatis.plus.extension)
+        api(libs.mybatis.plus.annotation)
+        api(libs.mybatis.plus.generator)
+
+        // Database Connection Pool (Spring Boot 3 variant)
+        api(libs.druid.spring.boot3.starter)
+
+        // API Documentation
+        api(libs.springdoc.openapi.starter.webmvc.ui)
 
         // Utilities
         api(libs.hutool.all)
@@ -20,53 +33,16 @@ dependencies {
         // MapStruct
         api(libs.mapstruct)
         api(libs.mapstruct.processor)
-        api(libs.mapstruct.jdk8)
-
-        // MyBatis Plus
-        api(libs.mybatis.plus.boot.starter)
-        api(libs.mybatis.plus.core)
-        api(libs.mybatis.plus.extension)
-        api(libs.mybatis.plus.annotation)
-        api(libs.mybatis.plus.generator)
 
         // Lombok
         api(libs.lombok)
 
-        // Spring Framework
-        api(libs.spring.beans)
-        api(libs.spring.tx)
-        api(libs.spring.context)
-
-        // Spring Boot
-        api(libs.spring.boot.starter.web)
-        api(libs.spring.boot.starter.logging)
-        api(libs.spring.boot.autoconfigure)
-        api(libs.spring.boot.starter.test)
-
-        // Logging
-        api(libs.slf4j.api)
-        api(libs.logback.classic)
-        api(libs.logback.core)
-
         // Database Drivers
         api(libs.postgresql)
-        api(libs.mysql.connector.java)
-        api(libs.ojdbc8)
 
-        // Database Connection Pool
-        api(libs.druid.spring.boot.starter)
-
-        // JSON
-        api(libs.jackson.annotations)
-        api(libs.jackson.core)
-        api(libs.jackson.databind)
-
-        // API Documentation
-        api(libs.springfox.boot.starter)
-        api(libs.swagger.annotations)
-
-        // Validation
-        api(libs.validation.api)
+        // XML Binding
+        api(libs.jakarta.xml.bind.api)
+        api(libs.jaxb.runtime)
     }
 }
 

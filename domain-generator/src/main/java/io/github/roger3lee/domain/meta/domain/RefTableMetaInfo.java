@@ -2,7 +2,7 @@ package io.github.roger3lee.domain.meta.domain;
 
 import lombok.Getter;
 
-import javax.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlAttribute;
 
 /**
  * @author li.pengcheng

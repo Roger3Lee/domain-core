@@ -3,7 +3,7 @@ package io.github.roger3lee.domain.core.domain;
 import io.github.roger3lee.domain.core.lambda.query.LambdaQuery;
 import io.github.roger3lee.domain.core.service.BaseDomainService;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Setter;
 
 import java.util.function.Consumer;
@@ -20,7 +20,7 @@ public abstract class BaseAggregateDomain<D extends BaseDomain, S extends BaseDo
      * 領域服務
      */
     @Setter
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @JsonIgnore
     protected transient S _service;
 

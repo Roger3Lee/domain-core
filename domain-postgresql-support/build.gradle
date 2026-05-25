@@ -1,8 +1,9 @@
 group = 'io.github.roger3lee'
-version = '2.0.0'
+version = '3.0.0'
 
 dependencies {
     implementation platform(project(':domain-dependencies'))
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${libs.versions.spring.boot.get()}")
 
     implementation project(':domain-core')
     implementation libs.mybatis.plus.core

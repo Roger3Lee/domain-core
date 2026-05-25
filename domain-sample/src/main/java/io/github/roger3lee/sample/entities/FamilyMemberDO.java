@@ -45,6 +45,6 @@ public class FamilyMemberDO {
     /**
      * 成员关系
      */
-    @TableField(value = "type", updateStrategy =  FieldStrategy.IGNORED)
+    @TableField(value = "type", updateStrategy =  FieldStrategy.ALWAYS)
     private String type;
 }

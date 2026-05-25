@@ -1,9 +1,9 @@
 plugins {
-    id 'org.springframework.boot' version '2.6.15'
+    id 'org.springframework.boot' version '3.5.8'
 }
 
 group = 'io.github.roger3lee'
-version = '2.0.0'
+version = '3.0.0'
 
 dependencies {
     implementation platform(project(':domain-dependencies'))
@@ -16,19 +16,17 @@ dependencies {
 
     implementation libs.spring.boot.starter.web
     implementation libs.spring.boot.starter.logging
-    implementation libs.mybatis.plus.boot.starter
-    implementation libs.druid.spring.boot.starter
+    implementation libs.mybatis.plus.spring.boot3.starter
+    implementation libs.mybatis.plus.jsqlparser
+    implementation libs.druid.spring.boot3.starter
     compileOnly libs.lombok
     annotationProcessor libs.lombok
     annotationProcessor libs.mapstruct.processor
-    implementation libs.mapstruct.jdk8
     implementation libs.mapstruct
     implementation libs.postgresql
-    implementation libs.springfox.boot.starter
+    implementation libs.springdoc.openapi.starter.webmvc.ui
     implementation libs.logback.classic
     implementation libs.slf4j.api
-    implementation libs.jackson.core
-    implementation libs.jackson.databind
 
     testImplementation libs.spring.boot.starter.test
 }

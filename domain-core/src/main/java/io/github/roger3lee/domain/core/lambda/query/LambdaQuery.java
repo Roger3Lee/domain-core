@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -382,20 +382,20 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
     @NoArgsConstructor
     public static class Condition {
         @JsonIgnore
-        @ApiModelProperty(hidden = true)
+        @Schema(hidden = true)
         private SFunction<?, Serializable> columnFunction;
 
-        @ApiModelProperty(hidden = true)
+        @Schema(hidden = true)
         @JsonIgnore
         private String entity;
 
-        @ApiModelProperty("字段")
+        @Schema(description = "字段")
         private String field;
 
-        @ApiModelProperty("过滤条件规则，默认是=")
+        @Schema(description = "过滤条件规则，默认是=")
         private Op op = Op.EQ;
 
-        @ApiModelProperty("值")
+        @Schema(description = "值")
         private Object value;
 
         @SuppressWarnings("rawtypes")

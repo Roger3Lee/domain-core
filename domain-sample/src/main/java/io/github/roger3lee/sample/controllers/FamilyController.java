@@ -30,9 +30,9 @@ public class FamilyController {
         return FamilyDomain.load(1, familyService)
                 .loadRelated(FamilyDomain.FamilyAddressDomain.class)
                 .loadRelated(FamilyDomain.FamilyMemberDomain.class,
-                        x -> x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                                .or().eq(FamilyDomain.FamilyMemberDomain::getType, "DAUGHTER")
-                                .orderBy(FamilyDomain.FamilyMemberDomain::getId, Order.DESC));
+                        x -> x.eq(fm -> fm.getType(), "SON")
+                                .or().eq(fm -> fm.getType(), "DAUGHTER")
+                                .orderBy(fm -> fm.getId(), Order.DESC));
     }
 
     /**
@@ -196,7 +196,7 @@ public class FamilyController {
 
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyMemberDomain.class,
-            x -> x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
+            x -> x.eq(fm -> fm.getType(), "SON")
         );
     }
 
@@ -212,8 +212,8 @@ public class FamilyController {
 
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyMemberDomain.class,
-            x -> x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                  .or().eq(FamilyDomain.FamilyMemberDomain::getType, "DAUGHTER")
+            x -> x.eq(fm -> fm.getType(), "SON")
+                  .or().eq(fm -> fm.getType(), "DAUGHTER")
         );
     }
 
@@ -229,9 +229,9 @@ public class FamilyController {
 
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyMemberDomain.class,
-            x -> x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                  .or().eq(FamilyDomain.FamilyMemberDomain::getType, "DAUGHTER")
-                  .or().eq(FamilyDomain.FamilyMemberDomain::getType, "FATHER")
+            x -> x.eq(fm -> fm.getType(), "SON")
+                  .or().eq(fm -> fm.getType(), "DAUGHTER")
+                  .or().eq(fm -> fm.getType(), "FATHER")
         );
     }
 
@@ -247,7 +247,7 @@ public class FamilyController {
 
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyMemberDomain.class,
-            x -> x.in(FamilyDomain.FamilyMemberDomain::getType,
+            x -> x.in(fm -> fm.getType(),
                      Arrays.asList("SON", "DAUGHTER", "FATHER"))
         );
     }
@@ -264,9 +264,9 @@ public class FamilyController {
 
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyMemberDomain.class,
-            x -> x.like(FamilyDomain.FamilyMemberDomain::getName, "张")
-                  .eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                  .or().eq(FamilyDomain.FamilyMemberDomain::getType, "DAUGHTER")
+            x -> x.like(fm -> fm.getName(), "张")
+                  .eq(fm -> fm.getType(), "SON")
+                  .or().eq(fm -> fm.getType(), "DAUGHTER")
         );
     }
 
@@ -282,9 +282,9 @@ public class FamilyController {
 
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyMemberDomain.class,
-            x -> x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                  .or(q -> q.eq(FamilyDomain.FamilyMemberDomain::getType, "DAUGHTER")
-                            .like(FamilyDomain.FamilyMemberDomain::getName, "李"))
+            x -> x.eq(fm -> fm.getType(), "SON")
+                  .or(q -> q.eq(fm -> fm.getType(), "DAUGHTER")
+                            .like(fm -> fm.getName(), "李"))
         );
     }
 
@@ -300,8 +300,8 @@ public class FamilyController {
 
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyMemberDomain.class,
-            x -> x.and(q -> q.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                             .like(FamilyDomain.FamilyMemberDomain::getName, "张"))
+            x -> x.and(q -> q.eq(fm -> fm.getType(), "SON")
+                             .like(fm -> fm.getName(), "张"))
         );
     }
 
@@ -317,9 +317,9 @@ public class FamilyController {
 
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyMemberDomain.class,
-            x -> x.like(FamilyDomain.FamilyMemberDomain::getName, "张")
-                  .and(q -> q.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                             .or().eq(FamilyDomain.FamilyMemberDomain::getType, "DAUGHTER"))
+            x -> x.like(fm -> fm.getName(), "张")
+                  .and(q -> q.eq(fm -> fm.getType(), "SON")
+                             .or().eq(fm -> fm.getType(), "DAUGHTER"))
         );
     }
 
@@ -337,11 +337,11 @@ public class FamilyController {
 
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyMemberDomain.class,
-            x -> x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                  .or(q -> q.eq(FamilyDomain.FamilyMemberDomain::getType, "DAUGHTER")
-                            .like(FamilyDomain.FamilyMemberDomain::getName, "李"))
-                  .or(q -> q.eq(FamilyDomain.FamilyMemberDomain::getType, "FATHER")
-                            .like(FamilyDomain.FamilyMemberDomain::getName, "王"))
+            x -> x.eq(fm -> fm.getType(), "SON")
+                  .or(q -> q.eq(fm -> fm.getType(), "DAUGHTER")
+                            .like(fm -> fm.getName(), "李"))
+                  .or(q -> q.eq(fm -> fm.getType(), "FATHER")
+                            .like(fm -> fm.getName(), "王"))
         );
     }
 
@@ -357,9 +357,9 @@ public class FamilyController {
 
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyMemberDomain.class,
-            x -> x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                  .or().eq(FamilyDomain.FamilyMemberDomain::getType, "DAUGHTER")
-                  .orderBy(FamilyDomain.FamilyMemberDomain::getId, Order.DESC)
+            x -> x.eq(fm -> fm.getType(), "SON")
+                  .or().eq(fm -> fm.getType(), "DAUGHTER")
+                  .orderBy(fm -> fm.getId(), Order.DESC)
         );
     }
 
@@ -375,9 +375,9 @@ public class FamilyController {
 
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyMemberDomain.class,
-            x -> x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                  .or().like(FamilyDomain.FamilyMemberDomain::getName, "张")
-                  .or().eq(FamilyDomain.FamilyMemberDomain::getPhone, "13800138000")
+            x -> x.eq(fm -> fm.getType(), "SON")
+                  .or().like(fm -> fm.getName(), "张")
+                  .or().eq(fm -> fm.getPhone(), "13800138000")
         );
     }
 
@@ -398,8 +398,8 @@ public class FamilyController {
         FamilyDomain family = FamilyDomain.load(1, familyService);
         family.loadRelated(FamilyDomain.FamilyAddressDomain.class)
               .loadRelated(FamilyDomain.FamilyMemberDomain.class,
-                  x -> x.eq(FamilyDomain.FamilyMemberDomain::getType, "SON")
-                        .or().eq(FamilyDomain.FamilyMemberDomain::getType, "DAUGHTER")
+                  x -> x.eq(fm -> fm.getType(), "SON")
+                        .or().eq(fm -> fm.getType(), "DAUGHTER")
               );
     }
 }

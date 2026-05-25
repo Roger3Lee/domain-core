@@ -62,7 +62,7 @@ public class FieldStrategyHelper {
         String param = "#{" + itemName + "." + property + "}";
 
         switch (strategy) {
-            case IGNORED:
+            case ALWAYS:
                 // 总是包含，不判断 NULL
                 return param;
 
@@ -96,7 +96,7 @@ public class FieldStrategyHelper {
         String column = field.getColumn();
 
         switch (strategy) {
-            case IGNORED:
+            case ALWAYS:
                 // 直接更新，允许 NULL 覆盖
                 return column + " = v." + column;
 
@@ -130,7 +130,7 @@ public class FieldStrategyHelper {
         FieldStrategy strategy = getEffectiveStrategy(field.getUpdateStrategy());
 
         switch (strategy) {
-            case IGNORED:
+            case ALWAYS:
                 // 直接更新，允许 NULL
                 return column + " = VALUES(" + column + ")";
 
@@ -167,7 +167,7 @@ public class FieldStrategyHelper {
         FieldStrategy strategy = getEffectiveStrategy(field.getUpdateStrategy());
 
         switch (strategy) {
-            case IGNORED:
+            case ALWAYS:
                 // 直接更新，允许 NULL
                 return column + " = " + sourceAlias + "." + column;
 

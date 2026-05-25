@@ -6,7 +6,7 @@ import io.github.roger3lee.domain.utils.GenerateUtils;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
 import com.baomidou.mybatisplus.generator.keywords.PostgreSqlKeyWordsHandler;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;

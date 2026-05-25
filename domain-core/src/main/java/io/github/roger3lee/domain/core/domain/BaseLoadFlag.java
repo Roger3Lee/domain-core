@@ -3,7 +3,7 @@ package io.github.roger3lee.domain.core.domain;
 import io.github.roger3lee.domain.core.lambda.order.LambdaOrderItem;
 import io.github.roger3lee.domain.core.lambda.query.LambdaQuery;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.util.*;

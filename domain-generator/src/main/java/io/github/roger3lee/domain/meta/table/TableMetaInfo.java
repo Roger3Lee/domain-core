@@ -3,8 +3,8 @@ package io.github.roger3lee.domain.meta.table;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
 import java.util.List;
 
 /**

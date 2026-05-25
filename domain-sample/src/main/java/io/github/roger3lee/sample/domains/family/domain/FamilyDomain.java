@@ -8,8 +8,7 @@ import io.github.roger3lee.domain.core.utils.LoadFlagUtils;
 import lombok.*;
 import java.io.Serializable;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.github.roger3lee.sample.domains.family.convertor.*;
 import io.github.roger3lee.sample.domains.family.service.*;
 import io.github.roger3lee.sample.domains.family.lambdaexp.*;
@@ -28,7 +27,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 * @author auto
 * @version v1.0
 */
-@ApiModel(value = "家庭领域模型")
+@Schema(description = "家庭领域模型")
 @NoArgsConstructor
 @AllArgsConstructor
 public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService> {
@@ -42,21 +41,21 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     */
     @Getter
     @Setter
-    @ApiModelProperty(value =  "自增主键")
+    @Schema(description = "自增主键")
     private Long id;
     /**
     * 名称
     */
     @Getter
     @Setter
-    @ApiModelProperty(value =  "名称")
+    @Schema(description = "名称")
     private String name;
     /**
     * 家庭成员数量
     */
     @Getter
     @Setter
-    @ApiModelProperty(value =  "家庭成员数量")
+    @Schema(description = "家庭成员数量")
     private Integer personCount;
 
 
@@ -64,7 +63,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     * RELATE family_address
     */
     @Setter
-    @ApiModelProperty(value =  "RELATE family_address")
+    @Schema(description = "RELATE family_address")
     private FamilyAddressDomain familyAddress;
 
     public FamilyAddressDomain getFamilyAddress(){
@@ -78,7 +77,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     * RELATE family_member
     */
     @Setter
-    @ApiModelProperty(value =  "RELATE family_member")
+    @Schema(description = "RELATE family_member")
     private java.util.List<FamilyMemberDomain> familyMemberList;
 
     public java.util.List<FamilyMemberDomain> getFamilyMemberList(){
@@ -93,7 +92,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     */
     @Getter
     @Setter
-    @ApiModelProperty(value =  "加载数据標識類")
+    @Schema(description = "加载数据標識類")
     private LoadFlag loadFlag;
 
     @NoArgsConstructor
@@ -104,28 +103,28 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "自增主键")
+        @Schema(description = "自增主键")
         private Long id;
         /**
         * 家庭ID
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "家庭ID")
+        @Schema(description = "家庭ID")
         private Long familyId;
         /**
         * 家庭名称
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "家庭名称")
+        @Schema(description = "家庭名称")
         private String familyName;
         /**
         * 地址
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "地址")
+        @Schema(description = "地址")
         private String addressName;
     }
     @NoArgsConstructor
@@ -136,42 +135,42 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "自增主键")
+        @Schema(description = "自增主键")
         private Long id;
         /**
         * 家庭ID
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "家庭ID")
+        @Schema(description = "家庭ID")
         private Long familyId;
         /**
         * 家庭名称
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "家庭名称")
+        @Schema(description = "家庭名称")
         private String familyName;
         /**
         * 姓名
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "姓名")
+        @Schema(description = "姓名")
         private String name;
         /**
         * 电话
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "电话")
+        @Schema(description = "电话")
         private String phone;
         /**
         * 成员关系
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "成员关系")
+        @Schema(description = "成员关系")
         private String type;
     }
     /**
@@ -244,7 +243,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         /**
          * 加載所有數據， 謹慎使用
          */
-        @ApiModelProperty(value =  "加載所有數據， 謹慎使用")
+        @Schema(description = "加載所有數據， 謹慎使用")
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private Boolean loadAll;
 
@@ -252,13 +251,13 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         /**
         * 加載FamilyAddressDomain
         */
-        @ApiModelProperty(value =  "加載FamilyAddressDomain")
+        @Schema(description = "加載FamilyAddressDomain")
         private Boolean loadFamilyAddressDomain;
 
         /**
         * 加載FamilyMemberDomain
         */
-        @ApiModelProperty(value =  "加載FamilyMemberDomain")
+        @Schema(description = "加載FamilyMemberDomain")
         private Boolean loadFamilyMemberDomain;
 
         /**

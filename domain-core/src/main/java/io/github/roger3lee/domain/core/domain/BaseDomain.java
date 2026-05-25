@@ -4,7 +4,7 @@ import cn.hutool.core.annotation.PropIgnore;
 import io.github.roger3lee.domain.core.constants.SaveState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -26,7 +26,7 @@ public class BaseDomain {
      * 是否已更改标志
      * 用于跟踪对象的修改状态
      */
-    @ApiModelProperty(value = "是否已更改", hidden = true)
+    @Schema(description = "是否已更改", hidden = true)
     private Boolean changed = false;
 
     /**
@@ -36,7 +36,7 @@ public class BaseDomain {
      * 注意：此字段使用transient关键字和多个序列化忽略注解
      * 确保在任何序列化场景下都不会被处理
      */
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @JsonIgnore
     @PropIgnore
     private transient Object _thisDomain;

@@ -1,8 +1,9 @@
 group = 'io.github.roger3lee'
-version = '2.0.0'
+version = '3.0.0'
 
 dependencies {
     implementation platform(project(':domain-dependencies'))
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${libs.versions.spring.boot.get()}")
 
     implementation libs.hutool.all
     implementation libs.mapstruct
@@ -12,7 +13,6 @@ dependencies {
     annotationProcessor libs.lombok
     implementation libs.spring.beans
     implementation libs.slf4j.api
-    implementation libs.jackson.annotations
     implementation libs.spring.tx
-    implementation libs.swagger.annotations
+    implementation libs.springdoc.openapi.starter.webmvc.ui
 }

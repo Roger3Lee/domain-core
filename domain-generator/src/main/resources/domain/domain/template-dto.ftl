@@ -10,8 +10,7 @@ import ${corePackage}.utils.LoadFlagUtils;
 import lombok.*;
 import java.io.Serializable;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.convertor.*;
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.service.*;
 <#if (source.relatedTable?size>0)>
@@ -36,7 +35,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 * @author auto
 * @version v1.0
 */
-@ApiModel(value = "${source.description}")
+@Schema(description = "${source.description}")
 @NoArgsConstructor
 @AllArgsConstructor
 public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregateDomain<${className},${serviceClassName}><#else>BaseDomain</#if><#if (source.implement??) && (source.implement!='')> implements ${source.implement}</#if> {
@@ -54,7 +53,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
     */
     @Getter
     @Setter
-    @ApiModelProperty(value =  "${column.comment}")
+    @Schema(description = "${column.comment}")
     private ${column.type} ${NameUtils.getFieldName(column.name)};
     </#list>
 
@@ -71,7 +70,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
     * RELATE ${relateTable.name}
     */
     @Setter
-    @ApiModelProperty(value =  "RELATE ${relateTable.name}")
+    @Schema(description = "RELATE ${relateTable.name}")
     private <#if relateTable.many>java.util.List<${relateDtoClassName}> ${fieldNameList};<#else>${relateDtoClassName} ${fieldName};</#if>
 
     public <#if relateTable.many>java.util.List<${relateDtoClassName}> ${relatedDomainGetterList}<#else>${relateDtoClassName} ${relatedDomainGetter}</#if>(){
@@ -88,7 +87,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
     */
     @Getter
     @Setter
-    @ApiModelProperty(value =  "加载数据標識類")
+    @Schema(description = "加载数据標識類")
     private LoadFlag loadFlag;
 </#if>
 
@@ -105,7 +104,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
         */
         @Getter
         @Setter
-        @ApiModelProperty(value =  "${column.comment}")
+        @Schema(description = "${column.comment}")
         private ${column.type} ${NameUtils.getFieldName(column.name)};
     </#list>
     <#--    关联实体關聯其他實體属性-->
@@ -118,7 +117,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
             <#assign refFieldName=NameUtils.getRefFieldName(refTable.name,refTable.many)/>
             <#assign sourceDomainGetterList=NameUtils.genListGetter(refTable.tableName)/>
 
-        @ApiModelProperty(value =  "Related to ${refTable.tableName}")
+        @Schema(description = "Related to ${refTable.tableName}")
         @JsonIgnore
         private <#if refTable.many>CacheDomain<java.util.List<${refClassName}>><#else>CacheDomain<${refClassName}></#if> ${refFieldName};
         /**
@@ -299,7 +298,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
         /**
          * 加載所有數據， 謹慎使用
          */
-        @ApiModelProperty(value =  "加載所有數據， 謹慎使用")
+        @Schema(description = "加載所有數據， 謹慎使用")
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private Boolean loadAll;
 
@@ -310,7 +309,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
         /**
         * 加載${NameUtils.dataTOName(relateTable.name)}
         */
-        @ApiModelProperty(value =  "加載${relateClassName}")
+        @Schema(description = "加載${relateClassName}")
         private Boolean ${relatedLoadPropertyName};
     </#list>
 
