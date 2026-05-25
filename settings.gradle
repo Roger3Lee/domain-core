@@ -9,13 +9,11 @@ pluginManagement {
 
 rootProject.name = 'domain-generator-parent'
 
+
+// Commented-out modules (matching Maven parent POM)
+
 include 'domain-dependencies'
 include 'domain-core'
 include 'domain-generator'
 include 'domain-sample'
 include 'domain-postgresql-support'
-
-// Commented-out modules (matching Maven parent POM)
-// include 'domain-mysql-support'
-// include 'domain-polardb-support'
-// include 'domain-oracle-support'

@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'io.github.roger3lee'
-version = '1.0-SNAPSHOT'
+version = '2.0.0'
 
 repositories {
     maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
@@ -36,7 +36,8 @@ subprojects {
 subprojects { subProj ->
     // 跳过不需要发布的模块
     if (project.name in ['domain-dependencies', 'domain-generator', 'domain-sample',
-                         'domain-generator-idea-plugin', 'domain-web-generator']) {
+                         'domain-generator-idea-plugin', 'domain-web-generator',
+                         'domain-mysql-support', 'domain-polardb-support', 'domain-oracle-support']) {
         return
     }
 

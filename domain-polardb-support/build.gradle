@@ -1,5 +1,5 @@
 group = 'io.github.roger3lee'
-version = '1.0-SNAPSHOT'
+version = '2.0.0'
 
 dependencies {
     implementation platform(project(':domain-dependencies'))
