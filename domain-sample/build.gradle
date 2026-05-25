@@ -2,7 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.6.15'
 }
 
-group = 'com.artframework'
+group = 'io.github.roger3lee'
 version = '1.0-SNAPSHOT'
 
 dependencies {

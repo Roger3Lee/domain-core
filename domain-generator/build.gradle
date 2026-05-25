@@ -1,4 +1,4 @@
-group = 'com.artframework'
+group = 'io.github.roger3lee'
 version = '1.2.0-SNAPSHOT'
 
 dependencies {

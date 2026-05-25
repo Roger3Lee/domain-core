@@ -2,7 +2,7 @@ plugins {
     id 'java-platform'
 }
 
-group = 'com.artframework'
+group = 'io.github.roger3lee'
 version = '1.0-SNAPSHOT'
 
 dependencies {
