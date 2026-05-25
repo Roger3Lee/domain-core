@@ -6,6 +6,8 @@ group = 'com.artframework'
 version = '1.0-SNAPSHOT'
 
 repositories {
+    maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+    mavenLocal()
     mavenCentral()
 }
 
@@ -17,6 +19,8 @@ subprojects {
     apply plugin: 'java'
 
     repositories {
+        maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+        mavenLocal()
         mavenCentral()
     }
 
