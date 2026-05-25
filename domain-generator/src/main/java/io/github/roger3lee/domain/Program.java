@@ -29,10 +29,10 @@ public class Program {
                                 new File("D:\\work\\code\\domain\\domain-core\\config\\domain-config.xml"));
 
                 Map<String, String> packageParam = new HashMap<>();
-                packageParam.put("tablePackage", "io.github.roger3lee.sample.entities");
-                packageParam.put("mapperPackage", "io.github.roger3lee.sample.mappers");
-                packageParam.put("domainPackage", "io.github.roger3lee.sample.domains");
-                packageParam.put("controllerPackage", "io.github.roger3lee.sample.controllers");
+                packageParam.put("tablePackage", "com.artframework.sample.entities");
+                packageParam.put("mapperPackage", "com.artframework.sample.mappers");
+                packageParam.put("domainPackage", "com.artframework.sample.domains");
+                packageParam.put("controllerPackage", "com.artframework.sample.controllers");
                 //
                 GenerateUtils.generateTables(
                                 "D:\\work\\code\\domain\\domain-core\\domain-sample\\src\\main\\java\\com\\artframework\\sample\\mappers",
