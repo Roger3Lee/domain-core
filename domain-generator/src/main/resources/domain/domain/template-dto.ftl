@@ -261,7 +261,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
      * @param <T>
      */
     @Override
-    public <T> void loadRelated(Class<T> tClass, LambdaQuery<T> query) {
+    public <T> ${className} loadRelated(Class<T> tClass, LambdaQuery<T> query) {
         LoadFlag.LoadFlagBuilder builder = LoadFlag.builder();
     <#list source.relatedTable as relateTable>
         <#assign relateDtoClassName=NameUtils.dataTOName(relateTable.name)/>
@@ -273,6 +273,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
         LoadFlag loadFlag = builder.build();
         LoadFlagUtils.mergeQueryCondition(loadFlag, query, LambdaQueryUtils.getEntityName(tClass));
         this._service.find(this, loadFlag);
+        return this;
     }
 </#if>
 </#if>

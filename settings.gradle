@@ -5,10 +5,6 @@ include 'domain-core'
 include 'domain-generator'
 include 'domain-sample'
 include 'domain-postgresql-support'
-include 'domain-web-generator'
-// Note: domain-web-generator has pre-existing compilation errors
-// (loadRelated return type mismatch: void vs D). Fix code generation
-// template and re-enable.
 
 // Commented-out modules (matching Maven parent POM)
 // include 'domain-mysql-support'
