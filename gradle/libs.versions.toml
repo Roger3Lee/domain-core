@@ -24,6 +24,7 @@ springdoc = "2.8.8"
 # XML Binding (for domain-generator, Java 11+)
 jakarta-xml-bind = "4.0.2"
 jaxb-runtime = "4.0.5"
+picocli = "4.7.6"
 
 [libraries]
 # Internal modules (version set by project)
@@ -79,6 +80,10 @@ springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openap
 # XML Binding (for domain-generator)
 jakarta-xml-bind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version.ref = "jakarta-xml-bind" }
 jaxb-runtime = { module = "org.glassfish.jaxb:jaxb-runtime", version.ref = "jaxb-runtime" }
+
+# Picocli CLI (for domain-generator-v2)
+picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
+picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
