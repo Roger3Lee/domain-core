@@ -1,0 +1,224 @@
+/* FamilyPage styles */
+.fp-root {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  font-family: system-ui, sans-serif;
+  color: #1a1a2e;
+}
+
+.fp-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #2c3e7a;
+}
+
+.fp-hint {
+  font-size: 0.78rem;
+  color: #888;
+  font-weight: 400;
+}
+
+/* ── Sections ── */
+.fp-section {
+  margin-bottom: 20px;
+}
+
+.fp-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Cards ── */
+.fp-card {
+  border: 1px solid #d0d7e3;
+  border-radius: 8px;
+  padding: 16px;
+  background: #f9faff;
+}
+
+.fp-card--sub {
+  border-left: 4px solid #4a6cf7;
+  background: #f4f6ff;
+}
+
+.fp-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* ── Fields ── */
+.fp-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.fp-fields label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.82rem;
+  color: #555;
+  gap: 4px;
+}
+
+.fp-input {
+  padding: 7px 10px;
+  border: 1px solid #c4cde0;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.fp-input:focus {
+  border-color: #4a6cf7;
+  box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.12);
+}
+
+/* ── Buttons ── */
+.fp-btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+  background: #e8eaf0;
+  color: #333;
+  transition: background 0.15s;
+}
+
+.fp-btn:hover:not(:disabled) {
+  background: #d0d5e8;
+}
+
+.fp-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fp-btn--primary {
+  background: #4a6cf7;
+  color: #fff;
+}
+
+.fp-btn--primary:hover:not(:disabled) {
+  background: #3557e0;
+}
+
+.fp-btn--secondary {
+  background: #3ab785;
+  color: #fff;
+}
+
+.fp-btn--secondary:hover:not(:disabled) {
+  background: #2d9e70;
+}
+
+.fp-btn--danger {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.fp-btn--danger:hover:not(:disabled) {
+  background: #c0392b;
+}
+
+.fp-btn--sm {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+/* ── Badges ── */
+.fp-badge {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.fp-badge--changed {
+  background: #fff3cd;
+  color: #b8860b;
+  border: 1px solid #f0c040;
+}
+
+/* ── Messages ── */
+.fp-msg {
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+}
+
+.fp-msg--success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.fp-msg--error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* ── List items ── */
+.fp-list-item {
+  border: 1px solid #dde3f0;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: #fff;
+  position: relative;
+}
+
+.fp-list-item--changed {
+  border-color: #f0c040;
+  background: #fffdf0;
+}
+
+.fp-list-idx {
+  font-size: 0.78rem;
+  color: #888;
+  margin-right: 6px;
+}
+
+/* ── Inspector ── */
+.fp-inspector {
+  background: #1e2336;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.fp-inspector h3 {
+  color: #a0b4e0;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.fp-pre {
+  color: #e0e8ff;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  max-height: 360px;
+  margin: 0;
+}
+
+/* ── id label ── */
+.fp-id {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 400;
+}
