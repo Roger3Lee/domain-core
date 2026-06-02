@@ -21,7 +21,7 @@ public class FamilyMemberDO  {
     /**
     * 自增主键
     */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "ID", type = IdType.AUTO)
     private Long id;
     /**
     * 家庭ID
@@ -29,7 +29,7 @@ public class FamilyMemberDO  {
     @TableField("family_id")
     private Long familyId;
     /**
-    * 家庭名称
+    * 冗余字段：家庭名称
     */
     @TableField("family_name")
     private String familyName;

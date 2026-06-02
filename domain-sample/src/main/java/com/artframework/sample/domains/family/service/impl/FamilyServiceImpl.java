@@ -31,16 +31,16 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
     private FamilyRepository familyRepository;
 
     @Autowired
-    private FamilyAddressRepository familyAddressRepository;
+    private FamilyMemberRepository familyMemberRepository;
 
     @Autowired
-    private FamilyMemberRepository familyMemberRepository;
+    private FamilyAddressRepository familyAddressRepository;
 
     @PostConstruct
     public void init(){
         this.addRepository(FamilyDomain.class, this.familyRepository);
-        this.addRepository(FamilyDomain.FamilyAddressDomain.class, this.familyAddressRepository);
         this.addRepository(FamilyDomain.FamilyMemberDomain.class, this.familyMemberRepository);
+        this.addRepository(FamilyDomain.FamilyAddressDomain.class, this.familyAddressRepository);
     }
 
    /**
@@ -60,16 +60,6 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
     public FamilyDomain find(FamilyDomain response,FamilyDomain.LoadFlag loadFlag){
         final FamilyDomain resp = response;
         if (ObjectUtil.isNotNull(loadFlag)) {
-            if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.getLoadFamilyAddressDomain())){
-                LambdaQuery<FamilyDomain.FamilyAddressDomain> lambdaQuery = LambdaQuery.of(FamilyDomain.FamilyAddressDomain.class);
-                lambdaQuery.eq(FamilyLambdaExp.familyAddress_familyIdTargetLambda,FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(resp));
-                FamilyDomain.FamilyAddressDomain item= familyAddressRepository.query(
-                    LambdaQueryUtils.combine(lambdaQuery, loadFlag, FamilyDomain.FamilyAddressDomain.class));
-                if(ObjectUtil.isNotNull(item)){
-                    item.set_thisDomain(resp);
-                }
-                resp.setFamilyAddress(item);
-            }
             if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.getLoadFamilyMemberDomain())){
                 LambdaQuery<FamilyDomain.FamilyMemberDomain> lambdaQuery = LambdaQuery.of(FamilyDomain.FamilyMemberDomain.class);
                 lambdaQuery.eq(FamilyLambdaExp.familyMember_familyIdTargetLambda,FamilyLambdaExp.familyId_RelatedFamilyMember_SourceLambda.apply(resp));
@@ -80,6 +70,18 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
                     resp.setFamilyMemberList(queryList);
                 } else {
                     resp.getFamilyMemberList().addAll(queryList);
+                }
+            }
+            if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.getLoadFamilyAddressDomain())){
+                LambdaQuery<FamilyDomain.FamilyAddressDomain> lambdaQuery = LambdaQuery.of(FamilyDomain.FamilyAddressDomain.class);
+                lambdaQuery.eq(FamilyLambdaExp.familyAddress_familyIdTargetLambda,FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(resp));
+                List<FamilyDomain.FamilyAddressDomain> queryList = familyAddressRepository.queryList(
+                    LambdaQueryUtils.combine(lambdaQuery, loadFlag, FamilyDomain.FamilyAddressDomain.class))
+                                            .stream().peek(x -> x.set_thisDomain(resp)).collect(Collectors.toList());
+                if (CollectionUtil.isEmpty(resp.getFamilyAddressList())){
+                    resp.setFamilyAddressList(queryList);
+                } else {
+                    resp.getFamilyAddressList().addAll(queryList);
                 }
             }
         }
@@ -109,13 +111,6 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
         //插入数据
         FamilyDomain domain = familyRepository.insert(request);
 
-        //插入关联数据family_address
-        if(ObjectUtil.isNotNull(request.getFamilyAddress())){
-            FamilyLambdaExp.familyAddressFamilyIdTargetSetLambda.accept(request.getFamilyAddress(), (Long)FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(domain));
-            FamilyLambdaExp.familyAddressFamilyNameTargetSetLambda.accept(request.getFamilyAddress(), (String)FamilyLambdaExp.familyName_RelatedFamilyAddress_SourceLambda.apply(domain));
-            familyAddressRepository.insert(request.getFamilyAddress());
-        }
-
         //插入关联数据family_member
         if(CollUtil.isNotEmpty(request.getFamilyMemberList())){
             request.getFamilyMemberList().forEach(x->{
@@ -123,6 +118,15 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
                 FamilyLambdaExp.familyMemberFamilyNameTargetSetLambda.accept(x, (String)FamilyLambdaExp.familyName_RelatedFamilyMember_SourceLambda.apply(domain));
             });
             familyMemberRepository.insert(request.getFamilyMemberList());
+        }
+
+        //插入关联数据family_address
+        if(CollUtil.isNotEmpty(request.getFamilyAddressList())){
+            request.getFamilyAddressList().forEach(x->{
+                FamilyLambdaExp.familyAddressFamilyIdTargetSetLambda.accept(x, (Long)FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(domain));
+                FamilyLambdaExp.familyAddressFamilyNameTargetSetLambda.accept(x, (String)FamilyLambdaExp.familyName_RelatedFamilyAddress_SourceLambda.apply(domain));
+            });
+            familyAddressRepository.insert(request.getFamilyAddressList());
         }
         return (Long) FamilyLambdaExp.dtoKeyLambda.apply(domain);
     }
@@ -145,17 +149,6 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
     @Transactional(rollbackFor = Exception.class)
     public Boolean update(FamilyDomain request, FamilyDomain domain){
         FamilyDomain old = domain;
-        //更新关联数据family_address
-        if(ObjectUtil.isNotNull(request.getLoadFlag())
-            && (BooleanUtil.isTrue(request.getLoadFlag().getLoadAll()) || BooleanUtil.isTrue(request.getLoadFlag().getLoadFamilyAddressDomain()))){
-            if(ObjectUtil.isNotNull(request.getFamilyAddress())){
-                FamilyLambdaExp.familyAddressFamilyIdTargetSetLambda.accept(request.getFamilyAddress(), (Long)FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(request));
-                FamilyLambdaExp.familyAddressFamilyNameTargetSetLambda.accept(request.getFamilyAddress(), (String)FamilyLambdaExp.familyName_RelatedFamilyAddress_SourceLambda.apply(request));
-            }
-            this.merge(ObjectUtil.isNotNull(old.getFamilyAddress())? CollUtil.toList(old.getFamilyAddress()):ListUtil.empty(),
-                    ObjectUtil.isNotNull(request.getFamilyAddress())? CollUtil.toList(request.getFamilyAddress()):ListUtil.empty(),
-                    FamilyLambdaExp.familyAddressDomainKeyLambda, familyAddressRepository);
-        }
         //更新关联数据family_member
         if(ObjectUtil.isNotNull(request.getLoadFlag())
             && (BooleanUtil.isTrue(request.getLoadFlag().getLoadAll()) || BooleanUtil.isTrue(request.getLoadFlag().getLoadFamilyMemberDomain()))){
@@ -166,6 +159,17 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
                 });
             }
             this.merge(old.getFamilyMemberList(), request.getFamilyMemberList(), FamilyLambdaExp.familyMemberDomainKeyLambda, familyMemberRepository);
+        }
+        //更新关联数据family_address
+        if(ObjectUtil.isNotNull(request.getLoadFlag())
+            && (BooleanUtil.isTrue(request.getLoadFlag().getLoadAll()) || BooleanUtil.isTrue(request.getLoadFlag().getLoadFamilyAddressDomain()))){
+            if(CollUtil.isNotEmpty(request.getFamilyAddressList())){
+                request.getFamilyAddressList().forEach(x->{
+                    FamilyLambdaExp.familyAddressFamilyIdTargetSetLambda.accept(x, (Long)FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(request));
+                    FamilyLambdaExp.familyAddressFamilyNameTargetSetLambda.accept(x, (String)FamilyLambdaExp.familyName_RelatedFamilyAddress_SourceLambda.apply(request));
+                });
+            }
+            this.merge(old.getFamilyAddressList(), request.getFamilyAddressList(), FamilyLambdaExp.familyAddressDomainKeyLambda, familyAddressRepository);
         }
 
         //更新数据
@@ -199,17 +203,17 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
             return false;
         }
 
-        if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.getLoadFamilyAddressDomain())){
-            //删除关联数据family_address
-            LambdaQuery<FamilyDomain.FamilyAddressDomain> lambdaQuery = LambdaQuery.of(FamilyDomain.FamilyAddressDomain.class);
-            lambdaQuery.eq(FamilyLambdaExp.familyAddress_familyIdTargetLambda,FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(old));
-            familyAddressRepository.deleteByFilter(lambdaQuery);
-        }
         if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.getLoadFamilyMemberDomain())){
             //删除关联数据family_member
             LambdaQuery<FamilyDomain.FamilyMemberDomain> lambdaQuery = LambdaQuery.of(FamilyDomain.FamilyMemberDomain.class);
             lambdaQuery.eq(FamilyLambdaExp.familyMember_familyIdTargetLambda,FamilyLambdaExp.familyId_RelatedFamilyMember_SourceLambda.apply(old));
             familyMemberRepository.deleteByFilter(lambdaQuery);
+        }
+        if(BooleanUtil.isTrue(loadFlag.getLoadAll()) || BooleanUtil.isTrue(loadFlag.getLoadFamilyAddressDomain())){
+            //删除关联数据family_address
+            LambdaQuery<FamilyDomain.FamilyAddressDomain> lambdaQuery = LambdaQuery.of(FamilyDomain.FamilyAddressDomain.class);
+            lambdaQuery.eq(FamilyLambdaExp.familyAddress_familyIdTargetLambda,FamilyLambdaExp.familyId_RelatedFamilyAddress_SourceLambda.apply(old));
+            familyAddressRepository.deleteByFilter(lambdaQuery);
         }
         return familyRepository.delete(CollUtil.newArrayList(old)) > 0;
     }

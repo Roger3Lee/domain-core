@@ -57,21 +57,14 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     @Setter
     @Schema(description = "家庭成员数量")
     private Integer personCount;
-
-
     /**
-    * RELATE family_address
+    * 户主姓名
     */
+    @Getter
     @Setter
-    @Schema(description = "RELATE family_address")
-    private FamilyAddressDomain familyAddress;
+    @Schema(description = "户主姓名")
+    private String householder;
 
-    public FamilyAddressDomain getFamilyAddress(){
-        if(ObjectUtil.isNotEmpty(this.familyAddress)){
-            ListUtil.toList(this.familyAddress).forEach(x -> x.set_thisDomain(this));
-        }
-        return this.familyAddress;
-    }
 
     /**
     * RELATE family_member
@@ -88,6 +81,20 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     }
 
     /**
+    * RELATE family_address
+    */
+    @Setter
+    @Schema(description = "RELATE family_address")
+    private java.util.List<FamilyAddressDomain> familyAddressList;
+
+    public java.util.List<FamilyAddressDomain> getFamilyAddressList(){
+        if(ObjectUtil.isNotEmpty(this.familyAddressList)){
+            ListUtil.toList(this.familyAddressList).forEach(x -> x.set_thisDomain(this));
+        }
+        return this.familyAddressList;
+    }
+
+    /**
     * 加载数据標識類
     */
     @Getter
@@ -95,38 +102,6 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     @Schema(description = "加载数据標識類")
     private LoadFlag loadFlag;
 
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class FamilyAddressDomain extends BaseDomain{
-        /**
-        * 自增主键
-        */
-        @Getter
-        @Setter
-        @Schema(description = "自增主键")
-        private Long id;
-        /**
-        * 家庭ID
-        */
-        @Getter
-        @Setter
-        @Schema(description = "家庭ID")
-        private Long familyId;
-        /**
-        * 家庭名称
-        */
-        @Getter
-        @Setter
-        @Schema(description = "家庭名称")
-        private String familyName;
-        /**
-        * 地址
-        */
-        @Getter
-        @Setter
-        @Schema(description = "地址")
-        private String addressName;
-    }
     @NoArgsConstructor
     @AllArgsConstructor
     public static class FamilyMemberDomain extends BaseDomain{
@@ -145,11 +120,11 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         @Schema(description = "家庭ID")
         private Long familyId;
         /**
-        * 家庭名称
+        * 冗余字段：家庭名称
         */
         @Getter
         @Setter
-        @Schema(description = "家庭名称")
+        @Schema(description = "冗余字段：家庭名称")
         private String familyName;
         /**
         * 姓名
@@ -172,6 +147,98 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         @Setter
         @Schema(description = "成员关系")
         private String type;
+
+        @Schema(description = "Related to family_address")
+        @JsonIgnore
+        private CacheDomain<FamilyAddressDomain> refAddress;
+        /**
+        * Related to family_address
+        */
+        public synchronized FamilyAddressDomain getRefAddress() {
+            if(null == this.refAddress){
+                FamilyDomain domain = (FamilyDomain)this.get_thisDomain();
+                if(null == domain){
+                    return null;
+                }
+
+                Predicate<FamilyAddressDomain> condition = x -> true;
+                condition = condition.and(x ->ObjectUtil.equals(FamilyLambdaExp.familyMemberRefAddress_idSourceLambda.apply(this), FamilyLambdaExp.familyMemberRefAddress_familyMemberIdTargetLambda.apply(x)));
+                if (CollUtil.isNotEmpty(domain.getFamilyAddressList())) {
+                    this.refAddress= new CacheDomain<>(domain.getFamilyAddressList().stream().filter(condition).findFirst().orElse(null));
+                } else {
+                    this.refAddress= new CacheDomain<>(null);
+                }
+            }
+            return this.refAddress.getValue();
+        }
+        /**
+        * REF to app_dir_doc_rel set
+        */
+        public synchronized void setRefAddress(FamilyAddressDomain ref) {
+            if (ObjectUtil.isNotEmpty(ref)) {
+                ListUtil.toList(ref).forEach(x -> x.set_thisDomain(this.get_thisDomain()));
+                this.refAddress = new CacheDomain<>(ref);
+            } else {
+                this.refAddress = new CacheDomain<>(null);
+            }
+        }
+        @Override
+        public void afterSave(SaveState saveState) {
+            FamilyDomain domain = (FamilyDomain)this.get_thisDomain();
+            // 處理refAddress
+            if(ObjectUtil.isNotEmpty(this.refAddress) && ObjectUtil.isNotEmpty(this.refAddress.getValue())){
+                java.util.List<FamilyAddressDomain> list = new java.util.ArrayList<>();
+                //設置關聯字段值
+                for (FamilyAddressDomain refDomain : ListUtil.toList(this.refAddress.getValue())) {
+                     FamilyLambdaExp.familyMemberRefAddress_familyMemberIdTargetSetLambda.accept(refDomain, (Long)FamilyLambdaExp.familyMemberRefAddress_idSourceLambda.apply(this));
+                     list.add(refDomain);
+                }
+
+                //將關聯信息插入到主domain中
+                if (CollectionUtil.isNotEmpty(domain.getFamilyAddressList())) {
+                    list.forEach(x -> {
+                        //引用類型，如果已經存在則不重複加入
+                        if (!domain.getFamilyAddressList().contains(x)) {
+                            domain.getFamilyAddressList().add(x);
+                        }
+                    });
+                } else {
+                    domain.setFamilyAddressList(list);
+                }
+            }
+        }
+    }
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FamilyAddressDomain extends BaseDomain{
+        /**
+        * 自增主键
+        */
+        @Getter
+        @Setter
+        @Schema(description = "自增主键")
+        private Long id;
+        /**
+        * 关联家庭ID
+        */
+        @Getter
+        @Setter
+        @Schema(description = "关联家庭ID")
+        private Long familyId;
+        /**
+        * 冗余字段：家庭名称
+        */
+        @Getter
+        @Setter
+        @Schema(description = "冗余字段：家庭名称")
+        private String familyName;
+        /**
+        * 地址
+        */
+        @Getter
+        @Setter
+        @Schema(description = "地址")
+        private String addressName;
     }
     /**
      * 加載實體數據
@@ -211,11 +278,11 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
     @Override
     public <T> FamilyDomain loadRelated(Class<T> tClass, LambdaQuery<T> query) {
         LoadFlag.LoadFlagBuilder builder = LoadFlag.builder();
-        if (tClass.equals(FamilyAddressDomain.class)) {
-            builder.loadFamilyAddressDomain = true;
-        }
         if (tClass.equals(FamilyMemberDomain.class)) {
             builder.loadFamilyMemberDomain = true;
+        }
+        if (tClass.equals(FamilyAddressDomain.class)) {
+            builder.loadFamilyAddressDomain = true;
         }
         LoadFlag loadFlag = builder.build();
         LoadFlagUtils.mergeQueryCondition(loadFlag, query, LambdaQueryUtils.getEntityName(tClass));
@@ -249,16 +316,16 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
 
 
         /**
-        * 加載FamilyAddressDomain
-        */
-        @Schema(description = "加載FamilyAddressDomain")
-        private Boolean loadFamilyAddressDomain;
-
-        /**
         * 加載FamilyMemberDomain
         */
         @Schema(description = "加載FamilyMemberDomain")
         private Boolean loadFamilyMemberDomain;
+
+        /**
+        * 加載FamilyAddressDomain
+        */
+        @Schema(description = "加載FamilyAddressDomain")
+        private Boolean loadFamilyAddressDomain;
 
         /**
          * 合併兩個loadFlag數據
@@ -275,17 +342,17 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
                 return loadFlagSource;
             }
 
-            // 合併FamilyAddressDomain
-            if ((null == loadFlag.loadFamilyAddressDomain || BooleanUtil.isFalse(loadFlag.loadFamilyAddressDomain)) &&
-                    BooleanUtil.isTrue(loadFlagSource.loadFamilyAddressDomain)) {
-                loadFlag.loadFamilyAddressDomain = true;
-                LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(FamilyDomain.FamilyAddressDomain.class));
-            }
             // 合併FamilyMemberDomain
             if ((null == loadFlag.loadFamilyMemberDomain || BooleanUtil.isFalse(loadFlag.loadFamilyMemberDomain)) &&
                     BooleanUtil.isTrue(loadFlagSource.loadFamilyMemberDomain)) {
                 loadFlag.loadFamilyMemberDomain = true;
                 LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(FamilyDomain.FamilyMemberDomain.class));
+            }
+            // 合併FamilyAddressDomain
+            if ((null == loadFlag.loadFamilyAddressDomain || BooleanUtil.isFalse(loadFlag.loadFamilyAddressDomain)) &&
+                    BooleanUtil.isTrue(loadFlagSource.loadFamilyAddressDomain)) {
+                loadFlag.loadFamilyAddressDomain = true;
+                LoadFlagUtils.mergeEntityQuery(loadFlag, loadFlagSource, LambdaQueryUtils.getEntityName(FamilyDomain.FamilyAddressDomain.class));
             }
 
             return loadFlag;

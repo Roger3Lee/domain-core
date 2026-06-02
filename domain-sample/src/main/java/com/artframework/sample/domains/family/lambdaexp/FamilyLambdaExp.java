@@ -33,42 +33,6 @@ public class FamilyLambdaExp{
 
 
     /**
-    *  family_address lambda
-    */
-    public static SFunction<FamilyDomain.FamilyAddressDomain, Serializable> familyAddressDomainKeyLambda = FamilyDomain.FamilyAddressDomain::getId;
-
-
-    /**
-    * REF  source lambda
-    */
-    public static SFunction<FamilyDomain, Serializable> familyId_RelatedFamilyAddress_SourceLambda = FamilyDomain::getId;
-
-    /**
-    * REF  target lambda
-    */
-    public static SFunction<FamilyDomain.FamilyAddressDomain,Serializable> familyAddress_familyIdTargetLambda =FamilyDomain.FamilyAddressDomain::getFamilyId;
-
-    /**
-    * REF  target lambda
-    */
-    public static BiConsumer<FamilyDomain.FamilyAddressDomain,Long> familyAddressFamilyIdTargetSetLambda =FamilyDomain.FamilyAddressDomain::setFamilyId;
-
-     /**
-     * REF  source lambda
-     */
-     public static SFunction<FamilyDomain, Serializable> familyName_RelatedFamilyAddress_SourceLambda = FamilyDomain::getName;
-
-     /**
-     * REF  target lambda
-     */
-     public static SFunction<FamilyDomain.FamilyAddressDomain,Serializable> familyAddress_familyNameTargetLambda =FamilyDomain.FamilyAddressDomain::getFamilyName;
-
-     /**
-     * REF  target lambda
-     */
-     public static BiConsumer<FamilyDomain.FamilyAddressDomain,String> familyAddressFamilyNameTargetSetLambda =FamilyDomain.FamilyAddressDomain::setFamilyName;
-
-    /**
     *  family_member lambda
     */
     public static SFunction<FamilyDomain.FamilyMemberDomain, Serializable> familyMemberDomainKeyLambda = FamilyDomain.FamilyMemberDomain::getId;
@@ -103,4 +67,54 @@ public class FamilyLambdaExp{
      * REF  target lambda
      */
      public static BiConsumer<FamilyDomain.FamilyMemberDomain,String> familyMemberFamilyNameTargetSetLambda =FamilyDomain.FamilyMemberDomain::setFamilyName;
+    /**
+    * REF address source lambda
+    */
+    public static SFunction<FamilyDomain.FamilyMemberDomain, Serializable> familyMemberRefAddress_idSourceLambda = FamilyDomain.FamilyMemberDomain::getId;
+
+    /**
+    * REF address target lambda
+    */
+    public static SFunction<FamilyDomain.FamilyAddressDomain,Serializable> familyMemberRefAddress_familyMemberIdTargetLambda =FamilyDomain.FamilyAddressDomain::getFamilyMemberId;
+
+    /**
+    * REF address target lambda
+    */
+    public static BiConsumer<FamilyDomain.FamilyAddressDomain,Long> familyMemberRefAddress_familyMemberIdTargetSetLambda =FamilyDomain.FamilyAddressDomain::setFamilyMemberId;
+
+    /**
+    *  family_address lambda
+    */
+    public static SFunction<FamilyDomain.FamilyAddressDomain, Serializable> familyAddressDomainKeyLambda = FamilyDomain.FamilyAddressDomain::getId;
+
+
+    /**
+    * REF  source lambda
+    */
+    public static SFunction<FamilyDomain, Serializable> familyId_RelatedFamilyAddress_SourceLambda = FamilyDomain::getId;
+
+    /**
+    * REF  target lambda
+    */
+    public static SFunction<FamilyDomain.FamilyAddressDomain,Serializable> familyAddress_familyIdTargetLambda =FamilyDomain.FamilyAddressDomain::getFamilyId;
+
+    /**
+    * REF  target lambda
+    */
+    public static BiConsumer<FamilyDomain.FamilyAddressDomain,Long> familyAddressFamilyIdTargetSetLambda =FamilyDomain.FamilyAddressDomain::setFamilyId;
+
+     /**
+     * REF  source lambda
+     */
+     public static SFunction<FamilyDomain, Serializable> familyName_RelatedFamilyAddress_SourceLambda = FamilyDomain::getName;
+
+     /**
+     * REF  target lambda
+     */
+     public static SFunction<FamilyDomain.FamilyAddressDomain,Serializable> familyAddress_familyNameTargetLambda =FamilyDomain.FamilyAddressDomain::getFamilyName;
+
+     /**
+     * REF  target lambda
+     */
+     public static BiConsumer<FamilyDomain.FamilyAddressDomain,String> familyAddressFamilyNameTargetSetLambda =FamilyDomain.FamilyAddressDomain::setFamilyName;
 }

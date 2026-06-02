@@ -21,15 +21,15 @@ public class FamilyAddressDO  {
     /**
     * 自增主键
     */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "ID", type = IdType.AUTO)
     private Long id;
     /**
-    * 家庭ID
+    * 关联家庭ID
     */
     @TableField("family_id")
     private Long familyId;
     /**
-    * 家庭名称
+    * 冗余字段：家庭名称
     */
     @TableField("family_name")
     private String familyName;
