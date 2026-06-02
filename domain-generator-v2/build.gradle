@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'io.github.roger3lee'
+version = '3.0.0'
+
+repositories {
+    maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+    mavenLocal()
+    mavenCentral()
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+dependencies {
+    implementation platform("org.springframework.boot:spring-boot-dependencies:2.7.18")
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+    annotationProcessor libs.picocli.codegen
+
+    implementation libs.commons.lang3
+    implementation libs.hutool.all
+    implementation libs.freemarker
+    implementation libs.slf4j.api
+    implementation libs.logback.classic
+    implementation libs.picocli
+    implementation libs.mybatis.plus.annotation
+
+    // JAXB API for Java 8 (javax.xml.bind is built-in JDK 8, but we need the API explicitly for Gradle)
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.9'
+}
+
+application {
+    mainClass = 'io.github.roger3lee.domain.v2.cli.GeneratorCLI'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'io.github.roger3lee.domain.v2.cli.GeneratorCLI'
+    }
+}
+
+shadowJar {
+    mergeServiceFiles()
+    archiveBaseName = 'domain-generator-v2'
+    archiveVersion = version
+    archiveClassifier = ''
+}
+
+build.dependsOn shadowJar
