@@ -3,10 +3,8 @@ package io.github.roger3lee.domain.mysql.config;
 import io.github.roger3lee.domain.mysql.injector.MySqlBatchSqlInjector;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -16,10 +14,8 @@ import org.springframework.context.annotation.Configuration;
  */
 @Slf4j
 @Configuration
-@ConditionalOnClass(name = "com.mysql.cj.jdbc.Driver")
 @ConditionalOnProperty(prefix = "domain.mysql", name = "enabled", havingValue = "true", matchIfMissing = true)
 @AutoConfigureBefore(name = "com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration")
-@ComponentScan(basePackages = "io.github.roger3lee.domain.mysql")
 public class MySqlDomainConfiguration {
 
     public MySqlDomainConfiguration() {
