@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'io.github.roger3lee'
-version = '3.0.1'
+version = '3.0.2'
 
 repositories {
     maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
@@ -112,7 +112,7 @@ subprojects { subProj ->
     }
 }
 
-// ========== Nexus Publish 插件配置（自动创建、关闭和发布 staging 仓库） ==========
+// ========== Nexus Publish 插件配置（自动创建、关闭和发布 staging 仓库�?==========
 nexusPublishing {
     repositories {
         sonatype {
