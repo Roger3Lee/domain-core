@@ -66,7 +66,7 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
      */
     private void validateQueryCondition(LambdaQuery<D> lambdaQuery) {
         if (ObjectUtil.isNull(lambdaQuery) || !lambdaQuery.hasFilter()) {
-            throw new IllegalArgumentException("不允许在不加任何过滤条件的情况下执行操作");
+            log.warn("查询在不加任何过滤条件的情况下执行操作");
         }
     }
 
@@ -115,6 +115,12 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
         // 优化：直接转换单个对象，避免创建不必要的列表
         return this.baseMapper.selectPage(page, wrapper)
                 .convert(this::convertSingleDO2DTO);
+    }
+
+    @Override
+    public Long queryCount(LambdaQuery<D> lambdaQuery) {
+        LambdaQueryWrapper<DO> wrapper = buildQueryWrapper(lambdaQuery);
+        return this.baseMapper.selectCount(wrapper);
     }
 
     /**

@@ -10,6 +10,9 @@ import io.github.roger3lee.domain.core.lambda.order.LambdaOrderItem;
 import io.github.roger3lee.domain.core.lambda.query.LambdaQuery;
 import io.github.roger3lee.domain.core.lambda.query.LogicalOperator;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
+import com.baomidou.mybatisplus.core.metadata.TableInfo;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -315,6 +318,9 @@ public class LambdaQueryUtils {
             case NOTNULL:
                 wrapper.isNotNull(LambdaCache.DOLambda(doClass, field));
                 break;
+            case CUSTOM:
+                handleCustomCondition(wrapper, field, condition.getSqlTemplate(), value, doClass);
+                break;
             case EQ:
             default:
                 // 等于条件，特殊处理 null 值
@@ -353,6 +359,56 @@ public class LambdaQueryUtils {
                 wrapper.in(LambdaCache.DOLambda(doClass, field), valueList);
             }
         }
+    }
+
+    /**
+     * 处理自定义操作符条件
+     * <p>将 sqlTemplate 中的 {0}, {1} 替换为 MyBatis-Plus 参数占位符，
+     * 列名通过 TableInfo 自动解析并拼接到模板前面。</p>
+     */
+    private static <F> void handleCustomCondition(LambdaQueryWrapper<F> wrapper,
+            String field,
+            String sqlTemplate,
+            Object value,
+            Class<F> doClass) {
+        if (sqlTemplate == null || sqlTemplate.isEmpty()) {
+            return;
+        }
+
+        // 解析列名
+        String columnName = resolveColumnName(doClass, field);
+
+        // 组装完整 SQL: column_name + sqlTemplate
+        String fullSql = columnName + " " + sqlTemplate;
+
+        // 将 {0}, {1} 等替换为 MyBatis-Plus 的 {0}, {1} 参数占位符
+        // MyBatis-Plus wrapper.apply 使用 {0}, {1} 作为占位符，与我们的模板一致
+        if (value instanceof Object[]) {
+            wrapper.apply(fullSql, (Object[]) value);
+        } else {
+            wrapper.apply(fullSql, value);
+        }
+    }
+
+    /**
+     * 通过 TableInfo 解析 DO 类的字段对应的数据库列名
+     */
+    private static <F> String resolveColumnName(Class<F> doClass, String fieldName) {
+        TableInfo tableInfo = TableInfoHelper.getTableInfo(doClass);
+        if (tableInfo != null) {
+            // 检查是否是主键字段
+            if (fieldName.equals(tableInfo.getKeyProperty())) {
+                return tableInfo.getKeyColumn();
+            }
+            // 检查普通字段
+            for (TableFieldInfo fieldInfo : tableInfo.getFieldList()) {
+                if (fieldName.equals(fieldInfo.getProperty())) {
+                    return fieldInfo.getColumn();
+                }
+            }
+        }
+        // 回退：使用字段名作为列名
+        return fieldName;
     }
 
     /**

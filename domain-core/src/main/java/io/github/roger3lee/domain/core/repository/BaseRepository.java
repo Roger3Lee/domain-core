@@ -25,6 +25,14 @@ public interface BaseRepository<D extends BaseDomain, DO> {
     IPage<D> queryPage(PageDomain pageDomain, LambdaQuery<D> lambdaQuery);
 
     /**
+     * 统计查询符合条件的数据总量
+     *
+     * @param lambdaQuery 查询条件
+     * @return 符合条件的数据总量
+     */
+    Long queryCount(LambdaQuery<D> lambdaQuery);
+
+    /**
      * 插入一条数据
      *
      * @param item

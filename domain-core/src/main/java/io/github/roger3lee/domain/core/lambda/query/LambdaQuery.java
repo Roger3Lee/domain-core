@@ -306,6 +306,52 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
         return addCondition(column, Op.NOTNULL, null);
     }
 
+    /**
+     * 添加自定义操作符条件（通过 Condition 对象）
+     * <p>通过 Condition 的 sqlTemplate 字段定义自定义 SQL 操作符，
+     * 使用 {0}, {1} 作为值占位符，列名由框架自动解析拼接到模板前面。</p>
+     *
+     * <pre>
+     * // 示例：PostgreSQL ILIKE
+     * query.condition(new Condition(FamilyDomain::getName, "ILIKE {0}", "%张%"));
+     * // 生成 SQL: name ILIKE '%张%'
+     * </pre>
+     *
+     * @param condition 包含 sqlTemplate 的自定义条件
+     */
+    public LambdaQuery<T> condition(Condition condition) {
+        if (condition == null) {
+            return this;
+        }
+
+        if (nextConditionOperator == LogicalOperator.OR) {
+            handleChainedOr(condition);
+            nextConditionOperator = null;
+        } else {
+            currentGroup.addChild(condition);
+        }
+
+        return this;
+    }
+
+    /**
+     * 添加自定义操作符条件（快捷方式）
+     * <p>sqlTemplate 中使用 {0}, {1} 作为值占位符，列名由框架自动解析拼接到模板前面。</p>
+     *
+     * <pre>
+     * // 示例：PostgreSQL ILIKE
+     * query.condition(FamilyDomain::getName, "ILIKE {0}", "%张%");
+     * // 生成 SQL: name ILIKE '%张%'
+     * </pre>
+     *
+     * @param column      字段 Lambda
+     * @param sqlTemplate SQL 操作符模板，如 "ILIKE {0}"
+     * @param value       值
+     */
+    public LambdaQuery<T> condition(SFunction<T, Serializable> column, String sqlTemplate, Object value) {
+        return condition(new Condition(column, sqlTemplate, value));
+    }
+
     // ==================== 内部类 ====================
 
     /**
@@ -398,6 +444,15 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
         @Schema(description = "值")
         private Object value;
 
+        /**
+         * 自定义 SQL 模板，仅在 op = CUSTOM 时生效。
+         * <p>使用 {0}, {1} 作为值占位符，列名由框架自动解析并拼接在前面。</p>
+         * <p>示例: "ILIKE {0}"  →  生成 "column_name ILIKE ?"</p>
+         */
+        @Schema(description = "自定义SQL模板（仅CUSTOM操作符使用）", example = "ILIKE {0}")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        private String sqlTemplate;
+
         @SuppressWarnings("rawtypes")
         public Condition(SFunction<?, Serializable> column, Op op, Object value) {
             LambdaCache.LambdaInfo lambdaInfo = LambdaCache.info(column);
@@ -412,6 +467,24 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
             this.entity = entity;
             this.field = field;
             this.op = op != null ? op : Op.EQ;
+            this.value = value;
+        }
+
+        /**
+         * 自定义操作符条件构造
+         *
+         * @param column      字段 Lambda
+         * @param sqlTemplate SQL 模板，如 "ILIKE {0}"
+         * @param value       值
+         */
+        @SuppressWarnings("rawtypes")
+        public Condition(SFunction<?, Serializable> column, String sqlTemplate, Object value) {
+            LambdaCache.LambdaInfo lambdaInfo = LambdaCache.info(column);
+            this.entity = lambdaInfo.getClazzName();
+            this.field = lambdaInfo.getFieldName();
+            this.columnFunction = column;
+            this.op = Op.CUSTOM;
+            this.sqlTemplate = sqlTemplate;
             this.value = value;
         }
     }

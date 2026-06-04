@@ -24,7 +24,14 @@ public enum Op {
     LE("<="),
 
     ISNULL("ISNULL"),
-    NOTNULL("NOTNULL"),;
+    NOTNULL("NOTNULL"),
+
+    /**
+     * 自定义操作符，配合 sqlTemplate 使用
+     * <p>sqlTemplate 中使用 {0}, {1} 等作为值占位符，列名由框架自动解析</p>
+     * <p>示例: sqlTemplate = "ILIKE {0}", value = "%keyword%"</p>
+     */
+    CUSTOM("CUSTOM"),;
 
     private final String code;
 

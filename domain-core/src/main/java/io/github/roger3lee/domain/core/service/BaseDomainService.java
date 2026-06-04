@@ -39,4 +39,13 @@ public interface BaseDomainService {
     <T extends BaseDomain> IPage<T> queryPage(Class<T> clazz, PageDomain pageDomain);
 
     <T extends BaseDomain> IPage<T> queryPage(Class<T> clazz, PageDomain pageDomain, LambdaQuery<T> lambdaQuery);
+
+    /**
+     * 统计查询符合条件的数据总量
+     *
+     * @param clazz 领域类
+     * @param lambdaQuery 查询条件
+     * @return 符合条件的数据总量
+     */
+    <T extends BaseDomain> Long queryCount(Class<T> clazz, LambdaQuery<T> lambdaQuery);
 }

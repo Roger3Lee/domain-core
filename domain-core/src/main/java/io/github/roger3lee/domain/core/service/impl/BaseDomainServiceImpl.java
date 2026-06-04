@@ -144,5 +144,15 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
         BaseRepository<T, ?> repository = getRepository(clazz);
         return repository.queryPage(pageDomain, lambdaQuery);
     }
+
+    /**
+     * 统计查询符合条件的数据总量
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends BaseDomain> Long queryCount(Class<T> clazz, LambdaQuery<T> lambdaQuery) {
+        BaseRepository<T, ?> repository = getRepository(clazz);
+        return repository.queryCount(lambdaQuery);
+    }
 }
     

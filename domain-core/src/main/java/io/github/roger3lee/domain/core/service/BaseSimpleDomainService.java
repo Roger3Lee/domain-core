@@ -41,6 +41,14 @@ public interface BaseSimpleDomainService<T> {
 
     IPage<T> queryPage(PageDomain pageDomain, LambdaQuery<T> lambdaQuery);
 
+    /**
+     * 统计查询符合条件的数据总量
+     *
+     * @param lambdaQuery 查询条件
+     * @return 符合条件的数据总量
+     */
+    Long queryCount(LambdaQuery<T> lambdaQuery);
+
     Boolean batchUpdate(List<T> list);
 
     Boolean batchDelete(List<T> list);

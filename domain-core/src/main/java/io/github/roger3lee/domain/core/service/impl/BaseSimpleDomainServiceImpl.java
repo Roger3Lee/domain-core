@@ -71,6 +71,11 @@ public abstract class BaseSimpleDomainServiceImpl<T extends BaseDomain> implemen
     }
 
     @Override
+    public Long queryCount(LambdaQuery<T> lambdaQuery) {
+        return getRepository().queryCount(lambdaQuery);
+    }
+
+    @Override
     public Boolean batchUpdate(List<T> list) {
         return getRepository().update(list) > 0;
     }

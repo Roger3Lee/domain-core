@@ -21,7 +21,7 @@ function AddChecksums($filePath) {
 }
 
 foreach ($mod in $modules) {
-    $destDir = Join-Path $bundleDir "io\github\roger3lee\$($mod.artifactId)\3.0.0"
+    $destDir = Join-Path $bundleDir "io\github\roger3lee\$($mod.artifactId)\3.0.1"
     New-Item -ItemType Directory -Path $destDir -Force | Out-Null
 
     # Copy JARs + .asc signatures from build/libs
@@ -45,16 +45,16 @@ foreach ($mod in $modules) {
     $pubDir = "$($mod.name)\build\publications\$($mod.pub)"
     $pomFile = Join-Path $pubDir "pom-default.xml"
     if (Test-Path $pomFile) {
-        $destPom = Join-Path $destDir "$($mod.artifactId)-3.0.0.pom"
+        $destPom = Join-Path $destDir "$($mod.artifactId)-3.0.1.pom"
         Copy-Item $pomFile $destPom -Force
-        Write-Host "  POM: $($mod.artifactId)-3.0.0.pom"
+        Write-Host "  POM: $($mod.artifactId)-3.0.1.pom"
         AddChecksums $destPom
     }
     $pomAsc = Join-Path $pubDir "pom-default.xml.asc"
     if (Test-Path $pomAsc) {
-        $destPomAsc = Join-Path $destDir "$($mod.artifactId)-3.0.0.pom.asc"
+        $destPomAsc = Join-Path $destDir "$($mod.artifactId)-3.0.1.pom.asc"
         Copy-Item $pomAsc $destPomAsc -Force
-        Write-Host "  POM.ASC: $($mod.artifactId)-3.0.0.pom.asc"
+        Write-Host "  POM.ASC: $($mod.artifactId)-3.0.1.pom.asc"
         AddChecksums $destPomAsc
     }
 }
