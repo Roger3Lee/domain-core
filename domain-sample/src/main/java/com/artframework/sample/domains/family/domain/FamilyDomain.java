@@ -239,6 +239,11 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         @Setter
         @Schema(description = "地址")
         private String addressName;
+
+        @Getter
+        @Setter
+        @Schema(description = "地址")
+        public Long familyMemberId;
     }
     /**
      * 加載實體數據
