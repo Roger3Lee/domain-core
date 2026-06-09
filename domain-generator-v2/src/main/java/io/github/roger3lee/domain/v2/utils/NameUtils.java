@@ -77,6 +77,14 @@ public class NameUtils {
         return getNameWithSuffix(name, "ServiceImpl");
     }
 
+    public static String appServiceName(String name) {
+        return getNameWithSuffix(name, "AppService");
+    }
+
+    public static String appServiceImplName(String name) {
+        return getNameWithSuffix(name, "AppServiceImpl");
+    }
+
     public static String lambdaExpName(String name) {
         return getNameWithSuffix(name, "LambdaExp");
     }

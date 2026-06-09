@@ -131,6 +131,10 @@ The generator outputs files organized by package structure:
     │       ├── convertor/
     │       │   ├── {Name}Convertor.java
     │       │   └── {Name}ConvertorDecorator.java
+    ├── applications/
+    │   ├── {Name}AppService.java
+    │   └── impl/
+    │       └── {Name}AppServiceImpl.java
     ├── controllers/
     │   └── {Name}Controller.java
 ```

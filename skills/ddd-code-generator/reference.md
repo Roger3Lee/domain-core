@@ -310,6 +310,97 @@ public interface FamilyService extends BaseDomainService {
 | `loadByKey(Serializable, SFunction, service)` | `Serializable` | Generic static factory for any field |
 | `delete(keyType)` | `${mainTable.keyType}` | Strongly typed delete |
 
+### Generated: FamilyAppService.java
+
+```java
+package com.example.project.applications;
+
+import com.example.project.domains.family.domain.*;
+
+public interface FamilyAppService {
+
+    /**
+    * 查找
+    * @param request 请求体
+    * @return
+    */
+    FamilyDomain find(FamilyFindDomain request);
+
+    /**
+    * 新增
+    * @param request 请求体
+    * @return
+    */
+    Long insert(FamilyDomain request);
+
+    /**
+    * 修改
+    * @param request 请求体
+    * @return 成功OR失败
+    */
+    Boolean update(FamilyDomain request);
+
+    /**
+    * 删除
+    * @param key 数据ID
+    * @return 成功OR失败
+    */
+    Boolean delete(Long key);
+}
+```
+
+### Generated: FamilyAppServiceImpl.java
+
+```java
+package com.example.project.applications;
+
+import com.example.project.domains.family.domain.*;
+import com.example.project.domains.family.service.*;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class FamilyAppServiceImpl implements FamilyAppService {
+
+    @Autowired
+    private FamilyService familyService;
+
+    @Override
+    public FamilyDomain find(FamilyFindDomain request){
+        return familyService.find(request);
+    }
+
+    @Override
+    public Long insert(FamilyDomain request){
+        return familyService.insert(request);
+    }
+
+    @Override
+    public Boolean update(FamilyDomain request){
+        return familyService.update(request);
+    }
+
+    @Override
+    public Boolean delete(Long key){
+        return familyService.delete(key);
+    }
+}
+```
+
+### Architecture Layers
+
+```
+Controller -> FamilyAppService (interface)
+           -> FamilyAppServiceImpl -> FamilyService (interface)
+                                   -> FamilyServiceImpl -> Repository -> Database
+```
+
+The Application layer acts as a thin facade/orchestration layer between the HTTP Controller and the Domain Service. Use it for:
+- Cross-cutting concerns (validation, logging, authorization)
+- Orchestrating calls to multiple domain services
+- Keeping Controllers thin and focused on HTTP concerns
+
 ## Domain XML Reference (Continued)
 
 ### Simple Domain (no related tables)

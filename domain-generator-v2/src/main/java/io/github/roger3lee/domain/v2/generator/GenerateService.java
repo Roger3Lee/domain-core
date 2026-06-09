@@ -149,7 +149,10 @@ public class GenerateService {
         // 2. Generate domain layers
         generateDomains(packagePath + "/domains", domainList, packageParam, overwrite);
 
-        // 3. Generate controllers
+        // 3. Generate application layer
+        generateApplications(packagePath + "/applications", domainList, packageParam, overwrite);
+
+        // 4. Generate controllers
         generateControllers(packagePath + "/controllers", domainList, packageParam, overwrite);
 
         log.info("Code generation completed. Output: {}", outputPath);
@@ -259,6 +262,25 @@ public class GenerateService {
         }
     }
 
+    public void generateApplications(String applicationPath, List<DomainMetaInfo> domainList,
+                                     Map<String, String> packageParam, boolean overwrite) throws IOException {
+        for (DomainMetaInfo domainMetaInfo : domainList) {
+            DomainInfo domainInfo = DomainInfo.convert(domainMetaInfo, tableMetaInfoMap);
+            Map<String, Object> params = buildTemplateParams(packageParam);
+            params.put("source", domainInfo);
+
+            // AppService interface
+            String appServiceCode = processTemplate("application/template-application.ftl", params);
+            FileUtils.saveFile(applicationPath,
+                    NameUtils.appServiceName(domainInfo.getName()) + ".java", appServiceCode, overwrite);
+
+            // AppServiceImpl
+            String appServiceImplCode = processTemplate("application/template-application-impl.ftl", params);
+            FileUtils.saveFile(applicationPath + "/impl",
+                    NameUtils.appServiceImplName(domainInfo.getName()) + ".java", appServiceImplCode, overwrite);
+        }
+    }
+
     public void generateControllers(String controllerPath, List<DomainMetaInfo> domainList,
                                     Map<String, String> packageParam, boolean overwrite) throws IOException {
         for (DomainMetaInfo domainMetaInfo : domainList) {
@@ -313,6 +335,7 @@ public class GenerateService {
         param.put("tablePackage", basePackage + ".entities");
         param.put("mapperPackage", basePackage + ".mappers");
         param.put("domainPackage", basePackage + ".domains");
+        param.put("applicationPackage", basePackage + ".applications");
         param.put("controllerPackage", basePackage + ".controllers");
         return param;
     }

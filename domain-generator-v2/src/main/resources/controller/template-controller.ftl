@@ -1,21 +1,21 @@
 package ${controllerPackage!''};
 
 import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain.*;
-import ${domainPackage!''}.${NameUtils.packageName(source.folder)}.service.*;
+import ${applicationPackage!''}.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 <#assign controllerClassName=NameUtils.controllerName(source.name)/>
-<#assign serviceClassName=NameUtils.serviceName(source.name)/>
-<#assign serviceFieldName=NameUtils.getFieldName(serviceClassName)/>
+<#assign appServiceClassName=NameUtils.appServiceName(source.name)/>
+<#assign appServiceFieldName=NameUtils.getFieldName(appServiceClassName)/>
 <#assign dtoClassName=NameUtils.dataTOName(source.name)/>
 
 @RestController()
 @RequestMapping("/${source.name}/v1")
 public class ${controllerClassName} {
     @Autowired
-    private ${serviceClassName} ${serviceFieldName};
+    private ${appServiceClassName} ${appServiceFieldName};
 
     /**
     * 查找
@@ -24,7 +24,7 @@ public class ${controllerClassName} {
     */
     @PostMapping("/query")
     public ${dtoClassName} find(@RequestBody ${NameUtils.getName(source.name)}FindDomain request){
-        return ${serviceFieldName}.find(request);
+        return ${appServiceFieldName}.find(request);
     }
 
     /**
@@ -34,7 +34,7 @@ public class ${controllerClassName} {
     */
     @PutMapping()
     public ${source.mainTable.keyType} insert(@RequestBody ${dtoClassName} request){
-        return ${serviceFieldName}.insert(request);
+        return ${appServiceFieldName}.insert(request);
     }
 
     /**
@@ -44,7 +44,7 @@ public class ${controllerClassName} {
     */
     @PostMapping()
     public Boolean update(@RequestBody ${dtoClassName} request){
-        return ${serviceFieldName}.update(request);
+        return ${appServiceFieldName}.update(request);
     }
 
     /**
@@ -54,6 +54,6 @@ public class ${controllerClassName} {
     */
     @DeleteMapping
     public Boolean delete(@RequestParam("key") ${source.mainTable.keyType} key){
-        return ${serviceFieldName}.delete(key);
+        return ${appServiceFieldName}.delete(key);
     }
 }
