@@ -120,11 +120,11 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         @Schema(description = "家庭ID")
         private Long familyId;
         /**
-        * 冗余字段：家庭名称
+        * 家庭名称
         */
         @Getter
         @Setter
-        @Schema(description = "冗余字段：家庭名称")
+        @Schema(description = "家庭名称")
         private String familyName;
         /**
         * 姓名
@@ -219,18 +219,18 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
         @Schema(description = "自增主键")
         private Long id;
         /**
-        * 关联家庭ID
+        * 家庭ID
         */
         @Getter
         @Setter
-        @Schema(description = "关联家庭ID")
+        @Schema(description = "家庭ID")
         private Long familyId;
         /**
-        * 冗余字段：家庭名称
+        * 家庭名称
         */
         @Getter
         @Setter
-        @Schema(description = "冗余字段：家庭名称")
+        @Schema(description = "家庭名称")
         private String familyName;
         /**
         * 地址
@@ -251,7 +251,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
      * @param service
      * @return
      */
-    public static FamilyDomain load(Serializable key, FamilyService service) {
+    public static FamilyDomain load(Long key, FamilyService service) {
         FamilyDomain domain = service.find(FamilyFindDomain.builder().key(key).build());
         if(ObjectUtil.isNotNull(domain)){
             domain._service = service;
@@ -267,7 +267,7 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
      * @return
      */
     public static FamilyDomain loadByKey(Serializable key, SFunction<FamilyDomain, Serializable> keyLambda, FamilyService service) {
-        FamilyDomain domain = service.findByKey(FamilyFindDomain.builder().key(key).build(), keyLambda);
+        FamilyDomain domain = service.findByKey(key, keyLambda);
         if(ObjectUtil.isNotNull(domain)){
             domain._service = service;
         }

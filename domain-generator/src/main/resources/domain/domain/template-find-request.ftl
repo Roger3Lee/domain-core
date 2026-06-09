@@ -2,8 +2,6 @@ package ${domainPackage!''}.${NameUtils.packageName(source.folder)}.domain;
 
 import lombok.*;
 
-import java.io.Serializable;
-
 @Getter
 @Setter
 @ToString
@@ -11,8 +9,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Builder
 public class ${NameUtils.getName(source.name)}FindDomain {
-<#--    private ${source.mainTable.keyType} key;-->
-    private Serializable key;
+    private ${source.mainTable.keyType} key;
 <#if (source.relatedTable?size>0)>
     /**
     * 默认加载所有

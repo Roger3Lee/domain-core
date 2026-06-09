@@ -29,11 +29,12 @@ public interface ${serviceClassName} extends <#if (source.relatedTable?size>0)>B
     ${dtoClassName} find(${dtoClassName} response, ${dtoClassName}.LoadFlag loadFlag);
 </#if>
     /**
-     * 查找
-     * @param request 请求体
+     * 通過指定字段查找
+     * @param key 查詢值
+     * @param keyLambda 查詢字段的lambda表達式
      * @return
      */
-    ${dtoClassName} findByKey(${domainName}FindDomain request, SFunction<${dtoClassName}, Serializable> keyLambda);
+    ${dtoClassName} findByKey(Serializable key, SFunction<${dtoClassName}, Serializable> keyLambda);
 
     /**
     * 新增

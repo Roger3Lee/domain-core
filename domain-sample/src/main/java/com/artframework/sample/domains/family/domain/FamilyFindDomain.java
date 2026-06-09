@@ -2,8 +2,6 @@ package com.artframework.sample.domains.family.domain;
 
 import lombok.*;
 
-import java.io.Serializable;
-
 @Getter
 @Setter
 @ToString
@@ -11,7 +9,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Builder
 public class FamilyFindDomain {
-    private Serializable key;
+    private Long key;
     /**
     * 默认加载所有
     */

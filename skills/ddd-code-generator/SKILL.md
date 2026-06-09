@@ -10,7 +10,7 @@ Generates a complete DDD domain model layer stack from a domain XML config + SQL
 ## Prerequisites
 
 - JDK 8+ installed (required to run the JAR)
-- The JAR is bundled in this skill directory: `domain-generator-v2-3.0.0.jar`
+- The JAR is bundled in this skill directory: `domain-generator-v2-3.0.2.jar`
 
 If the JAR needs to be rebuilt from source, build it from the `domain-generator-v2` module:
 
@@ -18,7 +18,7 @@ If the JAR needs to be rebuilt from source, build it from the `domain-generator-
 # Set JAVA_HOME to JDK 11+ for Gradle build
 ./gradlew :domain-generator-v2:shadowJar
 # Then copy the JAR into the skill directory
-cp domain-generator-v2/build/libs/domain-generator-v2-3.0.0.jar skills/generate-domain-model/domain-generator-v2-3.0.0.jar
+cp domain-generator-v2/build/libs/domain-generator-v2-3.0.2.jar skills/ddd-code-generator/domain-generator-v2-3.0.2.jar
 ```
 
 ## Inputs Required
@@ -78,7 +78,7 @@ COMMENT ON COLUMN table_name.col_name IS '描述';
 ### Step 2: Run the Generator JAR
 
 ```bash
-java -jar "domain-generator-v2-3.0.0.jar" \
+java -jar "domain-generator-v2-3.0.2.jar" \
     -d "path/to/domain-config.xml" \
     -s "path/to/domain-sample-mysql.sql" \
     -o "path/to/output-dir" \
@@ -86,7 +86,7 @@ java -jar "domain-generator-v2-3.0.0.jar" \
     --dialect mysql
 ```
 
-> **Note:** The JAR is bundled alongside this skill document. Use the absolute path to the JAR based on your project workspace, e.g. `{workspace}/skills/generate-domain-model/domain-generator-v2-3.0.0.jar`.
+> **Note:** The JAR is bundled alongside this skill document. Use the absolute path to the JAR based on your project workspace, e.g. `{workspace}/skills/ddd-code-generator/domain-generator-v2-3.0.2.jar`.
 
 **CLI Options:**
 | Option | Description | Default |
@@ -171,6 +171,21 @@ After copying, check:
 - Related `many=true` → `List<{Related}Domain>` with List getter/setter
 - Related `many=false` → single `{Related}Domain` field
 - Includes `LoadFlag` inner class with boolean for each related table
+
+**FindDomain:**
+
+- `key` field uses the main table’s actual key type (e.g. `Long`), NOT `Serializable`
+- Only used for primary key lookup via `find(FindDomain)` method
+- `findByKey(Serializable key, SFunction)` does NOT use FindDomain — accepts raw key directly
+
+**Service method signatures:**
+
+| Method | Parameter | Purpose |
+|--------|-----------|----------|
+| `find(FindDomain)` | FindDomain with strongly-typed key | Primary key lookup |
+| `findByKey(Serializable, SFunction)` | Raw Serializable key + lambda | Generic field lookup |
+| `insert(Domain)` | Domain DTO | Returns `keyType` |
+| `delete(keyType)` | Strongly-typed key | Primary key delete |
 
 **SQL-to-Java type mapping:**
 | SQL Type | Java Type |

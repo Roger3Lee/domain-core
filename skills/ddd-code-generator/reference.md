@@ -222,10 +222,95 @@ public class FamilyDomain extends BaseAggregateDomain<FamilyDomain,FamilyService
 
     // LoadFlag, load(), loadByKey(), loadRelated(), copy() methods...
     // (follow the template-dto.ftl pattern exactly)
+
+    /**
+     * Load by primary key (strongly typed)
+     */
+    public static FamilyDomain load(Long key, FamilyService service) {
+        FamilyDomain domain = service.find(FamilyFindDomain.builder().key(key).build());
+        if(ObjectUtil.isNotNull(domain)){
+            domain._service = service;
+        }
+        return domain;
+    }
+
+    /**
+     * Load by any field (generic Serializable key)
+     */
+    public static FamilyDomain loadByKey(Serializable key, SFunction<FamilyDomain, Serializable> keyLambda, FamilyService service) {
+        FamilyDomain domain = service.findByKey(key, keyLambda);
+        if(ObjectUtil.isNotNull(domain)){
+            domain._service = service;
+        }
+        return domain;
+    }
 }
 ```
 
 ## Domain XML Reference
+
+### Generated: FamilyFindDomain.java
+
+```java
+package com.example.project.domains.family.domain;
+
+import lombok.*;
+
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class FamilyFindDomain {
+    private Long key;  // Strongly typed (matches main table key type)
+    /**
+    * 默认加载所有
+    */
+    @Builder.Default
+    private FamilyDomain.LoadFlag loadFlag = new FamilyDomain.LoadFlag();
+}
+```
+
+### Generated: FamilyService.java (excerpt)
+
+```java
+package com.example.project.domains.family.service;
+
+import com.example.project.domains.family.domain.*;
+import io.github.roger3lee.domain.core.service.*;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import java.io.Serializable;
+
+public interface FamilyService extends BaseDomainService {
+    // Find by primary key (uses FindDomain with strongly-typed key)
+    FamilyDomain find(FamilyFindDomain request);
+
+    // Find by entity + loadFlag
+    FamilyDomain find(FamilyDomain response, FamilyDomain.LoadFlag loadFlag);
+
+    // Find by any field (generic Serializable key, no FindDomain wrapper)
+    FamilyDomain findByKey(Serializable key, SFunction<FamilyDomain, Serializable> keyLambda);
+
+    Long insert(FamilyDomain request);
+    Boolean update(FamilyDomain request);
+    Boolean delete(Long key);
+    Boolean delete(Long key, FamilyDomain.LoadFlag loadFlag);
+}
+```
+
+### Key Design Decisions
+
+| Method | Key Type | Rationale |
+|--------|----------|----------|
+| `FindDomain.key` | `${mainTable.keyType}` (e.g. `Long`) | Strongly typed for compile-time safety |
+| `find(FindDomain)` | Uses FindDomain | Primary key lookup with optional LoadFlag |
+| `findByKey(Serializable, SFunction)` | `Serializable` | Generic lookup by any field, no FindDomain |
+| `load(keyType, service)` | `${mainTable.keyType}` | Strongly typed static factory |
+| `loadByKey(Serializable, SFunction, service)` | `Serializable` | Generic static factory for any field |
+| `delete(keyType)` | `${mainTable.keyType}` | Strongly typed delete |
+
+## Domain XML Reference (Continued)
 
 ### Simple Domain (no related tables)
 

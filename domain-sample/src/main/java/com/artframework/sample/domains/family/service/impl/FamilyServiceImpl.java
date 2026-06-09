@@ -90,14 +90,14 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
     }
 
     /**
-     * 查找
-     * @param request 请求体
-     * @param keyLambda 請求key參數對應的字段的lambda表達式
+     * 通過指定字段查找
+     * @param key 查詢值
+     * @param keyLambda 查詢字段的lambda表達式
      * @return
      */
     @Override
-    public FamilyDomain findByKey(FamilyFindDomain request, SFunction<FamilyDomain, Serializable> keyLambda){
-        return find(familyRepository.query(request.getKey(), keyLambda), request.getLoadFlag());
+    public FamilyDomain findByKey(Serializable key, SFunction<FamilyDomain, Serializable> keyLambda){
+        return find(familyRepository.query(key, keyLambda), null);
     }
 
     /**
@@ -134,7 +134,7 @@ public class FamilyServiceImpl extends BaseDomainServiceImpl implements FamilySe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean update(FamilyDomain request){
-        Serializable keyId = FamilyLambdaExp.dtoKeyLambda.apply(request);
+        Long keyId = (Long) FamilyLambdaExp.dtoKeyLambda.apply(request);
         FamilyDomain old = find(new FamilyFindDomain(keyId, request.getLoadFlag()));
         return update(request,old);
     }

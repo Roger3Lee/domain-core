@@ -221,7 +221,7 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
      * @param service
      * @return
      */
-    public static ${className} load(Serializable key, ${serviceClassName} service) {
+    public static ${className} load(${source.mainTable.keyType} key, ${serviceClassName} service) {
     <#if (source.relatedTable?size>0)>
         ${className} domain = service.find(${NameUtils.getName(source.name)}FindDomain.builder().key(key).build());
         if(ObjectUtil.isNotNull(domain)){
@@ -242,13 +242,13 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
      */
     public static ${className} loadByKey(Serializable key, SFunction<${className}, Serializable> keyLambda, ${serviceClassName} service) {
      <#if (source.relatedTable?size>0)>
-        ${className} domain = service.findByKey(${NameUtils.getName(source.name)}FindDomain.builder().key(key).build(), keyLambda);
+        ${className} domain = service.findByKey(key, keyLambda);
         if(ObjectUtil.isNotNull(domain)){
             domain._service = service;
         }
         return domain;
      <#else>
-        return service.findByKey(${NameUtils.getName(source.name)}FindDomain.builder().key(key).build(), keyLambda);
+        return service.findByKey(key, keyLambda);
      </#if>
     }
 <#if (source.relatedTable?size>0)>

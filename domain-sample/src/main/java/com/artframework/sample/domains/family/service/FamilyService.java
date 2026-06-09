@@ -24,11 +24,12 @@ public interface FamilyService extends BaseDomainService {
      */
     FamilyDomain find(FamilyDomain response, FamilyDomain.LoadFlag loadFlag);
     /**
-     * 查找
-     * @param request 请求体
+     * 通過指定字段查找
+     * @param key 查詢值
+     * @param keyLambda 查詢字段的lambda表達式
      * @return
      */
-    FamilyDomain findByKey(FamilyFindDomain request, SFunction<FamilyDomain, Serializable> keyLambda);
+    FamilyDomain findByKey(Serializable key, SFunction<FamilyDomain, Serializable> keyLambda);
 
     /**
     * 新增
