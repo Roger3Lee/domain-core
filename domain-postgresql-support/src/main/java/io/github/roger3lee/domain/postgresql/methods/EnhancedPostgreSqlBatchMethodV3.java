@@ -1,4 +1,4 @@
-﻿package io.github.roger3lee.domain.postgresql.methods;
+package io.github.roger3lee.domain.postgresql.methods;
 
 import io.github.roger3lee.domain.core.batch.BatchOperationType;
 import io.github.roger3lee.domain.core.batch.EnhancedBatchMethod;

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'io.github.roger3lee'
-version = '3.0.2'
+version = '3.0.3'
 
 repositories {
     maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
@@ -33,9 +33,9 @@ subprojects {
     }
 }
 
-// ========== Maven Central 发布配置 ==========
+// ========== Maven Central 鍙戝竷閰嶇疆 ==========
 subprojects { subProj ->
-    // 跳过不需要发布的模块
+    // 璺宠繃涓嶉渶瑕佸彂甯冪殑妯″潡
     if (project.name in ['domain-dependencies', 'domain-generator', 'domain-generator-v2', 'domain-sample',
                          'domain-generator-idea-plugin', 'domain-web-generator',
                          'domain-polardb-support', 'domain-oracle-support']) {
@@ -45,19 +45,19 @@ subprojects { subProj ->
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
 
-    // 源码 jar 任务
+    // 婧愮爜 jar 浠诲姟
     task sourceJar(type: Jar) {
         archiveClassifier = 'sources'
         from sourceSets.main.allSource
     }
 
-    // javadoc jar 任务
+    // javadoc jar 浠诲姟
     task javadocJar(type: Jar) {
         archiveClassifier = 'javadoc'
         from javadoc.destinationDir
     }
 
-    // javadoc 编码设置
+    // javadoc 缂栫爜璁剧疆
     javadoc {
         options.encoding = 'UTF-8'
         if (JavaVersion.current().isJava9Compatible()) {
@@ -70,9 +70,9 @@ subprojects { subProj ->
             mavenJava(MavenPublication) {
                 from components.java
 
-                // 附带源码 jar
+                // 闄勫甫婧愮爜 jar
                 artifact sourceJar
-                // 附带 javadoc jar
+                // 闄勫甫 javadoc jar
                 artifact javadocJar
 
                 pom {
@@ -104,7 +104,7 @@ subprojects { subProj ->
             }
         }
 
-        // nexus-publish-plugin 自动添加 sonatype 仓库，无需手动配置
+        // nexus-publish-plugin 鑷�姩娣诲姞 sonatype 浠撳簱锛屾棤闇€鎵嬪姩閰嶇疆
     }
 
     signing {
@@ -112,7 +112,7 @@ subprojects { subProj ->
     }
 }
 
-// ========== Nexus Publish 插件配置（自动创建、关闭和发布 staging 仓库�?==========
+// ========== Nexus Publish 鎻掍欢閰嶇疆锛堣嚜鍔ㄥ垱寤恒€佸叧闂�拰鍙戝竷 staging 浠撳簱锛?==========
 nexusPublishing {
     repositories {
         sonatype {
