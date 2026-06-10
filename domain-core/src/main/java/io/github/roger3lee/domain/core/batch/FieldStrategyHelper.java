@@ -1,4 +1,4 @@
-package io.github.roger3lee.domain.core.batch;
+﻿package io.github.roger3lee.domain.core.batch;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
@@ -237,5 +237,25 @@ public class FieldStrategyHelper {
                "</when>" +
                "<otherwise>DEFAULT</otherwise>" +
                "</choose>";
+    }
+
+    public static String getPostgreSQLCastSuffix(TableFieldInfo field) {
+        Class<?> type = field.getPropertyType();
+        String pgType = getPostgreSQLType(type);
+        return pgType.isEmpty() ? "" : "::" + pgType;
+    }
+
+    private static String getPostgreSQLType(Class<?> javaType) {
+        if (String.class.isAssignableFrom(javaType)) return "text";
+        if (java.time.LocalDateTime.class.isAssignableFrom(javaType) || java.sql.Timestamp.class.isAssignableFrom(javaType) || java.util.Date.class.isAssignableFrom(javaType)) return "timestamp";
+        if (java.time.LocalDate.class.isAssignableFrom(javaType) || java.sql.Date.class.isAssignableFrom(javaType)) return "date";
+        if (java.time.LocalTime.class.isAssignableFrom(javaType) || java.sql.Time.class.isAssignableFrom(javaType)) return "time";
+        if (Boolean.class.isAssignableFrom(javaType) || boolean.class.isAssignableFrom(javaType)) return "boolean";
+        if (Long.class.isAssignableFrom(javaType) || long.class.isAssignableFrom(javaType)) return "bigint";
+        if (Integer.class.isAssignableFrom(javaType) || int.class.isAssignableFrom(javaType) || Short.class.isAssignableFrom(javaType) || short.class.isAssignableFrom(javaType) || Byte.class.isAssignableFrom(javaType) || byte.class.isAssignableFrom(javaType)) return "integer";
+        if (Double.class.isAssignableFrom(javaType) || double.class.isAssignableFrom(javaType) || Float.class.isAssignableFrom(javaType) || float.class.isAssignableFrom(javaType) || java.math.BigDecimal.class.isAssignableFrom(javaType)) return "numeric";
+        if (java.sql.Blob.class.isAssignableFrom(javaType) || byte[].class.isAssignableFrom(javaType)) return "bytea";
+        if (java.sql.Clob.class.isAssignableFrom(javaType)) return "text";
+        return "";
     }
 }

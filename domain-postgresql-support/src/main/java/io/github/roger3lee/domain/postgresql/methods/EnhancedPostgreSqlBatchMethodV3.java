@@ -1,4 +1,4 @@
-package io.github.roger3lee.domain.postgresql.methods;
+﻿package io.github.roger3lee.domain.postgresql.methods;
 
 import io.github.roger3lee.domain.core.batch.BatchOperationType;
 import io.github.roger3lee.domain.core.batch.EnhancedBatchMethod;
@@ -91,7 +91,9 @@ public class EnhancedPostgreSqlBatchMethodV3 extends EnhancedBatchMethod {
         sql.append("(#{item.").append(keyProperty).append("}");
 
         for (TableFieldInfo field : fields) {
-            sql.append(", #{item.").append(field.getProperty()).append("}");
+            // 添加 PostgreSQL 类型转换后缀，避免 NULL 参数被推断为 text 与目标列类型不匹配
+            sql.append(", #{item.").append(field.getProperty()).append("}")
+                    .append(FieldStrategyHelper.getPostgreSQLCastSuffix(field));
         }
 
         sql.append(")");
