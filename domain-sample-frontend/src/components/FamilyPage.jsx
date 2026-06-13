@@ -40,9 +40,9 @@ export default function FamilyPage() {
     setLoading(true);
     setMessage(null);
     try {
-      const payload = buildFindPayload(Number(searchKey));
-      setLastPayload(payload);
-      const data = await queryFamily(payload);
+      const { key, loadFlag: lf } = buildFindPayload(Number(searchKey));
+      setLastPayload({ key, loadFlag: lf });
+      const data = await queryFamily(key, lf);
       resetDomain(data);
       setMessage({ type: 'success', text: 'Loaded successfully' });
     } catch (e) {

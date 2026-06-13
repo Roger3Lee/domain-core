@@ -320,31 +320,35 @@ import com.example.project.domains.family.domain.*;
 public interface FamilyAppService {
 
     /**
-    * 查找
-    * @param request 请求体
-    * @return
-    */
+     * 根据主键查询领域对象，返回包含主表及关联表数据的完整DTO
+     *
+     * @param request 请求体
+     * @return FamilyDomain
+     */
     FamilyDomain find(FamilyFindDomain request);
 
     /**
-    * 新增
-    * @param request 请求体
-    * @return
-    */
+     * 新增领域对象，将主表及 request 中携带的关联表数据一并持久化到数据库并返回生成的主键
+     *
+     * @param request 新增请求体，包含主表数据及需要新增的关联表数据
+     * @return Long 新增记录的主键标识
+     */
     Long insert(FamilyDomain request);
 
     /**
-    * 修改
-    * @param request 请求体
-    * @return 成功OR失败
-    */
+     * 修改领域对象，根据 DTO 中的主键更新主表及指定范围的关联表数据
+     *
+     * @param request 修改请求体，包含主表数据及需要更新的关联表数据（由 loadFlag 控制范围）
+     * @return Boolean 更新操作是否成功
+     */
     Boolean update(FamilyDomain request);
 
     /**
-    * 删除
-    * @param key 数据ID
-    * @return 成功OR失败
-    */
+     * 根据主键删除领域对象，级联删除关联表数据
+     *
+     * @param key 待删除记录的主键标识
+     * @return Boolean 删除操作是否成功
+     */
     Boolean delete(Long key);
 }
 ```
@@ -384,6 +388,84 @@ public class FamilyAppServiceImpl implements FamilyAppService {
     @Override
     public Boolean delete(Long key){
         return familyService.delete(key);
+    }
+}
+```
+
+### Generated: FamilyController.java
+
+```java
+package com.example.project.controllers;
+
+import com.example.project.domains.family.domain.*;
+import com.example.project.applications.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@RestController()
+@RequestMapping("/family/v1")
+public class FamilyController {
+    @Autowired
+    private FamilyAppService familyAppService;
+
+    /**
+     * 根据主键查询领域对象，返回包含主表及关联表数据的完整DTO
+     * <p>
+     * loadFlag 控制查询时加载关联数据的范围：
+     * - loadAll=true：加载所有关联表数据
+     * - loadXxx=true：仅加载指定关联表数据
+     * - 不传或全部为false：仅加载主表数据
+     *
+     * loadFlag 同时控制 update 接口的更新范围：只有被标记的关联表
+     * 才会在后续调用 update 时被持久化；未标记的关联表数据将被忽略不做任何变更。
+     *
+     * @param key      主键标识
+     * @param loadFlag 关联数据加载与更新范围标识，可选参数
+     * @return FamilyDomain 领域数据传输对象
+     */
+    @PostMapping("/{key}")
+    public FamilyDomain find(
+            @PathVariable("key") Long key,
+            @RequestBody(required = false) FamilyDomain.LoadFlag loadFlag
+    ){
+        FamilyFindDomain request = FamilyFindDomain.builder()
+                .key(key)
+                .loadFlag(loadFlag != null ? loadFlag : new FamilyDomain.LoadFlag())
+                .build();
+        return familyAppService.find(request);
+    }
+
+    /**
+     * 新增领域对象，将主表及 request 中携带的关联表数据一并持久化
+     *
+     * @param request 新增请求体
+     * @return Long 新增记录的主键标识
+     */
+    @PutMapping()
+    public Long insert(@RequestBody FamilyDomain request){
+        return familyAppService.insert(request);
+    }
+
+    /**
+     * 修改领域对象，关联表的更新范围由 request.loadFlag 控制
+     *
+     * @param request 修改请求体
+     * @return Boolean 更新操作是否成功
+     */
+    @PostMapping()
+    public Boolean update(@RequestBody FamilyDomain request){
+        return familyAppService.update(request);
+    }
+
+    /**
+     * 根据主键删除领域对象，级联删除关联表数据
+     *
+     * @param key 待删除记录的主键标识
+     * @return Boolean 删除操作是否成功
+     */
+    @DeleteMapping("/{key}")
+    public Boolean delete(@PathVariable("key") Long key){
+        return familyAppService.delete(key);
     }
 }
 ```

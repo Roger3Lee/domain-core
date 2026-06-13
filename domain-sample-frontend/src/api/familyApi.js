@@ -6,17 +6,18 @@
 const BASE = '/sample/family/v1';
 
 /**
- * POST /family/v1/query
+ * POST /family/v1/{key}
  * Find a FamilyDomain by key with optional loadFlag.
  *
- * @param {object} findPayload - { key, loadFlag }
+ * @param {number|string} key - primary key
+ * @param {object} [loadFlag] - optional load flag for related tables
  * @returns {Promise<object>} FamilyDomain
  */
-export async function queryFamily(findPayload) {
-  const res = await fetch(BASE + '/query', {
+export async function queryFamily(key, loadFlag) {
+  const res = await fetch(`${BASE}/${key}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(findPayload),
+    body: loadFlag ? JSON.stringify(loadFlag) : null,
   });
   if (!res.ok) throw new Error(`Query failed: ${res.status}`);
   return res.json();
@@ -58,13 +59,13 @@ export async function updateFamily(domain) {
 }
 
 /**
- * DELETE /family/v1?key={id}
+ * DELETE /family/v1/{key}
  *
- * @param {number} id
+ * @param {number|string} key - primary key
  * @returns {Promise<boolean>}
  */
-export async function deleteFamily(id) {
-  const res = await fetch(`${BASE}?key=${id}`, { method: 'DELETE' });
+export async function deleteFamily(key) {
+  const res = await fetch(`${BASE}/${key}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
   return res.json();
 }

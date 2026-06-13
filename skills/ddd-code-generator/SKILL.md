@@ -5,21 +5,12 @@ description: Generate DDD domain model code (entities, mappers, domain DTOs, rep
 
 # ddd-code-generator
 
-Generates a complete DDD domain model layer stack from a domain XML config + SQL DDL file, using the **domain-generator-v2** JAR tool.
+Generates a complete DDD domain model layer stack from a domain XML config + SQL DDL file, using the JAR tool.
 
 ## Prerequisites
 
 - JDK 8+ installed (required to run the JAR)
-- The JAR is bundled in this skill directory: `domain-generator-v2-3.0.2.jar`
-
-If the JAR needs to be rebuilt from source, build it from the `domain-generator-v2` module:
-
-```bash
-# Set JAVA_HOME to JDK 11+ for Gradle build
-./gradlew :domain-generator-v2:shadowJar
-# Then copy the JAR into the skill directory
-cp domain-generator-v2/build/libs/domain-generator-v2-3.0.2.jar skills/ddd-code-generator/domain-generator-v2-3.0.2.jar
-```
+- The JAR is bundled in this skill directory: `domain-generator-v2-3.0.3.jar`
 
 ## Inputs Required
 
@@ -78,7 +69,7 @@ COMMENT ON COLUMN table_name.col_name IS '描述';
 ### Step 2: Run the Generator JAR
 
 ```bash
-java -jar "domain-generator-v2-3.0.2.jar" \
+java -jar "domain-generator-v2-3.0.3.jar" \
     -d "path/to/domain-config.xml" \
     -s "path/to/domain-sample-mysql.sql" \
     -o "path/to/output-dir" \
@@ -86,7 +77,7 @@ java -jar "domain-generator-v2-3.0.2.jar" \
     --dialect mysql
 ```
 
-> **Note:** The JAR is bundled alongside this skill document. Use the absolute path to the JAR based on your project workspace, e.g. `{workspace}/skills/ddd-code-generator/domain-generator-v2-3.0.2.jar`.
+> **Note:** The JAR is bundled alongside this skill document. Use the absolute path to the JAR based on your project workspace, e.g. `{workspace}/skills/ddd-code-generator/domain-generator-v2-3.0.3.jar`.
 
 **CLI Options:**
 | Option | Description | Default |
@@ -150,6 +141,41 @@ After copying, check:
 - FK lambda references match Domain DTO field names
 - Related table columns include both FK and redundancy columns
 - `@Schema(description=...)` annotations match table/column comments
+
+## Generated Controller Endpoints
+
+The generator produces a REST controller with the following endpoint design. Key and delete operations use **path variables** instead of query parameters.
+
+| HTTP Method | Path | Purpose |
+|-------------|------|--------|
+| `POST` | `/{name}/v1/{key}` | Query domain by primary key, with optional `LoadFlag` body |
+| `PUT` | `/{name}/v1` | Insert new domain (request body contains main + related data) |
+| `POST` | `/{name}/v1` | Update existing domain (request body contains main + related data) |
+| `DELETE` | `/{name}/v1/{key}` | Delete domain by primary key (cascades to related tables) |
+
+### LoadFlag: Loading Scope and Update Scope
+
+`LoadFlag` is a static inner class of the Domain DTO (e.g. `FamilyDomain.LoadFlag`). It controls two things:
+
+**1. Query loading scope** — which related tables to load from the database when calling `find`:
+
+| Flag | Behavior |
+|------|--------|
+| `loadAll = true` | Load all related tables |
+| `loadXxx = true` | Load only the specific related table (one boolean per related table) |
+| Not set / all false | Load only the main table |
+
+**2. Update persistence scope** — which related tables to merge (insert/update/delete) when calling `update`:
+
+| Flag | Behavior |
+|------|--------|
+| `loadAll = true` | Merge all related tables |
+| `loadXxx = true` | Merge only the specific related table |
+| Not flagged | Related table data in the request is **ignored** — no changes persisted |
+
+> **Best practice:** Before calling `update`, first call `find` with the same `loadFlag` to load the original data. The framework compares old vs. new and performs a correct differential merge.
+
+**Insert note:** `insert` persists all related table data present in the request body — it is **not** controlled by `loadFlag`.
 
 ## Key Generation Rules Reference
 
