@@ -14,8 +14,8 @@ public class FileUtils {
         saveFile(path, fileName, text, true);
     }
     public static void saveFile(String path, String fileName, String text, boolean overWrite) throws IOException {
-        //換行符轉換成LF
-        text = text.replace("\r\n", "\n");
+        //換行符統一轉換成CRLF
+        text = text.replace("\r\n", "\n").replace("\n", "\r\n");
         boolean isCreate = false;
         File file = new File(path);
         file.mkdirs();
@@ -42,6 +42,6 @@ public class FileUtils {
     }
 
     public static String readFile(File file) {
-        return FileUtil.readString(file, StandardCharsets.UTF_8).replace("\r\n", "\n");
+        return FileUtil.readString(file, StandardCharsets.UTF_8).replace("\r\n", "\n").replace("\n", "\r\n");
     }
 }

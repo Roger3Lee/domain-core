@@ -18,7 +18,7 @@ import java.util.List;
 <#assign repositoryImplClassName=NameUtils.repositoryImplName(source.name)/>
 <#assign decoratorName=NameUtils.covertDecoratorName(source.name)/>
 <#--MAPPER-->
-@Mapper(uses = ${decoratorName}.class)
+@Mapper(uses = ${decoratorName}.class, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface  ${covertName}{
     ${domainName}Convertor INSTANCE= Mappers.getMapper(${domainName}Convertor.class);
 

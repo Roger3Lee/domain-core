@@ -13,7 +13,7 @@ import lombok.ToString;
 */
 @Getter
 @Setter
-@ToString
+@ToString(callSuper = true)
 <#if !source.basic>
 @TableName(value="${source.name}", autoResultMap = true)
 </#if>
