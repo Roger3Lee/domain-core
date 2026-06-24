@@ -13,7 +13,7 @@ import lombok.ToString;
 */
 @Getter
 @Setter
-@ToString
+@ToString(callSuper = true)
 @TableName(value="family_address", autoResultMap = true)
 public class FamilyAddressDO  {
 

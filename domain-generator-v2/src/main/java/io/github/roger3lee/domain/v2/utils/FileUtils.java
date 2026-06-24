@@ -16,7 +16,7 @@ public class FileUtils {
     }
 
     public static void saveFile(String path, String fileName, String text, boolean overWrite) throws IOException {
-        text = text.replace("\r\n", "\n");
+        text = text.replace("\r\n", "\n").replace("\n", "\r\n");
         File dir = new File(path);
         dir.mkdirs();
         File file = new File(path, fileName);
@@ -44,6 +44,10 @@ public class FileUtils {
     }
 
     public static String readFile(File file) {
-        return FileUtil.readString(file, StandardCharsets.UTF_8).replace("\r\n", "\n");
+        return FileUtil.readString(file, StandardCharsets.UTF_8).replace("\r\n", "\n").replace("\n", "\r\n");
+    }
+
+    public static boolean fileExists(String path, String fileName) {
+        return new File(path, fileName).exists();
     }
 }

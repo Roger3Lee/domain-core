@@ -38,9 +38,21 @@ public class GeneratorCLI implements Callable<Integer> {
             description = "SQL dialect: mysql or postgresql (default: mysql)")
     private String dialect;
 
-    @Option(names = {"--no-overwrite"}, defaultValue = "false",
-            description = "Do not overwrite existing files")
-    private boolean noOverwrite;
+    @Option(names = {"--update-do"}, defaultValue = "false",
+            description = "Overwrite DO entities and mappers (use when table fields have changed)")
+    private boolean updateDo;
+
+    @Option(names = {"--update-domain"}, defaultValue = "false",
+            description = "Overwrite entire domain layer incl. repository and convertor (use when domain model has changed)")
+    private boolean updateDomain;
+
+    @Option(names = {"--ignore-fields"}, defaultValue = "",
+            description = "Comma-separated column names to exclude from DO (e.g. create_time,update_time,deleted)")
+    private String ignoreFields;
+
+    @Option(names = {"--inherit"}, defaultValue = "",
+            description = "Base entity class for all DO classes (e.g. com.example.BaseEntity)")
+    private String inheritClass;
 
     public static void main(String[] args) {
         int exitCode = new CommandLine(new GeneratorCLI()).execute(args);
@@ -66,10 +78,19 @@ public class GeneratorCLI implements Callable<Integer> {
             return 1;
         }
 
-        boolean overwrite = !noOverwrite;
+        log.info("Update DO   : {}", updateDo);
+        log.info("Update Dom  : {}", updateDomain);
+        if (!ignoreFields.isEmpty()) log.info("Ignore Fields: {}", ignoreFields);
+        if (!inheritClass.isEmpty()) log.info("Inherit     : {}", inheritClass);
 
         try {
             GenerateService service = new GenerateService();
+
+            // Apply DO configuration
+            service.setIgnoredFields(ignoreFields);
+            if (!inheritClass.isEmpty()) {
+                service.setBaseEntity(inheritClass);
+            }
 
             // Step 1: Load table metadata from SQL
             log.info("Step 1: Parsing SQL DDL...");
@@ -86,7 +107,7 @@ public class GeneratorCLI implements Callable<Integer> {
 
             // Step 3: Generate all code
             log.info("Step 3: Generating code...");
-            service.generateAll(outputDir, basePackage, domainList, overwrite);
+            service.generateAll(outputDir, basePackage, domainList, updateDo, updateDomain);
 
             log.info("=== Generation completed successfully ===");
             return 0;

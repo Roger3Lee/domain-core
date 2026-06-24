@@ -8,7 +8,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper(uses = FamilyConvertorDecorator.class)
+@Mapper(uses = FamilyConvertorDecorator.class, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface  FamilyConvertor{
     FamilyConvertor INSTANCE= Mappers.getMapper(FamilyConvertor.class);
 

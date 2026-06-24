@@ -74,65 +74,78 @@ java -jar "domain-generator-v2-3.0.3.jar" \
     -s "path/to/domain-sample-mysql.sql" \
     -o "path/to/output-dir" \
     -p "com.example.project" \
-    --dialect mysql
+    --dialect mysql \
+    --update-do \
+    --ignore-fields "create_time,update_time,deleted" \
+    --inherit "com.example.BaseEntity"
 ```
 
 > **Note:** The JAR is bundled alongside this skill document. Use the absolute path to the JAR based on your project workspace, e.g. `{workspace}/skills/ddd-code-generator/domain-generator-v2-3.0.3.jar`.
 
 **CLI Options:**
 | Option | Description | Default |
-|--------|-------------|---------|
+|--------|-------------|--------|
 | `-d` / `--domain-xml` | Path to domain configuration XML | Required |
 | `-s` / `--sql-file` | Path to SQL DDL file | Required |
 | `-o` / `--output-dir` | Output directory for generated files | Required |
 | `-p` / `--base-package` | Java base package name | Required |
 | `--dialect` | SQL dialect: `mysql` or `postgresql` | `mysql` |
-| `--no-overwrite` | Do not overwrite existing files | (off by default) |
+| `--update-do` | Overwrite DO entities and mappers (table fields changed) | `false` |
+| `--update-domain` | Overwrite entire domain layer incl. repository and convertor (domain model changed) | `false` |
+| `--ignore-fields` | Comma-separated column names to exclude from DO (e.g. `create_time,update_time`) | (none) |
+| `--inherit` | Base entity class for all DO classes (e.g. `com.example.BaseEntity`) | (none) |
 
-### Step 3: Copy Generated Files to Target Project
+### Step 3: Understand the Overwrite Policy
 
-The generator outputs files organized by package structure:
+The generator uses a **layer-based overwrite policy** controlled by CLI flags.
 
+#### Overwrite Policy Summary
+
+| Layer | Default (no flags) | `--update-do` | `--update-domain` |
+|-------|-------------------|---------------|-------------------|
+| `entities/` (DO) | skip | **overwrite** | skip |
+| `mappers/` | skip | **overwrite** | skip |
+| `domain/` (DTO, FindDomain) | **overwrite** | **overwrite** | **overwrite** |
+| `lambdaexp/` | **overwrite** | **overwrite** | **overwrite** |
+| `service/` | **overwrite** | **overwrite** | **overwrite** |
+| `repository/` | skip | skip | **overwrite** |
+| `convertor/` | skip | skip | **overwrite** |
+| `applications/` | **first run only** | **first run only** | **first run only** |
+| `controllers/` | **first run only** | **first run only** | **first run only** |
+
+#### When to Use Each Flag
+
+| Scenario | Command |
+|----------|--------|
+| **First time** generating a domain | `java -jar ...` (no flags) |
+| **Table fields changed** (add/remove/rename column) | `--update-do` |
+| **Domain model changed** (add related table, change FK, change aggregate) | `--update-domain` |
+| **Both DO and domain changed** | `--update-do --update-domain` |
+
+> **Important:** `applications/` and `controllers/` are **only generated on first run**. The generator detects whether the domain has already been generated and skips them.
+
+### Step 4: DO Configuration
+
+**`--ignore-fields`** — Specify column names to exclude from generated DO classes. These columns are typically managed by a base entity (e.g. `create_time`, `update_time`, `deleted`). Matching columns are marked as inherited and skipped in the DO class.
+
+**`--inherit`** — Specify a base entity class for all DO classes. The generated DO will `extends` this class. Typically used together with `--ignore-fields`:
+
+```bash
+java -jar ... --inherit "com.example.BaseEntity" --ignore-fields "create_time,update_time,deleted"
 ```
-{output-dir}/
-└── {basePackagePath}/
-    ├── entities/
-    │   ├── {Table}DO.java
-    │   └── ...
-    ├── mappers/
-    │   ├── {Table}Mapper.java
-    │   └── ...
-    ├── domains/
-    │   └── {domainFolder}/
-    │       ├── domain/
-    │       │   ├── {Name}Domain.java
-    │       │   └── {Name}FindDomain.java
-    │       ├── repository/
-    │       │   ├── {Name}Repository.java
-    │       │   ├── {RelatedName}Repository.java
-    │       │   └── impl/
-    │       │       ├── {Name}RepositoryImpl.java
-    │       │       └── {RelatedName}RepositoryImpl.java
-    │       ├── service/
-    │       │   ├── {Name}Service.java
-    │       │   └── impl/
-    │       │       └── {Name}ServiceImpl.java
-    │       ├── lambdaexp/
-    │       │   └── {Name}LambdaExp.java
-    │       ├── convertor/
-    │       │   ├── {Name}Convertor.java
-    │       │   └── {Name}ConvertorDecorator.java
-    ├── applications/
-    │   ├── {Name}AppService.java
-    │   └── impl/
-    │       └── {Name}AppServiceImpl.java
-    ├── controllers/
-    │   └── {Name}Controller.java
+
+This generates:
+```java
+@Getter
+@Setter
+@ToString(callSuper = true)
+@TableName(value="family", autoResultMap = true)
+public class FamilyDO extends com.example.BaseEntity {
+    // create_time, update_time, deleted are excluded
+}
 ```
 
-Copy these files into the target project's `src/main/java` directory, preserving the package structure.
-
-### Step 4: Verify
+### Step 5: Verify
 
 After copying, check:
 
