@@ -71,16 +71,17 @@ public class EnhancedMySqlBatchMethodV3 extends EnhancedBatchMethod {
         List<TableFieldInfo> fields = FieldStrategyHelper.getUpdateFields(tableInfo);
 
         StringBuilder sql = new StringBuilder("<script>");
-        sql.append("UPDATE ").append(tableInfo.getTableName()).append(" SET ");
+        sql.append("UPDATE ").append(tableInfo.getTableName()).append(" ");
 
-        // 构建 CASE WHEN 子句，根据 updateStrategy 生成不同的条件
-        for (int i = 0; i < fields.size(); i++) {
-            TableFieldInfo field = fields.get(i);
-            if (i > 0)
-                sql.append(", ");
+        // 使用 trim 包裹 SET 子句，suffixOverrides="," 自动去除末尾多余逗号
+        // 当某个字段的所有 WHEN 条件都不满足时，该字段的 trim 不产生任何内容，避免生成无效的 CASE ELSE column END
+        sql.append("<trim prefix=\"SET\" suffixOverrides=\",\">");
 
+        for (TableFieldInfo field : fields) {
             buildUpdateCaseWhen(sql, field, keyProperty, keyColumn);
         }
+
+        sql.append("</trim>");
 
         // WHERE 子句
         sql.append(" WHERE ").append(keyColumn).append(" IN (");
@@ -105,7 +106,12 @@ public class EnhancedMySqlBatchMethodV3 extends EnhancedBatchMethod {
         String column = field.getColumn();
         String property = field.getProperty();
 
-        sql.append(column).append(" = CASE ");
+        // 使用 trim 包裹 CASE WHEN 表达式
+        // 当所有 WHEN 条件都不满足时（foreach 内容为空），trim 不输出任何内容，避免生成无效的 CASE ELSE column END
+        // suffix 中的逗号用于字段间分隔，由外层 trim 的 suffixOverrides 处理末尾多余逗号
+        sql.append("<trim prefix=\"").append(column).append(" = CASE \" suffix=\" ELSE ")
+           .append(column).append(" END,\">");
+
         sql.append("<foreach collection=\"list\" item=\"item\">");
 
         switch (strategy) {
@@ -142,7 +148,7 @@ public class EnhancedMySqlBatchMethodV3 extends EnhancedBatchMethod {
         }
 
         sql.append("</foreach>");
-        sql.append("ELSE ").append(column).append(" END");
+        sql.append("</trim>");
     }
 
     /**

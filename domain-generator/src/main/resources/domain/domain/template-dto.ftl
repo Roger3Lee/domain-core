@@ -20,7 +20,6 @@ import cn.hutool.core.collection.*;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 </#if>
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
@@ -118,7 +117,6 @@ public class ${className} extends <#if (source.relatedTable?size>0)>BaseAggregat
             <#assign sourceDomainGetterList=NameUtils.genListGetter(refTable.tableName)/>
 
         @Schema(description = "Related to ${refTable.tableName}")
-        @JsonIgnore
         private <#if refTable.many>CacheDomain<java.util.List<${refClassName}>><#else>CacheDomain<${refClassName}></#if> ${refFieldName};
         /**
         * Related to ${refTable.tableName}

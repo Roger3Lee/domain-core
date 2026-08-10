@@ -30,15 +30,16 @@ picocli = "4.7.6"
 
 [libraries]
 # Internal modules (version set by project)
-domain-core = { module = "io.github.roger3lee:domain-core", version = "3.0.3" }
-domain-dependencies = { module = "io.github.roger3lee:domain-dependencies", version = "3.0.3" }
-domain-generator = { module = "io.github.roger3lee:domain-generator", version = "3.0.3" }
-domain-mysql-support = { module = "io.github.roger3lee:domain-mysql-support", version = "3.0.3" }
-domain-oracle-support = { module = "io.github.roger3lee:domain-oracle-support", version = "3.0.3" }
-domain-postgresql-support = { module = "io.github.roger3lee:domain-postgresql-support", version = "3.0.3" }
+domain-core = { module = "io.github.roger3lee:domain-core", version = "3.0.4" }
+domain-dependencies = { module = "io.github.roger3lee:domain-dependencies", version = "3.0.4" }
+domain-generator = { module = "io.github.roger3lee:domain-generator", version = "3.0.4" }
+domain-mysql-support = { module = "io.github.roger3lee:domain-mysql-support", version = "3.0.4" }
+domain-oracle-support = { module = "io.github.roger3lee:domain-oracle-support", version = "3.0.4" }
+domain-postgresql-support = { module = "io.github.roger3lee:domain-postgresql-support", version = "3.0.4" }
 
 # Utilities
 hutool-all = { module = "cn.hutool:hutool-all", version.ref = "hutool" }
+hutool-core = { module = "cn.hutool:hutool-core", version.ref = "hutool" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
 freemarker = { module = "org.freemarker:freemarker", version.ref = "freemarker" }
 

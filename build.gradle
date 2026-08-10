@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'io.github.roger3lee'
-version = '3.0.3'
+version = '3.0.4'
 
 repositories {
     maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
@@ -33,9 +33,9 @@ subprojects {
     }
 }
 
-// ========== Maven Central 鍙戝竷閰嶇疆 ==========
+// ========== Maven Central 閸欐垵绔烽柊宥囩枂 ==========
 subprojects { subProj ->
-    // 璺宠繃涓嶉渶瑕佸彂甯冪殑妯″潡
+    // 鐠哄疇绻冩稉宥夋付鐟曚礁褰傜敮鍐畱濡€虫健
     if (project.name in ['domain-dependencies', 'domain-generator', 'domain-generator-v2', 'domain-sample',
                          'domain-generator-idea-plugin', 'domain-web-generator',
                          'domain-polardb-support', 'domain-oracle-support']) {
@@ -45,19 +45,19 @@ subprojects { subProj ->
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
 
-    // 婧愮爜 jar 浠诲姟
+    // 濠ф劗鐖?jar 娴犺濮?
     task sourceJar(type: Jar) {
         archiveClassifier = 'sources'
         from sourceSets.main.allSource
     }
 
-    // javadoc jar 浠诲姟
+    // javadoc jar 娴犺濮?
     task javadocJar(type: Jar) {
         archiveClassifier = 'javadoc'
         from javadoc.destinationDir
     }
 
-    // javadoc 缂栫爜璁剧疆
+    // javadoc 缂傛牜鐖滅拋鍓х枂
     javadoc {
         options.encoding = 'UTF-8'
         if (JavaVersion.current().isJava9Compatible()) {
@@ -70,9 +70,9 @@ subprojects { subProj ->
             mavenJava(MavenPublication) {
                 from components.java
 
-                // 闄勫甫婧愮爜 jar
+                // 闂勫嫬鐢┃鎰垳 jar
                 artifact sourceJar
-                // 闄勫甫 javadoc jar
+                // 闂勫嫬鐢?javadoc jar
                 artifact javadocJar
 
                 pom {
@@ -104,7 +104,7 @@ subprojects { subProj ->
             }
         }
 
-        // nexus-publish-plugin 鑷�姩娣诲姞 sonatype 浠撳簱锛屾棤闇€鎵嬪姩閰嶇疆
+        // nexus-publish-plugin 閼凤拷濮╁ǎ璇插 sonatype 娴犳挸绨遍敍灞炬￥闂団偓閹靛濮╅柊宥囩枂
     }
 
     signing {
@@ -112,7 +112,7 @@ subprojects { subProj ->
     }
 }
 
-// ========== Nexus Publish 鎻掍欢閰嶇疆锛堣嚜鍔ㄥ垱寤恒€佸叧闂�拰鍙戝竷 staging 浠撳簱锛?==========
+// ========== Nexus Publish 閹绘帊娆㈤柊宥囩枂閿涘牐鍤滈崝銊ュ灡瀵ゆ亽鈧礁鍙ч梻锟芥嫲閸欐垵绔?staging 娴犳挸绨遍敍?==========
 nexusPublishing {
     repositories {
         sonatype {
