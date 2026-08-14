@@ -30,3 +30,7 @@ dependencies {
 
     testImplementation libs.spring.boot.starter.test
 }
+
+test {
+    useJUnitPlatform()
+}

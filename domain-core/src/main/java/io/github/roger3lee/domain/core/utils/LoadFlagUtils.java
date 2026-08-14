@@ -6,55 +6,33 @@ import io.github.roger3lee.domain.core.domain.BaseLoadFlag;
 import io.github.roger3lee.domain.core.lambda.order.LambdaOrderItem;
 import io.github.roger3lee.domain.core.lambda.query.LambdaQuery;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class LoadFlagUtils {
 
+    /**
+     * 合并源LoadFlag中指定实体的查询条件到目标LoadFlag
+     *
+     * @param loadFlag       目标LoadFlag
+     * @param loadFlagSource 源LoadFlag
+     * @param entityName     实体名称
+     * @return 目标LoadFlag
+     */
     public static <T extends BaseLoadFlag> T mergeEntityQuery(T loadFlag, T loadFlagSource, String entityName) {
         if (ObjectUtil.isNull(loadFlag) || ObjectUtil.isNull(loadFlagSource) || ObjectUtil.isEmpty(entityName)) {
             return loadFlag;
         }
 
-        // 获取源LoadFlag中指定实体的Query
-        BaseLoadFlag.Query sourceQuery = loadFlagSource.getQuery().get(entityName);
+        LambdaQuery<?> sourceQuery = loadFlagSource.getQuery().get(entityName);
         if (ObjectUtil.isNull(sourceQuery)) {
             return loadFlag;
         }
 
-        // 获取或创建目标LoadFlag中指定实体的Query
-        BaseLoadFlag.Query targetQuery = loadFlag.getQuery().computeIfAbsent(entityName, k -> new BaseLoadFlag.Query());
-
-        // 合并过滤条件
-        if (ObjectUtil.isNotNull(sourceQuery.getFilter())) {
-            if (ObjectUtil.isNull(targetQuery.getFilter())) {
-                targetQuery.setFilter(sourceQuery.getFilter());
-            } else {
-                // 合并现有过滤条件，将源条件作为AND条件添加到目标条件
-                targetQuery.getFilter().addChild(sourceQuery.getFilter());
-            }
-        }
-
-        // 合并排序条件
-        if (CollUtil.isNotEmpty(sourceQuery.getOrder())) {
-            if (CollUtil.isEmpty(targetQuery.getOrder())) {
-                targetQuery.setOrder(new ArrayList<>(sourceQuery.getOrder()));
-            } else {
-                // 合并排序条件，避免重复
-                for (LambdaOrderItem orderItem : sourceQuery.getOrder()) {
-                    if (!targetQuery.getOrder().contains(orderItem)) {
-                        targetQuery.getOrder().add(orderItem);
-                    }
-                }
-            }
-        }
-
+        mergeLambdaQuery(loadFlag, sourceQuery, entityName);
         return loadFlag;
     }
 
     /**
-     * 从 LambdaQuery 中提取条件并合并到 LoadFlag
-     * 
+     * 将 LambdaQuery 合并到 LoadFlag 中指定实体的查询条件
+     *
      * @param loadFlag   目标 LoadFlag
      * @param query      源 LambdaQuery
      * @param entityName 实体名称
@@ -64,39 +42,34 @@ public class LoadFlagUtils {
             return;
         }
 
-        // 提取过滤条件和排序条件
-        LambdaQuery.ConditionGroup filter = LambdaQueryUtils.toFilters(query);
-        List<LambdaOrderItem> orders = LambdaQueryUtils.toOrders(query);
-
-        if ((ObjectUtil.isNotNull(filter) && CollUtil.isNotEmpty(filter.getCondition()))
-                || CollUtil.isNotEmpty(orders)) {
-            // 创建临时LoadFlag并合并
-            BaseLoadFlag tempSource = createTempLoadFlag(filter, orders, entityName);
-            mergeEntityQuery(loadFlag, tempSource, entityName);
-        }
+        mergeLambdaQuery(loadFlag, query, entityName);
     }
-    
+
     /**
-     * 创建临时的LoadFlag用于合并操作
-     * 
-     * @param filter     过滤条件
-     * @param orders     排序条件
-     * @param entityName 实体名称
-     * @return 临时LoadFlag
+     * 合并 LambdaQuery：目标不存在时直接放入，否则过滤条件AND连接、排序去重追加
      */
-    private static BaseLoadFlag createTempLoadFlag(LambdaQuery.ConditionGroup filter, List<LambdaOrderItem> orders, String entityName) {
-        BaseLoadFlag tempLoadFlag = new BaseLoadFlag();
-        BaseLoadFlag.Query query = new BaseLoadFlag.Query();
-        
-        if (ObjectUtil.isNotNull(filter) && CollUtil.isNotEmpty(filter.getCondition())) {
-            query.setFilter(filter);
+    private static void mergeLambdaQuery(BaseLoadFlag loadFlag, LambdaQuery<?> source, String entityName) {
+        LambdaQuery<?> target = loadFlag.getQuery().get(entityName);
+        if (ObjectUtil.isNull(target)) {
+            loadFlag.getQuery().put(entityName, source);
+            return;
         }
-        
-        if (CollUtil.isNotEmpty(orders)) {
-            query.setOrder(new ArrayList<>(orders));
+        if (target == source) {
+            return;
         }
-        
-        tempLoadFlag.getQuery().put(entityName, query);
-        return tempLoadFlag;
+
+        // 合并过滤条件（AND 连接）
+        if (source.hasFilter()) {
+            target.getFilter().addChild(source.getFilter());
+        }
+
+        // 合并排序条件，避免重复
+        if (CollUtil.isNotEmpty(source.getOrderItems())) {
+            for (LambdaOrderItem orderItem : source.getOrderItems()) {
+                if (!target.getOrderItems().contains(orderItem)) {
+                    target.getOrderItems().add(orderItem);
+                }
+            }
+        }
     }
 }

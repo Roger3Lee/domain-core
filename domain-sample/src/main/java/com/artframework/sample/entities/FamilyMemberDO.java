@@ -21,7 +21,7 @@ public class FamilyMemberDO  {
     /**
     * 自增主键
     */
-    @TableId(value = "ID", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
     * 家庭ID

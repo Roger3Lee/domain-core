@@ -2,9 +2,12 @@ package io.github.roger3lee.sample.test;
 
 import io.github.roger3lee.domain.core.lambda.query.LambdaQuery;
 import io.github.roger3lee.domain.core.utils.LambdaQueryUtils;
-import io.github.roger3lee.sample.domains.family.domain.FamilyDomain;
-import io.github.roger3lee.sample.entities.FamilyMemberDO;
+import com.artframework.sample.domains.family.domain.FamilyDomain;
+import com.artframework.sample.entities.FamilyMemberDO;
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -14,6 +17,9 @@ public class SqlGenerationTest {
 
     @Test
     void testSqlGeneration() {
+        // 0. 脱离 Spring 环境，手动初始化实体 TableInfo
+        TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), FamilyMemberDO.class);
+
         // 1. 创建外键查询
         LambdaQuery<FamilyDomain.FamilyMemberDomain> lambdaQuery =
             LambdaQuery.of(FamilyDomain.FamilyMemberDomain.class);

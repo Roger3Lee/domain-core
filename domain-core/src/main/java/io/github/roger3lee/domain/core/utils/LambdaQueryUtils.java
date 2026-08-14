@@ -46,6 +46,7 @@ public class LambdaQueryUtils {
 
     /**
      * 合并查询条件和排序（从BaseLoadFlag中提取）
+     * <p>将 LoadFlag 中指定实体的 LambdaQuery 的过滤条件（AND 连接）和排序合并到目标查询。</p>
      * 
      * @param lambdaQuery 目标查询对象
      * @param loadFlag    LoadFlag对象
@@ -59,10 +60,12 @@ public class LambdaQueryUtils {
             return lambdaQuery;
         }
 
-        LambdaQuery.ConditionGroup filter = getEntityFilters(loadFlag, entityClass);
-        List<LambdaOrderItem> orderItems = getEntityOrders(loadFlag, entityClass);
+        LambdaQuery<?> entityQuery = getEntityLambdaQuery(loadFlag, entityClass);
+        if (ObjectUtil.isNull(entityQuery)) {
+            return lambdaQuery;
+        }
 
-        return combine(lambdaQuery, filter, orderItems);
+        return combine(lambdaQuery, entityQuery.getFilter(), entityQuery.getOrderItems());
     }
 
     /**
@@ -83,7 +86,8 @@ public class LambdaQueryUtils {
 
         // 展开用户 filter 的逻辑：
         // 如果用户 filter 是 AND 组且包含的元素可以直接展开，就展开它们
-        if (LogicalOperator.AND.equals(filter.getLogic())) {
+        // 注意：getLogic() 对 AND 返回 null（JSON 精简），null 也视为 AND
+        if (filter.getLogic() == null || LogicalOperator.AND.equals(filter.getLogic())) {
             // 遍历用户 filter 的所有子元素，直接添加到 rootFilter
             for (Object child : filter.getCondition()) {
                 rootFilter.addChild(child);
@@ -105,11 +109,8 @@ public class LambdaQueryUtils {
      * 从BaseLoadFlag中获取指定实体名称的排序条件
      */
     private static List<LambdaOrderItem> getEntityOrders(BaseLoadFlag loadFlag, String entityName) {
-        if (ObjectUtil.isNull(loadFlag) || ObjectUtil.isEmpty(entityName)) {
-            return null;
-        }
-        BaseLoadFlag.Query query = loadFlag.getQuery().get(entityName);
-        return query != null ? query.getOrder() : null;
+        LambdaQuery<?> query = getEntityLambdaQuery(loadFlag, entityName);
+        return query != null ? query.getOrderItems() : null;
     }
 
     /**
@@ -165,11 +166,25 @@ public class LambdaQueryUtils {
      * 从BaseLoadFlag中获取指定实体名称的过滤条件
      */
     public static LambdaQuery.ConditionGroup getEntityFilters(BaseLoadFlag loadFlag, String entityName) {
+        LambdaQuery<?> query = getEntityLambdaQuery(loadFlag, entityName);
+        return query != null ? query.getFilter() : null;
+    }
+
+    /**
+     * 从BaseLoadFlag中获取指定实体类的 LambdaQuery
+     */
+    public static <T> LambdaQuery<?> getEntityLambdaQuery(BaseLoadFlag loadFlag, Class<T> entityClass) {
+        return getEntityLambdaQuery(loadFlag, getEntityName(entityClass));
+    }
+
+    /**
+     * 从BaseLoadFlag中获取指定实体名称的 LambdaQuery
+     */
+    public static LambdaQuery<?> getEntityLambdaQuery(BaseLoadFlag loadFlag, String entityName) {
         if (ObjectUtil.isNull(loadFlag) || ObjectUtil.isEmpty(entityName)) {
             return null;
         }
-        BaseLoadFlag.Query query = loadFlag.getQuery().get(entityName);
-        return query != null ? query.getFilter() : null;
+        return loadFlag.getQuery().get(entityName);
     }
 
 

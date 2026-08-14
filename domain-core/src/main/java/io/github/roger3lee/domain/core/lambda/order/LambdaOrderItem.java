@@ -7,11 +7,16 @@ import io.github.roger3lee.domain.core.lambda.LambdaCache;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 
 @AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(of = {"field", "order"})
 public class LambdaOrderItem {
     public <T> LambdaOrderItem(SFunction<T, Serializable> field, Order order) {
         LambdaCache.LambdaInfo<T> lambdaInfo = LambdaCache.info(field);
@@ -27,10 +32,13 @@ public class LambdaOrderItem {
     }
 
     @Getter
+    @Setter
     @JsonIgnore
     private String entity;
     @Getter
+    @Setter
     private String field;
     @Getter
+    @Setter
     private Order order;
 }

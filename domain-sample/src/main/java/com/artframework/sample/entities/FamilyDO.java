@@ -21,7 +21,7 @@ public class FamilyDO  {
     /**
     * 自增主键
     */
-    @TableId(value = "ID", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
     * 名称
@@ -33,9 +33,9 @@ public class FamilyDO  {
     */
     @TableField("person_count")
     private Integer personCount;
-    /**
-    * 户主姓名
-    */
-    @TableField("householder")
-    private String householder;
+//    /**
+//    * 户主姓名
+//    */
+//    @TableField("householder")
+//    private String householder;
 }

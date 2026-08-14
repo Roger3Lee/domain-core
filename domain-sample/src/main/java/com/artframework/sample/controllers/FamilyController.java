@@ -3,6 +3,7 @@ package com.artframework.sample.controllers;
 import com.artframework.sample.domains.family.domain.*;
 import com.artframework.sample.domains.family.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.github.roger3lee.domain.core.lambda.query.LambdaQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,8 @@ public class FamilyController {
             @PathVariable("key") Long key,
             @RequestBody(required = false) FamilyDomain.LoadFlag loadFlag
     ){
+        loadFlag.lambdaQuery(FamilyDomain.FamilyAddressDomain.class, LambdaQuery.of(FamilyDomain.FamilyAddressDomain.class)
+                .eq(FamilyDomain.FamilyAddressDomain::getAddressName,"武"));
         FamilyFindDomain request = FamilyFindDomain.builder()
                 .key(key)
                 .loadFlag(loadFlag != null ? loadFlag : new FamilyDomain.LoadFlag())

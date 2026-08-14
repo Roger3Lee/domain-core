@@ -9,6 +9,7 @@ import io.github.roger3lee.domain.core.lambda.LambdaCache;
 import io.github.roger3lee.domain.core.lambda.order.LambdaOrder;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,11 +28,17 @@ import java.util.function.Consumer;
 
 /**
  * 自定义 LambdaQuery，支持 AND/OR 嵌套查询
+ * <p>支持 JSON 序列化/反序列化，序列化形状为：
+ * {@code {"filter": {...}, "order": [...], "select": [...], "exclude": [...]}}，
+ * 反序列化得到的实例 entityClass 为 null，仅能基于字段名构建查询。</p>
  *
  * @param <T> 实体类型
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LambdaQuery<T> extends LambdaOrder<T> {
     @Getter
+    @JsonIgnore
+    @Schema(hidden = true)
     private final Class<T> entityClass;
 
     // 根逻辑组（默认 AND 连接）
@@ -41,6 +49,32 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
 
     // 下一个条件的逻辑运算符（用于链式 OR）
     private LogicalOperator nextConditionOperator = null;
+
+    /**
+     * 字段选择（白名单）
+     */
+    @Getter
+    @Setter
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema(description = "字段选择（白名单）")
+    private List<String> select;
+
+    /**
+     * 字段排除（黑名单）
+     */
+    @Getter
+    @Setter
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema(description = "字段排除（黑名单）")
+    private List<String> exclude;
+
+    /**
+     * 无参构造，供 Jackson 反序列化使用（此时 entityClass 为 null）
+     */
+    protected LambdaQuery() {
+        super();
+        this.entityClass = null;
+    }
 
     protected LambdaQuery(Class<T> entityClass) {
         super(entityClass);
@@ -54,15 +88,33 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
     /**
      * 检查是否有过滤条件
      */
+    @JsonIgnore
     public Boolean hasFilter() {
         return CollUtil.isNotEmpty(rootGroup.getCondition());
     }
 
     /**
-     * 获取根过滤条件组
+     * 获取根过滤条件组（JSON 序列化为 filter 属性）
      */
+    @JsonProperty("filter")
     public ConditionGroup getFilter() {
         return rootGroup;
+    }
+
+    /**
+     * 设置根过滤条件组（供 Jackson 反序列化使用）
+     * <p>内容拷贝到 rootGroup，并重置 currentGroup，保证反序列化后仍可继续链式追加条件。</p>
+     */
+    @JsonProperty("filter")
+    public void setFilter(ConditionGroup filter) {
+        this.rootGroup.getCondition().clear();
+        if (filter != null) {
+            this.rootGroup.setLogic(filter.getLogic() != null ? filter.getLogic() : LogicalOperator.AND);
+            this.rootGroup.setCondition(filter.getCondition());
+        } else {
+            this.rootGroup.setLogic(LogicalOperator.AND);
+        }
+        this.currentGroup = this.rootGroup;
     }
 
     /**
