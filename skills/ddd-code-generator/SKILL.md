@@ -10,7 +10,7 @@ Generates a complete DDD domain model layer stack from a domain XML config + SQL
 ## Prerequisites
 
 - JDK 8+ installed (required to run the JAR)
-- The JAR is bundled in this skill directory: `domain-generator-v2-3.0.3.jar`
+- The JAR is bundled in this skill directory: `domain-generator-v2-3.0.4.jar`
 
 ## Inputs Required
 
@@ -69,7 +69,7 @@ COMMENT ON COLUMN table_name.col_name IS '描述';
 ### Step 2: Run the Generator JAR
 
 ```bash
-java -jar "domain-generator-v2-3.0.3.jar" \
+java -jar "domain-generator-v2-3.0.4.jar" \
     -d "path/to/domain-config.xml" \
     -s "path/to/domain-sample-mysql.sql" \
     -o "path/to/output-dir" \
@@ -80,7 +80,7 @@ java -jar "domain-generator-v2-3.0.3.jar" \
     --inherit "com.example.BaseEntity"
 ```
 
-> **Note:** The JAR is bundled alongside this skill document. Use the absolute path to the JAR based on your project workspace, e.g. `{workspace}/skills/ddd-code-generator/domain-generator-v2-3.0.3.jar`.
+> **Note:** The JAR is bundled alongside this skill document. Use the absolute path to the JAR based on your project workspace, e.g. `{workspace}/skills/ddd-code-generator/domain-generator-v2-3.0.4.jar`.
 
 **CLI Options:**
 | Option | Description | Default |
