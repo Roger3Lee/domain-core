@@ -26,6 +26,11 @@ public enum Op {
     ISNULL("ISNULL"),
     NOTNULL("NOTNULL"),
 
+    BETWEEN("BETWEEN"),
+    NOT_BETWEEN("NOT_BETWEEN"),
+    NOT_LIKE_LEFT("NOT_LIKE_LEFT"),
+    NOT_LIKE_RIGHT("NOT_LIKE_RIGHT"),
+
     /**
      * 自定义操作符，配合 sqlTemplate 使用
      * <p>sqlTemplate 中使用 {0}, {1} 等作为值占位符，列名由框架自动解析</p>

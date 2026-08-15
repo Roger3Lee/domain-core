@@ -13,9 +13,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Lambda 查询工具类
@@ -135,6 +138,52 @@ public class LambdaQueryUtils {
             default:
                 wrapper.orderByAsc(LambdaCache.DOLambda(doClass, order.getField()));
                 break;
+        }
+    }
+
+    /**
+     * 构建字段选择到 MyBatis Plus 查询包装器
+     * <p>支持白名单（select）和黑名单（exclude）两种模式：</p>
+     * <ul>
+     *   <li>select 不为空时，仅查询指定字段</li>
+     *   <li>exclude 不为空时（且 select 为空），查询所有字段但排除 exclude 中的字段</li>
+     * </ul>
+     *
+     * @param wrapper     查询包装器
+     * @param lambdaQuery 查询对象
+     * @param doClass     DO 类型
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <DO> void buildSelectWrapper(LambdaQueryWrapper<DO> wrapper,
+            LambdaQuery<?> lambdaQuery,
+            Class<DO> doClass) {
+        if (wrapper == null || lambdaQuery == null || doClass == null) {
+            return;
+        }
+
+        List<String> select = lambdaQuery.getSelect();
+        List<String> exclude = lambdaQuery.getExclude();
+
+        if (CollUtil.isNotEmpty(select)) {
+            // 白名单模式：只选择指定字段
+            List<SFunction<DO, Serializable>> lambdas = new ArrayList<>();
+            for (String f : select) {
+                lambdas.add(LambdaCache.DOLambda(doClass, f));
+            }
+            wrapper.select(lambdas.toArray(new SFunction[0]));
+        } else if (CollUtil.isNotEmpty(exclude)) {
+            // 黑名单模式：选择所有字段，排除指定字段
+            List<String> allFields = getAllFieldNames(doClass);
+            List<SFunction<DO, Serializable>> lambdas = new ArrayList<>();
+            for (String f : allFields) {
+                if (!exclude.contains(f)) {
+                    lambdas.add(LambdaCache.DOLambda(doClass, f));
+                }
+            }
+            // 仅当确实排除了某些字段时才设置 select
+            if (CollUtil.isNotEmpty(lambdas) && lambdas.size() < allFields.size()) {
+                wrapper.select(lambdas.toArray(new SFunction[0]));
+            }
         }
     }
 
@@ -312,6 +361,26 @@ public class LambdaQueryUtils {
             case NOT_LIKE:
                 wrapper.notLike(LambdaCache.DOLambda(doClass, field), value);
                 break;
+            case NOT_LIKE_LEFT:
+                wrapper.notLikeLeft(LambdaCache.DOLambda(doClass, field), value);
+                break;
+            case NOT_LIKE_RIGHT:
+                wrapper.notLikeRight(LambdaCache.DOLambda(doClass, field), value);
+                break;
+            case BETWEEN: {
+                Object[] pairVals = extractPairValues(value);
+                if (pairVals != null) {
+                    wrapper.between(LambdaCache.DOLambda(doClass, field), pairVals[0], pairVals[1]);
+                }
+                break;
+            }
+            case NOT_BETWEEN: {
+                Object[] pairVals = extractPairValues(value);
+                if (pairVals != null) {
+                    wrapper.notBetween(LambdaCache.DOLambda(doClass, field), pairVals[0], pairVals[1]);
+                }
+                break;
+            }
             case NE:
                 wrapper.ne(LambdaCache.DOLambda(doClass, field), value);
                 break;
@@ -377,6 +446,28 @@ public class LambdaQueryUtils {
     }
 
     /**
+     * 从值对象中提取两个值（用于 BETWEEN / NOT_BETWEEN）
+     * <p>支持 Object[] 和 Iterable 两种格式，兼容编程构建和 JSON 反序列化场景。</p>
+     *
+     * @param value 值对象
+     * @return 包含两个值的数组，或 null 如果无法提取
+     */
+    private static Object[] extractPairValues(Object value) {
+        if (value instanceof Object[]) {
+            Object[] arr = (Object[]) value;
+            if (arr.length >= 2) {
+                return new Object[]{arr[0], arr[1]};
+            }
+        } else if (value instanceof Iterable) {
+            List<?> list = ListUtil.toList((Iterable<?>) value);
+            if (list.size() >= 2) {
+                return new Object[]{list.get(0), list.get(1)};
+            }
+        }
+        return null;
+    }
+
+    /**
      * 处理自定义操作符条件
      * <p>将 sqlTemplate 中的 {0}, {1} 替换为 MyBatis-Plus 参数占位符，
      * 列名通过 TableInfo 自动解析并拼接到模板前面。</p>
@@ -424,6 +515,28 @@ public class LambdaQueryUtils {
         }
         // 回退：使用字段名作为列名
         return fieldName;
+    }
+
+    /**
+     * 通过 TableInfo 获取 DO 类的所有字段属性名列表（含主键）
+     *
+     * @param doClass DO 类型
+     * @return 字段属性名列表，如果 TableInfo 未初始化则返回空列表
+     */
+    private static <F> List<String> getAllFieldNames(Class<F> doClass) {
+        List<String> fields = new ArrayList<>();
+        TableInfo tableInfo = TableInfoHelper.getTableInfo(doClass);
+        if (tableInfo != null) {
+            // 主键字段
+            if (tableInfo.getKeyProperty() != null) {
+                fields.add(tableInfo.getKeyProperty());
+            }
+            // 普通字段
+            for (TableFieldInfo fieldInfo : tableInfo.getFieldList()) {
+                fields.add(fieldInfo.getProperty());
+            }
+        }
+        return fields;
     }
 
     /**

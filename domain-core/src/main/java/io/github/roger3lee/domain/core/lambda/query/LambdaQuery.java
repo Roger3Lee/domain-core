@@ -342,6 +342,28 @@ public class LambdaQuery<T> extends LambdaOrder<T> {
         return addCondition(column, Op.LIKE_RIGHT, val);
     }
 
+    public LambdaQuery<T> notLikeLeft(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.NOT_LIKE_LEFT, val);
+    }
+
+    public LambdaQuery<T> notLikeRight(SFunction<T, Serializable> column, Object val) {
+        return addCondition(column, Op.NOT_LIKE_RIGHT, val);
+    }
+
+    public LambdaQuery<T> between(SFunction<T, Serializable> column, Object val1, Object val2) {
+        if (val1 == null || val2 == null) {
+            return this;
+        }
+        return addCondition(column, Op.BETWEEN, new Object[]{val1, val2});
+    }
+
+    public LambdaQuery<T> notBetween(SFunction<T, Serializable> column, Object val1, Object val2) {
+        if (val1 == null || val2 == null) {
+            return this;
+        }
+        return addCondition(column, Op.NOT_BETWEEN, new Object[]{val1, val2});
+    }
+
     public LambdaQuery<T> in(SFunction<T, Serializable> column, Object val) {
         return addCondition(column, Op.IN, val);
     }

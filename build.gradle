@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'io.github.roger3lee'
-version = '3.0.5'
+version = '3.0.6'
 
 repositories {
     maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
@@ -33,9 +33,9 @@ subprojects {
     }
 }
 
-// ========== Maven Central 閸欐垵绔烽柊宥囩枂 ==========
+// ========== Maven Central 閸欐垵绔烽柊宥囩�?==========
 subprojects { subProj ->
-    // 鐠哄疇绻冩稉宥夋付鐟曚礁褰傜敮鍐畱濡€虫健
+    // 鐠哄疇绻冩稉宥夋付鐟曚礁褰傜敮鍐畱濡€虫�?
     if (project.name in ['domain-dependencies', 'domain-generator', 'domain-generator-v2', 'domain-sample',
                          'domain-generator-idea-plugin', 'domain-web-generator',
                          'domain-polardb-support', 'domain-oracle-support']) {
@@ -45,7 +45,7 @@ subprojects { subProj ->
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
 
-    // 濠ф劗鐖?jar 娴犺濮?
+    // 濠ф劗�?jar 娴犺濮?
     task sourceJar(type: Jar) {
         archiveClassifier = 'sources'
         from sourceSets.main.allSource
@@ -70,7 +70,7 @@ subprojects { subProj ->
             mavenJava(MavenPublication) {
                 from components.java
 
-                // 闂勫嫬鐢┃鎰垳 jar
+                // 闂勫嫬鐢┃鎰�?jar
                 artifact sourceJar
                 // 闂勫嫬鐢?javadoc jar
                 artifact javadocJar
@@ -104,7 +104,7 @@ subprojects { subProj ->
             }
         }
 
-        // nexus-publish-plugin 閼凤拷濮╁ǎ璇插 sonatype 娴犳挸绨遍敍灞炬￥闂団偓閹靛濮╅柊宥囩枂
+        // nexus-publish-plugin 閼凤拷濮╁ǎ璇插 sonatype 娴犳挸绨遍敍灞炬￥闂団偓閹靛濮╅柊宥囩�?
     }
 
     signing {
@@ -112,7 +112,7 @@ subprojects { subProj ->
     }
 }
 
-// ========== Nexus Publish 閹绘帊娆㈤柊宥囩枂閿涘牐鍤滈崝銊ュ灡瀵ゆ亽鈧礁鍙ч梻锟芥嫲閸欐垵绔?staging 娴犳挸绨遍敍?==========
+// ========== Nexus Publish 閹绘帊娆㈤柊宥囩枂閿涘牐鍤滈崝銊ュ灡瀵ゆ亽鈧礁鍙ч梻锟芥嫲閸欐垵�?staging 娴犳挸绨遍敍?==========
 nexusPublishing {
     repositories {
         sonatype {

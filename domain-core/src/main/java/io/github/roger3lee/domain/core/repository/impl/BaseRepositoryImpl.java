@@ -48,6 +48,9 @@ public abstract class BaseRepositoryImpl<D extends BaseDomain, DO> implements Ba
             return wrapper;
         }
 
+        // 构建字段选择（白名单/黑名单）
+        LambdaQueryUtils.buildSelectWrapper(wrapper, lambdaQuery, this.doClass);
+
         // 构建过滤条件
         if (lambdaQuery.hasFilter()) {
             LambdaQueryUtils.buildFilterWrapper(wrapper, lambdaQuery.getFilter(), this.doClass);
