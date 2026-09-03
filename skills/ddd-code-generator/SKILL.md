@@ -10,7 +10,7 @@ Generates a complete DDD domain model layer stack from a domain XML config + SQL
 ## Prerequisites
 
 - JDK 8+ installed (required to run the JAR)
-- The JAR is bundled in this skill directory: `domain-generator-v2-3.0.4.jar`
+- The JAR is bundled in this skill directory: `domain-generator-v2-3.0.6.jar`
 
 ## Inputs Required
 
@@ -69,7 +69,7 @@ COMMENT ON COLUMN table_name.col_name IS '描述';
 ### Step 2: Run the Generator JAR
 
 ```bash
-java -jar "domain-generator-v2-3.0.4.jar" \
+java -jar "domain-generator-v2-3.0.6.jar" \
     -d "path/to/domain-config.xml" \
     -s "path/to/domain-sample-mysql.sql" \
     -o "path/to/output-dir" \
@@ -80,7 +80,7 @@ java -jar "domain-generator-v2-3.0.4.jar" \
     --inherit "com.example.BaseEntity"
 ```
 
-> **Note:** The JAR is bundled alongside this skill document. Use the absolute path to the JAR based on your project workspace, e.g. `{workspace}/skills/ddd-code-generator/domain-generator-v2-3.0.4.jar`.
+> **Note:** The JAR is bundled alongside this skill document. Use the absolute path to the JAR based on your project workspace, e.g. `{workspace}/skills/ddd-code-generator/domain-generator-v2-3.0.6.jar`.
 
 **CLI Options:**
 | Option | Description | Default |
@@ -110,8 +110,8 @@ The generator uses a **layer-based overwrite policy** controlled by CLI flags.
 | `service/` | **overwrite** | **overwrite** | **overwrite** |
 | `repository/` | skip | skip | **overwrite** |
 | `convertor/` | skip | skip | **overwrite** |
-| `applications/` | **first run only** | **first run only** | **first run only** |
-| `controllers/` | **first run only** | **first run only** | **first run only** |
+| `applications/` | generate if missing | generate if missing | generate if missing |
+| `controllers/` | generate if missing | generate if missing | generate if missing |
 
 #### When to Use Each Flag
 
@@ -122,7 +122,7 @@ The generator uses a **layer-based overwrite policy** controlled by CLI flags.
 | **Domain model changed** (add related table, change FK, change aggregate) | `--update-domain` |
 | **Both DO and domain changed** | `--update-do --update-domain` |
 
-> **Important:** `applications/` and `controllers/` are **only generated on first run**. The generator detects whether the domain has already been generated and skips them.
+> **Important:** `applications/` and `controllers/` are generated when their corresponding files are missing. Existing files are never overwritten.
 
 ### Step 4: DO Configuration
 
