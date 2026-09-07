@@ -31,7 +31,7 @@ description: 使用已生成的 Java DDD 领域模型代码实现业务功能，
 
 1. **定位聚合与入口**
    - 找到目标 `{Name}Domain`、`{Name}FindDomain`、`{Name}Service` 和对应 `LoadFlag`。
-   - Controller 按模块既有模式调用 AppService 或生成的 DomainService；两者都不得直接访问 Repository 或 Mapper。
+   - Controller 按模块既有模式调用 AppService 或生成的 DomainService；两者都不直接访问 Repository 或 Mapper。
    - 让 DomainService 调用 Repository，由 Repository 调用 Mapper；不得跨层绕过生成的聚合 CRUD 能力。
 
 2. **新增聚合**
@@ -46,11 +46,14 @@ description: 使用已生成的 Java DDD 领域模型代码实现业务功能，
 
 4. **更新与删除聚合**
    - 更新请求必须携带准确的 LoadFlag。只有 `loadAll` 或已标记 `loadXxx` 的关联对象会参与新增、更新和删除合并。
-   - 更新前先以相同的 LoadFlag 查询原始聚合，再调用 `service.update(request)`，使框架能够完成差异比较和子对象合并。
+   - 增量更新优先用双参 `service.update(newDomain, oldDomain)`：先 `load`/`loadByKey` 取旧聚合并 `loadRelated` 取旧关联，再构造新 Domain 调用双参 update。单参 `service.update(request)` 内部会再次 `find` 加载主 entity，双参可避免这次二次查询。
+   - 关联集合的 MERGE 以关联实体主键（`RelatedDomain::getId`）对齐，不是业务键：更新沿用旧 id、新增留空 id、旧 id 缺失由框架删除；业务键与主键不一致时，应用层在构造新列表时把业务键映射到旧 id。
+   - 新 Domain 必须 `setChanged(true)`，否则框架会跳过实际 update（静默不生效）。
    - 删除使用生成的 `service.delete(...)`；确认 LoadFlag 覆盖应级联删除的关联对象，并确认业务上允许该级联行为。
 
 5. **列表、分页与批量处理**
    - 优先构造 `LambdaQuery.of(Domain.class)`，使用 `eq`、`in`、`like`、`between`、`and`、`or` 和 `orderBy` 表达条件。
+   - `orderBy(SFunction, Order)` 返回 `LambdaOrder` 但会原地修改 query 本身，必须作为独立语句调用（`query.orderBy(...)`）；链式 `.eq(...).orderBy(...)` 会静默丢失排序。
    - 列表和分页优先调用生成 Service/Repository 的 `queryList`、`queryPage` 等方法，并使用 `PageDomain` 传递页码和页大小。
    - 批量写入、更新或删除应使用框架提供的批量能力，分批处理超大数据集，并始终置于事务内。
 
