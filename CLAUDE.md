@@ -151,6 +151,9 @@ FamilyAddressDomain address = domain.getFamilyAddress();
 List<FamilyMemberDomain> members = domain.getFamilyMemberList();
 ```
 
+Note: aggregates returned by `service.queryOne`/`queryList`/`queryPage` are already
+service-bound and support `loadRelated` directly (no manual `set_service` needed).
+
 ### CRUD Operations with Domain Service
 
 ```java

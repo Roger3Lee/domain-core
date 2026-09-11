@@ -269,6 +269,9 @@ IPage<FamilyDomain> page = familyService.queryPage(
 );
 ```
 
+**特性：**
+- ✅ `queryOne`/`queryList`/`queryPage` 返回的聚合根已自动绑定领域服务，可直接调用 `loadRelated` 加载关联数据（无需手动 `set_service`）
+
 ### 更新（Update）
 
 ```java

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'io.github.roger3lee'
-version = '3.0.6'
+version = '3.0.7'
 
 repositories {
     maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }

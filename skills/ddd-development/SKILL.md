@@ -55,6 +55,7 @@ description: 使用已生成的 Java DDD 领域模型代码实现业务功能，
    - 优先构造 `LambdaQuery.of(Domain.class)`，使用 `eq`、`in`、`like`、`between`、`and`、`or` 和 `orderBy` 表达条件。
    - `orderBy(SFunction, Order)` 返回 `LambdaOrder` 但会原地修改 query 本身，必须作为独立语句调用（`query.orderBy(...)`）；链式 `.eq(...).orderBy(...)` 会静默丢失排序。
    - 列表和分页优先调用生成 Service/Repository 的 `queryList`、`queryPage` 等方法，并使用 `PageDomain` 传递页码和页大小。
+   - 通过 DomainService 的 `queryOne`/`queryList`/`queryPage` 返回的聚合根已自动绑定 Service，可直接调用 `loadRelated`，无需手动 `set_service`；直接走 Repository 查询的结果不会绑定。
    - 批量写入、更新或删除应使用框架提供的批量能力，分批处理超大数据集，并始终置于事务内。
 
 ## LoadFlag 是读写范围契约

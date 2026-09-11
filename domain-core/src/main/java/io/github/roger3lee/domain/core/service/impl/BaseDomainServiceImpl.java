@@ -3,6 +3,7 @@ package io.github.roger3lee.domain.core.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
+import io.github.roger3lee.domain.core.domain.BaseAggregateDomain;
 import io.github.roger3lee.domain.core.domain.BaseDomain;
 import io.github.roger3lee.domain.core.domain.PageDomain;
 import io.github.roger3lee.domain.core.lambda.query.LambdaQuery;
@@ -42,6 +43,21 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
             throw new UnsupportedOperationException("未找到类型 " + clazz.getCanonicalName() + " 对应的Repository");
         }
         return (BaseRepository<T, ?>) repository;
+    }
+
+    /**
+     * 为聚合根领域对象绑定当前领域服务
+     * 查询返回后可直接调用 loadRelated 加载关联数据，无需再手动调用 set_service
+     *
+     * @param domain 领域对象
+     * @return 绑定服务后的领域对象
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private <T extends BaseDomain> T bindService(T domain) {
+        if (domain instanceof BaseAggregateDomain) {
+            ((BaseAggregateDomain) domain).set_service(this);
+        }
+        return domain;
     }
 
     /**
@@ -108,7 +124,7 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
         }
 
         BaseRepository<T, ?> repository = getRepository(clazz);
-        return repository.query(lambdaQuery);
+        return bindService(repository.query(lambdaQuery));
     }
 
     /**
@@ -123,7 +139,11 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
         }
 
         BaseRepository<T, ?> repository = getRepository(clazz);
-        return repository.queryList(lambdaQuery);
+        List<T> list = repository.queryList(lambdaQuery);
+        if (CollUtil.isNotEmpty(list)) {
+            list.forEach(this::bindService);
+        }
+        return list;
     }
 
     /**
@@ -142,7 +162,11 @@ public abstract class BaseDomainServiceImpl implements BaseDomainService {
     @SuppressWarnings("unchecked")
     public <T extends BaseDomain> IPage<T> queryPage(Class<T> clazz, PageDomain pageDomain, LambdaQuery<T> lambdaQuery) {
         BaseRepository<T, ?> repository = getRepository(clazz);
-        return repository.queryPage(pageDomain, lambdaQuery);
+        IPage<T> page = repository.queryPage(pageDomain, lambdaQuery);
+        if (ObjectUtil.isNotNull(page) && CollUtil.isNotEmpty(page.getRecords())) {
+            page.getRecords().forEach(this::bindService);
+        }
+        return page;
     }
 
     /**
