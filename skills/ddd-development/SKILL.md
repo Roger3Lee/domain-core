@@ -3,6 +3,17 @@ name: ddd-development
 description: 使用已生成的 Java DDD 领域模型代码实现业务功能，涵盖聚合 CRUD、FindDomain、LoadFlag、LambdaQuery、分页、事务和扩展边界。用户要求调用或扩展生成的 Domain、Service、Repository，处理关联数据或领域查询时使用。
 ---
 
+# 技能依赖
+
+本技能基于Domain-Core DDD Framework 实现， 项目需引用 ```domain-core``` 需基于使用数据库选择对应的数据库support ，如 mysql使用 ```domain-mysql-support```
+
+```gradle
+// Domain-Core DDD Framework
+dependency 'io.github.roger3lee:domain-core:3.0.7'
+dependency 'io.github.roger3lee:domain-mysql-support:3.0.7'
+dependency 'io.github.roger3lee:domain-postgresql-support:3.0.7'
+```
+
 # 基于领域模型进行代码开发
 
 ## 目标与优先级
